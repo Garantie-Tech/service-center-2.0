@@ -1,9 +1,8 @@
-// Import the Inter font
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Metadata } from "next";
+import Loading from "./loading";
 
-// Use the Inter font
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -22,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
+        <Loading />
         {children}
       </body>
     </html>
