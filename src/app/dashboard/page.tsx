@@ -59,6 +59,11 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const applyFilters = (filters: any) => {
+    console.log("Applied Filters:", filters);
+    // Add your logic to apply filters (e.g., update state, fetch data, etc.)
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header onRefresh={() => window.location.reload()} />
@@ -69,13 +74,14 @@ const Dashboard: React.FC = () => {
         handleSearch={handleSearch}
       />
 
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         {/* Left Sidebar */}
         <aside className="bg-white p-3 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
-          <ClaimFilter
-            filterStatus={filterStatus}
-            handleFilterChange={handleFilterChange}
-          />
+        <ClaimFilter
+        filterStatus={filterStatus}
+        handleFilterChange={(value) => setFilterStatus(value)}
+        applyFilters={applyFilters} // Pass the function here
+      />
           <ClaimList
             claims={filteredClaims}
             selectedClaim={selectedClaim}
