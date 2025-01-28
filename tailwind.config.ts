@@ -11,6 +11,9 @@ export default {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
       },
+      colors: {
+        primaryBlue: "#3C63FC",
+      },
     },
   },
   plugins: [require('daisyui')],
