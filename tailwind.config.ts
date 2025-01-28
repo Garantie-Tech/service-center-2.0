@@ -14,6 +14,14 @@ export default {
       colors: {
         primaryBlue: "#3C63FC",
       },
+      fontSize: {
+        base: '16px',
+        sm: '14px',
+        lg: '18px',
+        xl: '20px',
+        xxs: '10px',
+        xs: '12px',
+      },
     },
   },
   plugins: [require('daisyui')],
