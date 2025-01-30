@@ -67,14 +67,16 @@ const Dashboard: React.FC = () => {
   };
 
   const handleFilterChange = (filter: string): void => {
+    // Update filter status
     setFilterStatus(filter);
+    console.log("Selected filter:", filter);
     if (filter === "All Claims") {
-      setFilteredClaims(claims);
+      setFilteredClaims(claims); // Show all claims if 'All Claims' is selected
     } else {
       const filteredResults = claims.filter(
         (claim) => claim.status.toLowerCase() === filter.toLowerCase()
       );
-      setFilteredClaims(filteredResults);
+      setFilteredClaims(filteredResults); // Update filtered claims
     }
   };
 
@@ -106,7 +108,7 @@ const Dashboard: React.FC = () => {
         <aside className="bg-white p-3 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
           <ClaimFilter
             filterStatus={filterStatus}
-            handleFilterChange={(value) => setFilterStatus(value)}
+            handleFilterChange={handleFilterChange}
             applyFilters={applyFilters} // Pass the function here
           />
           <ClaimList

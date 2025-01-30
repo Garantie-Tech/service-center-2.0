@@ -26,3 +26,15 @@ body {
 ::-webkit-scrollbar-track {
   background-color: #D5D5D5;
 }
+
+.custom-button {
+  @apply border rounded-[8px] px-[18px] py-[10px] font-semibold;
+}
+
+.btn-default {
+  @apply hover:bg-lightGray
+}
+
+.btn-primary {
+  @apply hover:bg-lightPrimaryBlue
+}

@@ -60,7 +60,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
 
   const handleDropdownChange = (value: string) => {
     setSelectedDropdown(value);
-    handleFilterChange(value); // Update parent component with selected dropdown value
+    handleFilterChange(value); // Call the parent function (in this case, Dashboard's handler)
     setIsDropdownOpen(false); // Close the dropdown
   };
 
@@ -71,10 +71,14 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
         <details
           className={`dropdown w-full ${isDropdownOpen ? "open" : ""}`}
           open={isDropdownOpen}
-          onToggle={(e) => setIsDropdownOpen((e.target as HTMLDetailsElement).open)}
+          onToggle={(e) =>
+            setIsDropdownOpen((e.target as HTMLDetailsElement).open)
+          }
         >
           <summary className="btn btn-outline w-full flex items-center justify-between">
-            <span className="flex items-center">{selectedDropdown}</span>
+            <span className="flex items-center text-xs">
+              {selectedDropdown}
+            </span>
             <Image
               src="/images/select-dropdown.svg"
               alt="Arrow"
@@ -83,7 +87,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               className="ml-2"
             />
           </summary>
-          <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg">
+          <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg text-xs">
             {[
               "All Claims",
               "Estimate Pending",
@@ -100,7 +104,9 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
                   onClick={() => handleDropdownChange(option)}
                 >
                   <Image
-                    src={`/images/${option.toLowerCase().replace(/\s+/g, "-")}-icon.svg`}
+                    src={`/images/${option
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")}-icon.svg`}
                     alt={option}
                     width={20}
                     height={20}
@@ -114,47 +120,42 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
         </details>
 
         {/* Filter Button */}
-        <button
-          className="btn btn-circle text-gray-500 hover:text-gray-700 ml-2"
-          title="Filter"
-          onClick={toggleFilter}
-        >
-          <Image
-            src="/images/filter-icon.svg"
-            alt="Filter"
-            width={20}
-            height={20}
-          />
-        </button>
+        <div className="flex justify-between items-center px-4">
+          <button className="px-2" title="Filter" onClick={toggleFilter}>
+            <Image
+              src="/images/filter-icon.svg"
+              alt="Filter"
+              width={40}
+              height={40}
+            />
+          </button>
 
-        {/* Sort Button */}
-        <button
-          className="btn btn-circle text-gray-500 hover:text-gray-700 ml-2"
-          title="Sort"
-        >
-          <Image
-            src="/images/sorting-icon.svg"
-            alt="Sort"
-            width={20}
-            height={20}
-          />
-        </button>
+          {/* Sort Button */}
+          <button className="px-2" title="Sorting">
+            <Image
+              src="/images/sorting-icon.svg"
+              alt="Sort"
+              width={35}
+              height={35}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Dropdown Modal */}
       {isFilterOpen && (
         <div
           ref={filterRef}
-          className="absolute top-0 right-0 transform translate-x-full bg-white p-4 rounded-lg shadow-lg z-50 w-96"
+          className="absolute top-0 right-0 transform translate-x-full bg-white p-4 rounded-lg shadow-lg z-50 w-96 text-sm"
           style={{
             top: "70px",
-            left: "-40px", // Retaining your previous styles for positioning
+            left: "-80px", // Retaining your previous styles for positioning
           }}
         >
-          <h3 className="text-lg font-bold mb-3">Date Range</h3>
+          <h3 className="text-sm font-bold mb-3">Date Range</h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium mb-1">From</label>
+              <label className="block text-xs font-medium mb-1">From</label>
               <input
                 type="date"
                 value={fromDate}
@@ -163,7 +164,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">To</label>
+              <label className="block text-xs font-medium mb-1">To</label>
               <input
                 type="date"
                 value={toDate}
@@ -176,7 +177,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           {/* Date Range Buttons */}
           <div className="flex gap-2 justify-between mb-4">
             <button
-              className="btn btn-outline w-1/3 text-xs py-1"
+              className="custom-button btn-default w-[32%] text-xs py-1"
               onClick={() => {
                 setFromDate(new Date().toISOString().split("T")[0]);
                 setToDate(new Date().toISOString().split("T")[0]);
@@ -185,7 +186,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               Today
             </button>
             <button
-              className="btn btn-outline w-1/3 text-xs py-1"
+              className="custom-button btn-default w-[32%] text-xs py-1"
               onClick={() => {
                 const today = new Date();
                 const firstDayOfWeek = new Date(
@@ -198,7 +199,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               This Week
             </button>
             <button
-              className="btn btn-outline w-1/3 text-xs py-1"
+              className="custom-button btn-default w-[32%] text-xs py-1"
               onClick={() => {
                 const today = new Date();
                 const firstDayOfMonth = new Date(
@@ -215,13 +216,12 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           </div>
 
           {/* Claim Types */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-bold mb-3">Claim Types</h3>
+          <div className="border-t pt-[30px] mt-[20px] mb-[40px]">
             <div className="text-xs flex flex-wrap gap-4">
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="checkbox checkbox-primary"
+                  className="checkbox rounded-[4px]"
                   checked={claimTypes.myClaims}
                   onChange={() =>
                     setClaimTypes((prev) => ({
@@ -235,7 +235,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="checkbox checkbox-primary"
+                  className="checkbox rounded-[4px]"
                   checked={claimTypes.otherClaims}
                   onChange={() =>
                     setClaimTypes((prev) => ({
@@ -249,7 +249,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="checkbox checkbox-primary"
+                  className="checkbox rounded-[4px]"
                   checked={claimTypes.pendingClaims}
                   onChange={() =>
                     setClaimTypes((prev) => ({
@@ -266,13 +266,13 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           {/* Action Buttons */}
           <div className="flex justify-center gap-2 mt-4">
             <button
-              className="btn w-1/2 btn-outline text-base px-4 py-1"
+              className="custom-button btn-default w-1/2 text-base"
               onClick={() => setIsFilterOpen(false)}
             >
               Cancel
             </button>
             <button
-              className="btn w-1/2 bg-primaryBlue text-white text-base px-4 py-1"
+              className="custom-button btn-primary w-1/2 bg-primaryBlue text-white text-base"
               onClick={handleApply}
             >
               Apply
