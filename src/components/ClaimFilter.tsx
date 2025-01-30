@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import Claim from "@/interfaces/ClaimInterface";
 
 interface ClaimFilterProps {
   filterStatus: string;
@@ -13,7 +14,7 @@ interface ClaimFilterProps {
       pendingClaims: boolean;
     };
   }) => void;
-  handleSortingChange: (sortBy: string, order: string) => void; // Sorting function
+  handleSortingChange: (sortBy: keyof Claim, order: "Ascending" | "Descending") => void; // Sorting function
 }
 
 const ClaimFilter: React.FC<ClaimFilterProps> = ({
@@ -71,13 +72,13 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
 
   const handleSortChange = (sortKey: string) => {
     setSortBy(sortKey);
-    handleSortingChange(sortKey, sortOrder); // Apply sorting immediately
+    handleSortingChange(sortBy as keyof Claim, sortOrder as "Ascending" | "Descending"); // Apply sorting immediately
     setIsSortingOpen(false);
   };
 
   const toggleSortOrder = (order: string) => {
     setSortOrder(order);
-    handleSortingChange(sortBy, order); // Apply sorting immediately
+    handleSortingChange(sortBy as keyof Claim, order as "Ascending" | "Descending"); // Apply sorting immediately
   };
 
   return (

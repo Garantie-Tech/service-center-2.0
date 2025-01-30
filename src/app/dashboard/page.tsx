@@ -8,16 +8,7 @@ import ClaimDetails from "@/components/ClaimDetails";
 import Header from "@/components/Header";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
-
-interface Claim {
-  id: number;
-  customer_name: string;
-  status: string;
-  date: string;
-  srn?: string;
-  followUp?: string;
-  time?: string;
-}
+import Claim from "@/interfaces/ClaimInterface";
 
 const Dashboard: React.FC = () => {
   const logout = useAuthStore((state) => state.logout);
