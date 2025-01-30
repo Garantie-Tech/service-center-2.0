@@ -14,6 +14,9 @@ interface Claim {
   customer_name: string;
   status: string;
   date: string;
+  srn?: string;
+  followUp?: string;
+  time?: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -66,6 +69,7 @@ const Dashboard: React.FC = () => {
     setFilteredClaims(searchResults);
   };
 
+  // handle filter change
   const handleFilterChange = (filter: string): void => {
     // Update filter status
     setFilterStatus(filter);
@@ -78,6 +82,27 @@ const Dashboard: React.FC = () => {
       );
       setFilteredClaims(filteredResults); // Update filtered claims
     }
+  };
+
+  // Sorting logic
+  const handleSortingChange = (
+    sortBy: keyof Claim,
+    order: "Ascending" | "Descending"
+  ): void => {
+    console.log(sortBy, order);
+
+    const sortedClaims = [...filteredClaims].sort((a, b) => {
+      const valueA = a[sortBy] ?? "";
+      const valueB = b[sortBy] ?? "";
+
+      if (order === "Ascending") {
+        return String(valueA).localeCompare(String(valueB));
+      } else {
+        return String(valueB).localeCompare(String(valueA));
+      }
+    });
+
+    setFilteredClaims(sortedClaims);
   };
 
   const applyFilters = (filters: any) => {
@@ -110,6 +135,7 @@ const Dashboard: React.FC = () => {
             filterStatus={filterStatus}
             handleFilterChange={handleFilterChange}
             applyFilters={applyFilters} // Pass the function here
+            handleSortingChange={handleSortingChange}
           />
           <ClaimList
             claims={filteredClaims}

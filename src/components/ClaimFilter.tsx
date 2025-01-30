@@ -12,24 +12,29 @@ interface ClaimFilterProps {
       otherClaims: boolean;
       pendingClaims: boolean;
     };
-  }) => void; // Function to handle filter application
+  }) => void;
+  handleSortingChange: (sortBy: string, order: string) => void; // Sorting function
 }
 
 const ClaimFilter: React.FC<ClaimFilterProps> = ({
   filterStatus,
   handleFilterChange,
   applyFilters,
+  handleSortingChange,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [fromDate, setFromDate] = useState<string>(""); // State for From Date
-  const [toDate, setToDate] = useState<string>(""); // State for To Date
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
   const [claimTypes, setClaimTypes] = useState({
     myClaims: false,
     otherClaims: false,
     pendingClaims: false,
-  }); // State for Claim Types
-  const [selectedDropdown, setSelectedDropdown] = useState("All Claims"); // Dropdown state
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown visibility state
+  });
+  const [selectedDropdown, setSelectedDropdown] = useState("All Claims");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSortingOpen, setIsSortingOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<string>("SRN");
+  const [sortOrder, setSortOrder] = useState<string>("Ascending");
 
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -54,14 +59,25 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
       toDate,
       claimTypes,
     };
-    applyFilters(filters); // Pass filters to the parent component
-    setIsFilterOpen(false); // Close the filter modal
+    applyFilters(filters);
+    setIsFilterOpen(false);
   };
 
   const handleDropdownChange = (value: string) => {
     setSelectedDropdown(value);
-    handleFilterChange(value); // Call the parent function (in this case, Dashboard's handler)
-    setIsDropdownOpen(false); // Close the dropdown
+    handleFilterChange(value);
+    setIsDropdownOpen(false);
+  };
+
+  const handleSortChange = (sortKey: string) => {
+    setSortBy(sortKey);
+    handleSortingChange(sortKey, sortOrder); // Apply sorting immediately
+    setIsSortingOpen(false);
+  };
+
+  const toggleSortOrder = (order: string) => {
+    setSortOrder(order);
+    handleSortingChange(sortBy, order); // Apply sorting immediately
   };
 
   return (
@@ -75,7 +91,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
             setIsDropdownOpen((e.target as HTMLDetailsElement).open)
           }
         >
-          <summary className="btn btn-outline w-full flex items-center justify-between">
+          <summary className="custom-button btn-default w-full flex items-center justify-between">
             <span className="flex items-center text-xs">
               {selectedDropdown}
             </span>
@@ -131,14 +147,58 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           </button>
 
           {/* Sort Button */}
-          <button className="px-2" title="Sorting">
-            <Image
-              src="/images/sorting-icon.svg"
-              alt="Sort"
-              width={35}
-              height={35}
-            />
-          </button>
+          <div className="relative">
+            <button
+              className="px-2"
+              title="Sorting"
+              onClick={() => setIsSortingOpen(!isSortingOpen)}
+            >
+              <Image
+                src="/images/sorting-icon.svg"
+                alt="Sort"
+                width={35}
+                height={35}
+              />
+            </button>
+            {isSortingOpen && (
+              <div className="absolute top-10 right-0 bg-white p-4 rounded-lg shadow-lg z-50 w-72 text-xs">
+                <h3 className="text-sm font-bold mb-3">Sort BY:</h3>
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      className="radio rounded-[20px] mr-2 checked:bg-primaryBlue"
+                      name="sortOrder"
+                      checked={sortOrder === "Ascending"}
+                      onChange={() => toggleSortOrder("Ascending")}
+                    />
+                    Ascending
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      className="radio rounded-[20px] mr-2 checked:bg-primaryBlue"
+                      name="sortOrder"
+                      checked={sortOrder === "Descending"}
+                      onChange={() => toggleSortOrder("Descending")}
+                    />
+                    Descending
+                  </label>
+                </div>
+                <ul className="text-sm">
+                  {["SRN", "Follow UP", "Time"].map((sortKey) => (
+                    <li
+                      key={sortKey}
+                      className="cursor-pointer px-4 py-2 hover:bg-gray-200"
+                      onClick={() => handleSortChange(sortKey)}
+                    >
+                      {sortKey}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -149,7 +209,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           className="absolute top-0 right-0 transform translate-x-full bg-white p-4 rounded-lg shadow-lg z-50 w-96 text-sm"
           style={{
             top: "70px",
-            left: "-80px", // Retaining your previous styles for positioning
+            left: "-80px",
           }}
         >
           <h3 className="text-sm font-bold mb-3">Date Range</h3>
@@ -221,7 +281,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="checkbox rounded-[4px]"
+                  className="checkbox rounded-[4px] checked:bg-primaryBlue"
                   checked={claimTypes.myClaims}
                   onChange={() =>
                     setClaimTypes((prev) => ({
@@ -235,7 +295,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="checkbox rounded-[4px]"
+                  className="checkbox rounded-[4px] checked:bg-primaryBlue"
                   checked={claimTypes.otherClaims}
                   onChange={() =>
                     setClaimTypes((prev) => ({
@@ -249,7 +309,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="checkbox rounded-[4px]"
+                  className="checkbox rounded-[4px] checked:bg-primaryBlue"
                   checked={claimTypes.pendingClaims}
                   onChange={() =>
                     setClaimTypes((prev) => ({

@@ -33,7 +33,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search Claim number, customer mobile, or IMEI number"
-              className="input input-bordered w-full text-sm pr-10"
+              className="input input-bordered w-full text-xs pr-10"
             />
             {searchTerm && (
               <button

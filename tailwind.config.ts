@@ -22,7 +22,7 @@ export default {
           300: "#D1D5DB",  // Medium gray
           400: "#9CA3AF",  // Default Tailwind gray-400
           500: "#6B7280",  // Dark gray
-          600: "#4B5563",  // Deeper gray
+          600: "#555E67",  // Deeper gray
           700: "#374151",  // Darker
           800: "#1F2937",  // Very dark
           900: "#111827",  // Almost black

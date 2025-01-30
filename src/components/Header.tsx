@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
       </h1>
 
       {/* Profile Section */}
-      <div className="dropdown dropdown-bottom dropdown-end text-gray">
+      <div className="dropdown dropdown-bottom dropdown-end text-gray-600">
         <div tabIndex={0} role="button" className="flex items-center gap-2">
           <Image
             src="/images/user-icon.svg"
