@@ -6,6 +6,8 @@ import ClaimFilter from "@/components/ClaimFilter";
 import ClaimList from "@/components/ClaimList";
 import ClaimDetails from "@/components/ClaimDetails";
 import Header from "@/components/Header";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 
 interface Claim {
   id: number;
@@ -15,6 +17,8 @@ interface Claim {
 }
 
 const Dashboard: React.FC = () => {
+  const logout = useAuthStore((state) => state.logout);
+  const router = useRouter();
   const [claims, setClaims] = useState<Claim[]>([]);
   const [filteredClaims, setFilteredClaims] = useState<Claim[]>([]);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
@@ -23,9 +27,24 @@ const Dashboard: React.FC = () => {
 
   // Dummy data
   const dummyClaims: Claim[] = [
-    { id: 18940, customer_name: "Radha Mohan", status: "Claim Initiated", date: "Today" },
-    { id: 18941, customer_name: "Roney Kumar", status: "Claim Initiated", date: "Yesterday" },
-    { id: 18948, customer_name: "Kavita Ronak", status: "BER Approved", date: "16/01/2025" },
+    {
+      id: 18940,
+      customer_name: "Radha Mohan",
+      status: "Claim Initiated",
+      date: "Today",
+    },
+    {
+      id: 18941,
+      customer_name: "Roney Kumar",
+      status: "Claim Initiated",
+      date: "Yesterday",
+    },
+    {
+      id: 18948,
+      customer_name: "Kavita Ronak",
+      status: "BER Approved",
+      date: "16/01/2025",
+    },
     // Add more claims as needed...
   ];
 
@@ -64,9 +83,17 @@ const Dashboard: React.FC = () => {
     // Add your logic to apply filters (e.g., update state, fetch data, etc.)
   };
 
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header onRefresh={() => window.location.reload()} />
+      <Header
+        onRefresh={() => window.location.reload()}
+        onLogout={handleLogout}
+      />
       {/* Search Section */}
       <SearchSection
         searchTerm={searchTerm}
@@ -77,11 +104,11 @@ const Dashboard: React.FC = () => {
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         {/* Left Sidebar */}
         <aside className="bg-white p-3 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
-        <ClaimFilter
-        filterStatus={filterStatus}
-        handleFilterChange={(value) => setFilterStatus(value)}
-        applyFilters={applyFilters} // Pass the function here
-      />
+          <ClaimFilter
+            filterStatus={filterStatus}
+            handleFilterChange={(value) => setFilterStatus(value)}
+            applyFilters={applyFilters} // Pass the function here
+          />
           <ClaimList
             claims={filteredClaims}
             selectedClaim={selectedClaim}

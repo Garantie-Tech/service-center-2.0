@@ -1,22 +1,24 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface HeaderProps {
   onRefresh: () => void;
+  onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onRefresh }) => {
+const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
   return (
     <header className="flex items-center justify-between bg-primaryBlue px-4 py-2 text-white shadow-sm">
       {/* Logo Section */}
       <div className="flex items-center gap-2">
         <Image
-          src="/images/v-shield.svg" // Replace with your logo URL
+          src="/images/v-shield.svg"
           alt="V-Shield Logo"
           width={120}
           height={64}
         />
-        <button onClick={onRefresh} className="">
+        <button onClick={onRefresh}>
           <Image
             src="/images/refresh.svg"
             alt="Refresh"
@@ -32,18 +34,60 @@ const Header: React.FC<HeaderProps> = ({ onRefresh }) => {
       </h1>
 
       {/* Profile Section */}
-      <div className="flex items-center gap-2">
-        <Image
-          src="/images/user-icon.svg"
-          alt="Profile"
-          width={32}
-          height={32}
-          className="rounded-full"
-        />
-        <div>
-          <p className="text-sm font-bold">Moni Roy</p>
-          <p className="text-xs">Admin</p>
+      <div className="dropdown dropdown-bottom dropdown-end text-grey">
+        <div tabIndex={0} role="button" className="flex items-center gap-2">
+          <Image
+            src="/images/user-icon.svg"
+            alt="Profile"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
+          <Image
+            src="/images/dropdown-icon.svg"
+            alt="Dropdown"
+            width={20}
+            height={20}
+          />
         </div>
+        <ul
+          tabIndex={0}
+          className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-xs"
+        >
+          <li>
+            <Link href="/profile" className="flex items-center gap-2">
+              <Image
+                src="/images/user-profile-icon.svg"
+                alt="Profile"
+                width={20}
+                height={20}
+              />
+              Profile
+            </Link>
+          </li>
+          <li>
+            <Link href="/settings" className="flex items-center gap-2">
+              <Image
+                src="/images/settings-icon.svg"
+                alt="Settings"
+                width={20}
+                height={20}
+              />
+              Settings
+            </Link>
+          </li>
+          <li>
+            <button onClick={onLogout} className="flex items-center gap-2">
+              <Image
+                src="/images/logout-icon.svg"
+                alt="Logout"
+                width={20}
+                height={20}
+              />
+              Logout
+            </button>
+          </li>
+        </ul>
       </div>
     </header>
   );

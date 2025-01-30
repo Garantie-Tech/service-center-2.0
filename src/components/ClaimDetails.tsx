@@ -13,7 +13,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({ selectedClaim }) => {
   if (!selectedClaim) {
     return (
       <div className="text-center">
-        <img src="/empty-box.svg" alt="Empty" className="w-32 mx-auto mb-4" />
         <h2 className="text-lg font-semibold">Select an item to read</h2>
         <p className="text-gray-500">Nothing is selected</p>
       </div>

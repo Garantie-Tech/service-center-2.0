@@ -8,7 +8,7 @@ const LoginFormLeftSection: React.FC = () => {
     <div
       className="hidden md:flex flex-col justify-center items-center w-1/2 bg-cover bg-center p-8 text-white"
       style={{
-        backgroundImage: "url(/images/service-center-login-bg.png)",
+        backgroundImage: "url(/images/service-center-login-bg.svg)",
       }}
     >
       <h2 className="text-3xl font-bold mb-4">Safety Verification</h2>

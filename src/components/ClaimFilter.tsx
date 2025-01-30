@@ -28,6 +28,8 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
     otherClaims: false,
     pendingClaims: false,
   }); // State for Claim Types
+  const [selectedDropdown, setSelectedDropdown] = useState("All Claims"); // Dropdown state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown visibility state
 
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -56,29 +58,60 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
     setIsFilterOpen(false); // Close the filter modal
   };
 
-  const handleCheckboxChange = (type: keyof typeof claimTypes) => {
-    setClaimTypes((prev) => ({
-      ...prev,
-      [type]: !prev[type],
-    }));
+  const handleDropdownChange = (value: string) => {
+    setSelectedDropdown(value);
+    handleFilterChange(value); // Update parent component with selected dropdown value
+    setIsDropdownOpen(false); // Close the dropdown
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
-        {/* Dropdown for filtering claims */}
-        <select
-          value={filterStatus}
-          onChange={(e) => handleFilterChange(e.target.value)}
-          className="select select-bordered w-full text-sm"
+        {/* Custom Dropdown */}
+        <details
+          className={`dropdown w-full ${isDropdownOpen ? "open" : ""}`}
+          open={isDropdownOpen}
+          onToggle={(e) => setIsDropdownOpen((e.target as HTMLDetailsElement).open)}
         >
-          <option value="All Claims">All Claims</option>
-          <option value="Claim Initiated">Claim Initiated</option>
-          <option value="BER Approved">BER Approved</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
+          <summary className="btn btn-outline w-full flex items-center justify-between">
+            <span className="flex items-center">{selectedDropdown}</span>
+            <Image
+              src="/images/select-dropdown.svg"
+              alt="Arrow"
+              width={20}
+              height={20}
+              className="ml-2"
+            />
+          </summary>
+          <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg">
+            {[
+              "All Claims",
+              "Estimate Pending",
+              "Approval Pending",
+              "Cancelled",
+              "Payment Pending",
+              "Rejected",
+              "Completed",
+              "Approved",
+            ].map((option) => (
+              <li key={option}>
+                <button
+                  className="w-full flex items-center text-left px-4 py-2 hover:bg-gray-200"
+                  onClick={() => handleDropdownChange(option)}
+                >
+                  <Image
+                    src={`/images/${option.toLowerCase().replace(/\s+/g, "-")}-icon.svg`}
+                    alt={option}
+                    width={20}
+                    height={20}
+                    className="mr-2"
+                  />
+                  {option}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
 
         {/* Filter Button */}
         <button
@@ -190,7 +223,12 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
                   type="checkbox"
                   className="checkbox checkbox-primary"
                   checked={claimTypes.myClaims}
-                  onChange={() => handleCheckboxChange("myClaims")}
+                  onChange={() =>
+                    setClaimTypes((prev) => ({
+                      ...prev,
+                      myClaims: !prev.myClaims,
+                    }))
+                  }
                 />
                 <span className="ml-2 text-xs">My Claims</span>
               </label>
@@ -199,7 +237,12 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
                   type="checkbox"
                   className="checkbox checkbox-primary"
                   checked={claimTypes.otherClaims}
-                  onChange={() => handleCheckboxChange("otherClaims")}
+                  onChange={() =>
+                    setClaimTypes((prev) => ({
+                      ...prev,
+                      otherClaims: !prev.otherClaims,
+                    }))
+                  }
                 />
                 <span className="ml-2 text-xs">Other Claims</span>
               </label>
@@ -208,7 +251,12 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
                   type="checkbox"
                   className="checkbox checkbox-primary"
                   checked={claimTypes.pendingClaims}
-                  onChange={() => handleCheckboxChange("pendingClaims")}
+                  onChange={() =>
+                    setClaimTypes((prev) => ({
+                      ...prev,
+                      pendingClaims: !prev.pendingClaims,
+                    }))
+                  }
                 />
                 <span className="ml-2 text-xs">Pending Claims</span>
               </label>

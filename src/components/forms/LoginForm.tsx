@@ -22,29 +22,33 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded">
-      <h1 className="text-2xl font-bold text-center mb-4">
-        Service Center Login
-      </h1>
-      <form onSubmit={handleSubmit}>
-        <InputField
-          label="Email"
-          type="email"
-          name="email"
-          value={credentials.email}
-          onChange={handleChange}
-          placeholder="Enter your email"
-        />
-        <InputField
-          label="Password"
-          type="password"
-          name="password"
-          value={credentials.password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-        />
-        <Button type="submit" label="Login" className="w-full mt-4" />
-      </form>
+    <div className="w-full bg-white rounded">
+      <h1 className="md:text-xxl text-2xl font-bold md:mb-40px mb-20px">Service Centre Platform</h1>
+      <div className="w-full md:w-[70%]">
+        <form onSubmit={handleSubmit}>
+          <InputField
+            label="Email"
+            type="email"
+            name="email"
+            value={credentials.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+          />
+          <InputField
+            label="Password"
+            type="password"
+            name="password"
+            value={credentials.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+          />
+          <Button
+            type="submit"
+            label="Submit"
+            className="bg-primaryBlue w-full mt-4 rounded-[8px]"
+          />
+        </form>
+      </div>
     </div>
   );
 };

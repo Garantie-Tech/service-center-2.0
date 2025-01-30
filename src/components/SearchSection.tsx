@@ -74,12 +74,20 @@ const SearchSection: React.FC<SearchSectionProps> = ({
 
         {/* Buttons */}
         <div className="flex items-center gap-4">
-          <button className="btn btn-circle bg-primaryBlue text-white flex items-center justify-center transition duration-200 hover:bg-blue-500">
+          <button>
+            <Image
+              src="/images/plan-finder.svg"
+              alt="Download"
+              width={24}
+              height={24}
+            />
+          </button>
+          <button>
             <Image
               src="/images/download-icon.svg"
               alt="Download"
-              width={20}
-              height={20}
+              width={24}
+              height={24}
             />
           </button>
           <button className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500">
