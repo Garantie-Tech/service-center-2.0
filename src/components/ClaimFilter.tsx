@@ -3,7 +3,6 @@ import Image from "next/image";
 import Claim from "@/interfaces/ClaimInterface";
 
 interface ClaimFilterProps {
-  filterStatus: string;
   handleFilterChange: (value: string) => void;
   applyFilters: (filters: {
     fromDate: string;
@@ -18,7 +17,6 @@ interface ClaimFilterProps {
 }
 
 const ClaimFilter: React.FC<ClaimFilterProps> = ({
-  filterStatus,
   handleFilterChange,
   applyFilters,
   handleSortingChange,
