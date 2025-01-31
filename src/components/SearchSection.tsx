@@ -12,8 +12,9 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   setSearchTerm,
   handleSearch,
 }) => {
+  
   const handleClearSearch = () => {
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
   };
 
   return (

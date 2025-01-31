@@ -8,6 +8,9 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
+  const user = localStorage.getItem('user');
+  const serviceCenterName = user ? JSON.parse(user) : null;
+
   return (
     <header className="flex items-center justify-between bg-primaryBlue px-4 py-2 text-white shadow-sm">
       {/* Logo Section */}
@@ -24,13 +27,13 @@ const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
             alt="Refresh"
             width={20}
             height={20}
-          />
+          />  
         </button>
       </div>
 
       {/* Title Section */}
       <h1 className="text-xl font-bold text-center flex-1">
-        Welcome Ahmedabad Service Center
+        Welcome {serviceCenterName?.name}
       </h1>
 
       {/* Profile Section */}

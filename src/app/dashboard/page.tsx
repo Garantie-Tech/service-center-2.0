@@ -9,6 +9,8 @@ import Header from "@/components/Header";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import Claim from "@/interfaces/ClaimInterface";
+import { fetchClaims, fetchClaimStatuses } from "@/services/claimService";
+import { useGlobalStore } from "@/store/store";
 
 interface FilterProps {
   fromDate: string;
@@ -21,6 +23,7 @@ interface FilterProps {
 }
 
 const Dashboard: React.FC = () => {
+  const setIsLoading = useGlobalStore((state) => state.setIsLoading);
   const logout = useAuthStore((state) => state.logout);
   const router = useRouter();
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -28,115 +31,146 @@ const Dashboard: React.FC = () => {
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("All Claims");
-  const [claimStatuses, setClaimStatuses] = useState<string[]>([]); // Dynamic API dropdown
+  // const [claimStatuses, setClaimStatuses] = useState<Record<string, string>>(
+  //   {}
+  // );
 
-  // Memoized Dummy Data
-  const dummyClaims = useMemo(
-    () => [
-      {
-        id: 18940,
-        customer_name: "Radha Mohan",
-        status: "Claim Initiated",
-        date: "Today",
-      },
-      {
-        id: 18941,
-        customer_name: "Roney Kumar",
-        status: "Claim Initiated",
-        date: "Yesterday",
-      },
-      {
-        id: 18948,
-        customer_name: "Kavita Ronak",
-        status: "BER Approved",
-        date: "16/01/2025",
-      },
-    ],
-    []
-  );
+  // useEffect(() => {
+  //   const fetchClaimStatusesData = async () => {
+  //     try {
+  //       setIsLoading(true);
+  //       const response = await fetchClaimStatuses();
+  //       console.log(response);
+  //       if (
+  //         response.success &&
+  //         response?.data?.data &&
+  //         typeof response?.data?.data === "object"
+  //       ) {
+  //         setClaimStatuses(response?.data?.data);
+  //       } else {
+  //         console.error("Error fetching claim statuses:", response.error);
+  //       }
+  //     } catch (error) {
+  //       console.error("API Error:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchClaimStatusesData();
+  // }, []);
+
+  const claimStatuses: { [key: string]: string } = {
+    "ALL CLAIMS": "All Claims",
+    NEW: "Estimate Pending",
+    "IN PROGRESS": "Approval Pending",
+    APPROVED: "Approved",
+    "PAYMENT PENDING": "Payment Pending",
+    REJECTED: "Rejected",
+    CLOSED: "Completed",
+    CANCELLED: "Cancelled",
+  };
 
   useEffect(() => {
-    setClaims(dummyClaims);
-    setFilteredClaims(dummyClaims);
-    if (dummyClaims.length > 0) {
-      setSelectedClaim(dummyClaims[0]); // Select first claim by default
-    }
-  }, [dummyClaims]);
+    if (Object.keys(claimStatuses).length === 0) return;
 
-  // Fetch claim statuses from API
-  useEffect(() => {
-    const fetchClaimStatuses = async () => {
-      // try {
-      //   const response = await fetch("/api/claim-statuses"); // Update with your API endpoint
-      //   const data = await response.json();
-      //   setClaimStatuses(data.statuses || []);
-      // } catch (error) {
-      //   console.error("Error fetching claim statuses:", error);
-      // }
+    const fetchClaimsData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetchClaims({
+          page: 0,
+          partner_id: 191,
+          date: "allTime",
+          source: "service_centre",
+          claim_status:filterStatus
+        });
+
+        if (response.success && response?.data?.data?.claims) {
+          const mappedClaims = response?.data?.data?.claims.map((claim) => ({
+            ...claim,
+            status: claimStatuses[claim.status] || claim.status,
+          }));
+
+          setClaims(mappedClaims);
+          setFilteredClaims(mappedClaims);
+          if (mappedClaims.length > 0) {
+            setSelectedClaim(mappedClaims[0]);
+          }
+        } else {
+          console.error("Error fetching claims:", response.error);
+        }
+      } catch (error) {
+        console.error("API Error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    fetchClaimStatuses();
-  }, []);
 
-  // Search Functionality
+    fetchClaimsData();
+  }, [filterStatus]);
+
   const handleSearch = (): void => {
     const searchResults = claims.filter(
       (claim) =>
-        claim.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        claim.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         claim.id.toString().includes(searchTerm) ||
         claim.status.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredClaims(searchResults);
   };
 
-  // Filter Change Handler
   const handleFilterChange = (filter: string): void => {
+    console.log(filter);
     setFilterStatus(filter);
-    console.log("Selected filter:", filter);
-    if (filter === "All Claims") {
+    if (filter === "ALL CLAIMS") {
       setFilteredClaims(claims);
     } else {
-      const filteredResults = claims.filter(
-        (claim) => claim.status.toLowerCase() === filter.toLowerCase()
+      setFilteredClaims(
+        claims.filter(
+          (claim) => claim.status.toLowerCase() === filter.toLowerCase()
+        )
       );
-      setFilteredClaims(filteredResults);
     }
   };
 
-  // Sorting Logic
   const handleSortingChange = (
     sortBy: keyof Claim,
     order: "Ascending" | "Descending"
   ): void => {
-    console.log(sortBy, order);
-
     const sortedClaims = [...filteredClaims].sort((a, b) => {
       const valueA = a[sortBy] ?? "";
       const valueB = b[sortBy] ?? "";
 
-      if (order === "Ascending") {
-        return String(valueA).localeCompare(String(valueB));
-      } else {
-        return String(valueB).localeCompare(String(valueA));
-      }
+      return order === "Ascending"
+        ? String(valueA).localeCompare(String(valueB))
+        : String(valueB).localeCompare(String(valueA));
     });
 
     setFilteredClaims(sortedClaims);
   };
 
+
   const applyFilters = (filters: FilterProps): void => {
+    const { fromDate, toDate } = filters;
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+  
+    const filteredResults = claims.filter((claim) => {
+      const claimDate = new Date(claim?.created_at);
+      return claimDate >= from && claimDate <= to;
+    });
+  
+    setFilteredClaims(filteredResults);
+  
     console.log("Applied Filters:", filters);
-    // Implement actual filter logic
+    console.log("Filtered Results:", filteredResults);
   };
+  
 
   const handleLogout = () => {
     logout();
     router.push("/");
   };
-
-  useEffect(() => {
-    console.log(filterStatus);
-    console.log(claimStatuses);
-  }, [filterStatus, claimStatuses]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -144,7 +178,7 @@ const Dashboard: React.FC = () => {
         onRefresh={() => window.location.reload()}
         onLogout={handleLogout}
       />
-      {/* Search Section */}
+
       <SearchSection
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -152,9 +186,9 @@ const Dashboard: React.FC = () => {
       />
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
-        {/* Left Sidebar */}
         <aside className="bg-white p-3 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
           <ClaimFilter
+            claimStatuses={claimStatuses}
             handleFilterChange={handleFilterChange}
             applyFilters={applyFilters}
             handleSortingChange={handleSortingChange}
@@ -166,7 +200,6 @@ const Dashboard: React.FC = () => {
           />
         </aside>
 
-        {/* Right Sidebar */}
         <main className="bg-white p-3 rounded-md shadow-sm overflow-auto">
           <ClaimDetails selectedClaim={selectedClaim} />
         </main>

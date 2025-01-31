@@ -13,13 +13,18 @@ interface ClaimFilterProps {
       pendingClaims: boolean;
     };
   }) => void;
-  handleSortingChange: (sortBy: keyof Claim, order: "Ascending" | "Descending") => void; // Sorting function
+  handleSortingChange: (
+    sortBy: keyof Claim,
+    order: "Ascending" | "Descending"
+  ) => void; // Sorting function
+  claimStatuses: Record<string, string>;
 }
 
 const ClaimFilter: React.FC<ClaimFilterProps> = ({
   handleFilterChange,
   applyFilters,
   handleSortingChange,
+  claimStatuses,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [fromDate, setFromDate] = useState<string>("");
@@ -70,14 +75,21 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
 
   const handleSortChange = (sortKey: string) => {
     setSortBy(sortKey);
-    handleSortingChange(sortBy as keyof Claim, sortOrder as "Ascending" | "Descending"); // Apply sorting immediately
+    handleSortingChange(
+      sortBy as keyof Claim,
+      sortOrder as "Ascending" | "Descending"
+    ); // Apply sorting immediately
     setIsSortingOpen(false);
   };
 
   const toggleSortOrder = (order: string) => {
     setSortOrder(order);
-    handleSortingChange(sortBy as keyof Claim, order as "Ascending" | "Descending"); // Apply sorting immediately
+    handleSortingChange(
+      sortBy as keyof Claim,
+      order as "Ascending" | "Descending"
+    ); // Apply sorting immediately
   };
+
 
   return (
     <div>
@@ -103,31 +115,23 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
             />
           </summary>
           <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg text-xs">
-            {[
-              "All Claims",
-              "Estimate Pending",
-              "Approval Pending",
-              "Cancelled",
-              "Payment Pending",
-              "Rejected",
-              "Completed",
-              "Approved",
-            ].map((option) => (
-              <li key={option}>
+            {Object.entries(claimStatuses).map(([key, value]) => (
+              <li key={key}>
                 <button
                   className="w-full flex items-center text-left px-4 py-2 hover:bg-gray-200"
-                  onClick={() => handleDropdownChange(option)}
+                  onClick={() => handleDropdownChange(key)}
                 >
                   <Image
-                    src={`/images/${option
+                    src={`/images/${key
                       .toLowerCase()
                       .replace(/\s+/g, "-")}-icon.svg`}
-                    alt={option}
+                    alt={key}
                     width={20}
                     height={20}
                     className="mr-2"
                   />
-                  {option}
+                  {value}{" "}
+                  {/* ✅ Show the human-readable status instead of the key */}
                 </button>
               </li>
             ))}

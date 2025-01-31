@@ -1,9 +1,4 @@
-interface Claim {
-  id: number;
-  customer_name: string;
-  status: string;
-  date: string;
-}
+import Claim from "@/interfaces/ClaimInterface";
 
 interface ClaimDetailsProps {
   selectedClaim: Claim | null;
@@ -26,7 +21,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({ selectedClaim }) => {
         <strong>Claim ID:</strong> {selectedClaim.id}
       </p>
       <p>
-        <strong>Customer Name:</strong> {selectedClaim.customer_name}
+        <strong>Customer Name:</strong> {selectedClaim.name}
       </p>
       <p>
         <strong>Status:</strong> {selectedClaim.status}

@@ -1,9 +1,10 @@
 export default interface Claim {
   id: number;
-  customer_name: string;
+  name: string;
   status: string;
   date: string;
   srn?: string;
   followUp?: string;
   time?: string;
+  created_at:string;
 }
