@@ -50,7 +50,7 @@ export async function apiRequest<T>(
   }
 }
 
-export function getRequest<T>(endpoint: string, params?: Record<string, any>, extraHeaders?: HeadersInit) {
+export function getRequest<T>(endpoint: string, params?: Record<string, unknown>, extraHeaders?: HeadersInit) {
   return apiRequest<T>(endpoint, "GET", undefined, params, extraHeaders);
 }
 

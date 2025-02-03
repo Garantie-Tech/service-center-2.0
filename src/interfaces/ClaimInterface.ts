@@ -6,5 +6,6 @@ export default interface Claim {
   srn?: string;
   followUp?: string;
   time?: string;
-  created_at:string;
+  created_at: string;
+  data?: Record<string, unknown>;
 }

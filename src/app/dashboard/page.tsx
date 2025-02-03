@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import SearchSection from "@/components/SearchSection";
 import ClaimFilter from "@/components/ClaimFilter";
 import ClaimList from "@/components/ClaimList";
@@ -9,7 +9,7 @@ import Header from "@/components/Header";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import Claim from "@/interfaces/ClaimInterface";
-import { fetchClaims, fetchClaimStatuses } from "@/services/claimService";
+import { fetchClaims } from "@/services/claimService";
 import { useGlobalStore } from "@/store/store";
 
 interface FilterProps {
@@ -23,6 +23,7 @@ interface FilterProps {
 }
 
 const Dashboard: React.FC = () => {
+  const [hasMounted, setHasMounted] = useState(false); // Prevents hydration issues
   const setIsLoading = useGlobalStore((state) => state.setIsLoading);
   const logout = useAuthStore((state) => state.logout);
   const router = useRouter();
@@ -31,34 +32,10 @@ const Dashboard: React.FC = () => {
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("All Claims");
-  // const [claimStatuses, setClaimStatuses] = useState<Record<string, string>>(
-  //   {}
-  // );
 
-  // useEffect(() => {
-  //   const fetchClaimStatusesData = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       const response = await fetchClaimStatuses();
-  //       console.log(response);
-  //       if (
-  //         response.success &&
-  //         response?.data?.data &&
-  //         typeof response?.data?.data === "object"
-  //       ) {
-  //         setClaimStatuses(response?.data?.data);
-  //       } else {
-  //         console.error("Error fetching claim statuses:", response.error);
-  //       }
-  //     } catch (error) {
-  //       console.error("API Error:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchClaimStatusesData();
-  // }, []);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const claimStatuses: { [key: string]: string } = {
     "ALL CLAIMS": "All Claims",
@@ -72,7 +49,7 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (Object.keys(claimStatuses).length === 0) return;
+    if (!hasMounted || Object.keys(claimStatuses).length === 0) return; // Ensures hydration happens first
 
     const fetchClaimsData = async () => {
       try {
@@ -82,11 +59,11 @@ const Dashboard: React.FC = () => {
           partner_id: 191,
           date: "allTime",
           source: "service_centre",
-          claim_status:filterStatus
+          claim_status: filterStatus,
         });
 
-        if (response.success && response?.data?.data?.claims) {
-          const mappedClaims = response?.data?.data?.claims.map((claim) => ({
+        if (response.success && response.data?.data?.claims) {
+          const mappedClaims = response.data.data.claims.map((claim) => ({
             ...claim,
             status: claimStatuses[claim.status] || claim.status,
           }));
@@ -107,7 +84,9 @@ const Dashboard: React.FC = () => {
     };
 
     fetchClaimsData();
-  }, [filterStatus]);
+  }, [filterStatus, hasMounted]);
+
+  if (!hasMounted) return null; // Prevent rendering until fully mounted
 
   const handleSearch = (): void => {
     const searchResults = claims.filter(
@@ -120,7 +99,6 @@ const Dashboard: React.FC = () => {
   };
 
   const handleFilterChange = (filter: string): void => {
-    console.log(filter);
     setFilterStatus(filter);
     if (filter === "ALL CLAIMS") {
       setFilteredClaims(claims);
@@ -149,23 +127,18 @@ const Dashboard: React.FC = () => {
     setFilteredClaims(sortedClaims);
   };
 
-
   const applyFilters = (filters: FilterProps): void => {
     const { fromDate, toDate } = filters;
     const from = new Date(fromDate);
     const to = new Date(toDate);
-  
+
     const filteredResults = claims.filter((claim) => {
       const claimDate = new Date(claim?.created_at);
       return claimDate >= from && claimDate <= to;
     });
-  
+
     setFilteredClaims(filteredResults);
-  
-    console.log("Applied Filters:", filters);
-    console.log("Filtered Results:", filteredResults);
   };
-  
 
   const handleLogout = () => {
     logout();
@@ -174,32 +147,18 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header
-        onRefresh={() => window.location.reload()}
-        onLogout={handleLogout}
-      />
-
-      <SearchSection
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        handleSearch={handleSearch}
-      />
-
+      <Header onRefresh={() => window.location.reload()} onLogout={handleLogout} />
+      <SearchSection onRefresh={() => window.location.reload()} searchTerm={searchTerm} setSearchTerm={setSearchTerm} handleSearch={handleSearch} />
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
-        <aside className="bg-white p-3 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
+        <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
           <ClaimFilter
             claimStatuses={claimStatuses}
             handleFilterChange={handleFilterChange}
             applyFilters={applyFilters}
             handleSortingChange={handleSortingChange}
           />
-          <ClaimList
-            claims={filteredClaims}
-            selectedClaim={selectedClaim}
-            setSelectedClaim={setSelectedClaim}
-          />
+          <ClaimList claims={filteredClaims} selectedClaim={selectedClaim} setSelectedClaim={setSelectedClaim} />
         </aside>
-
         <main className="bg-white p-3 rounded-md shadow-sm overflow-auto">
           <ClaimDetails selectedClaim={selectedClaim} />
         </main>

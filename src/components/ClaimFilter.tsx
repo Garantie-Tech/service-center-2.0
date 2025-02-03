@@ -90,10 +90,9 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
     ); // Apply sorting immediately
   };
 
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-3">
+    <div className="sticky top-0 bg-white h-[50px] mt-2">
+      <div className="relative flex justify-between items-center mb-3">
         {/* Custom Dropdown */}
         <details
           className={`dropdown w-full ${isDropdownOpen ? "open" : ""}`}
@@ -102,7 +101,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
             setIsDropdownOpen((e.target as HTMLDetailsElement).open)
           }
         >
-          <summary className="custom-button btn-default w-full flex items-center justify-between">
+          <summary className="custom-button btn-default w-full flex items-center justify-between cursor-pointer">
             <span className="flex items-center text-xs">
               {selectedDropdown}
             </span>
@@ -139,7 +138,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
         </details>
 
         {/* Filter Button */}
-        <div className="flex justify-between items-center px-4">
+        <div className="flex justify-between items-center pl-4">
           <button className="px-2" title="Filter" onClick={toggleFilter}>
             <Image
               src="/images/filter-icon.svg"

@@ -1,25 +1,23 @@
-import { getRequest, postRequest, putRequest, deleteRequest } from "@/utils/api";
+import Claim from "@/interfaces/ClaimInterface";
+import { getRequest } from "@/utils/api";
 
-export const fetchClaims = async (params?: Record<string, any>) => {
-  return await getRequest<{ claims: any[] }>("partners/claim", params);
+export interface ClaimResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    claims: Claim[];
+  };
+}
+
+export const fetchClaims = async (_params?: Record<string, unknown>) => {
+  return await getRequest<ClaimResponse>("partners/claim", _params);
 };
 
-export const fetchClaimStatuses = async (params?: Record<string, any>) => {
-  return await getRequest<{ claimStatuses: any[] }>("claims/statuses", {});
-};
-
-export const fetchClaimById = async (claimId: string) => {
-  return await getRequest<{ claim: any }>(`claims/${claimId}`);
-};
-
-export const createClaim = async (claimData: { title: string; description: string }) => {
-  return await postRequest<{ claim: any }>("claims", claimData);
-};
-
-export const updateClaim = async (claimId: string, claimData: { title?: string; description?: string }) => {
-  return await putRequest<{ claim: any }>(`claims/${claimId}`, claimData);
-};
-
-export const deleteClaim = async (claimId: string) => {
-  return await deleteRequest<{ message: string }>(`claims/${claimId}`);
+export const fetchClaimStatuses = async (_params?: Record<string, unknown>) => {
+  return await getRequest<{ data: { claimStatuses: Record<string, unknown>[] } }>(
+    "claims/statuses",
+    {}
+  );
 };
