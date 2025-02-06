@@ -2,12 +2,52 @@
 
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
+import { fetchExportData } from "@/services/exportService";
+import { exportToCSV } from "@/utils/exportCsv";
+import { useNotification } from "@/context/NotificationProvider";
+import { redirectToClaimsPortal } from "@/utils/redirect";
 
 const SearchSection: React.FC = () => {
-  const { searchTerm, setSearchTerm, handleSearch } = useGlobalStore();
+  const {
+    searchTerm,
+    setSearchTerm,
+    handleSearch,
+    setIsLoading,
+    filterStatus,
+  } = useGlobalStore();
 
   const handleClearSearch = () => {
     setSearchTerm("");
+  };
+
+  const { notifySuccess, notifyError } = useNotification();
+
+  const handleExport = async () => {
+    try {
+      setIsLoading(true);
+      const requestParams = {
+        page: 1,
+        pageSize: 25,
+        search: searchTerm,
+        status: filterStatus,
+      };
+      const response = await fetchExportData(requestParams);
+
+      if (response?.success) {
+        if (!response?.data?.data || response.data.data.length === 0) {
+          notifyError("No data to export.");
+          return;
+        }
+        exportToCSV(response.data.data, "claims_export.csv");
+        notifySuccess("Data exported successfully !");
+      } else {
+        notifyError("Failed to export data.");
+      }
+    } catch (e) {
+      notifyError("Failed to export data. Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -19,7 +59,11 @@ const SearchSection: React.FC = () => {
             <h2 className="text-sm font-bold">Claims</h2>
             <p className="text-xxs text-gray-500">50/1000</p>
           </div>
-          <button onClick={() => window.location.reload()}>
+          <button
+            onClick={() => window.location.reload()}
+            className="tooltip"
+            data-tip="Refresh"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -50,7 +94,8 @@ const SearchSection: React.FC = () => {
             {searchTerm && (
               <button
                 onClick={handleClearSearch}
-                className="absolute inset-y-0 right-10 flex items-center text-gray-500 hover:text-gray-800"
+                className="absolute inset-y-0 right-10 flex items-center text-gray-500 hover:text-gray-800 tooltip"
+                data-tip="Clear Search"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +112,8 @@ const SearchSection: React.FC = () => {
             )}
             <button
               onClick={handleSearch}
-              className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-800"
+              className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-800 tooltip"
+              data-tip="Search"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +132,10 @@ const SearchSection: React.FC = () => {
           {/* Buttons */}
           <div className="flex items-center justify-end gap-4">
             <div className="flex gap-4">
-              <button>
+              <button
+                className="w-[30px] ml-20px tooltip"
+                data-tip="Plan Finder"
+              >
                 <Image
                   src="/images/plan-finder.svg"
                   alt="Download"
@@ -94,7 +143,11 @@ const SearchSection: React.FC = () => {
                   height={24}
                 />
               </button>
-              <button>
+              <button
+                onClick={handleExport}
+                className="w-[30px] tooltip"
+                data-tip="Export Claims"
+              >
                 <Image
                   src="/images/download-icon.svg"
                   alt="Download"
@@ -103,7 +156,11 @@ const SearchSection: React.FC = () => {
                 />
               </button>
             </div>
-            <button className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500">
+            <button
+              onClick={redirectToClaimsPortal}
+              className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"
+              data-tip="Initiate Claim"
+            >
               <Image
                 src="/images/plus-circle.svg"
                 alt="Initiate Claim"

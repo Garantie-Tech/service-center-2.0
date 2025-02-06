@@ -79,7 +79,7 @@ const ClaimFilter: React.FC = () => {
             setIsDropdownOpen((e.target as HTMLDetailsElement).open)
           }
         >
-          <summary className="custom-button btn-default w-full flex items-center justify-between cursor-pointer">
+          <summary className="custom-button btn-default w-full flex items-center justify-between cursor-pointer tooltip tooltip-bottom" data-tip="Claim Status">
             <span className="flex items-center text-xs">
               {selectedDropdown}
             </span>
@@ -116,7 +116,7 @@ const ClaimFilter: React.FC = () => {
 
         {/* Filter Button */}
         <div className="flex justify-between items-center pl-4">
-          <button className="px-2" title="Filter" onClick={toggleFilter}>
+          <button className="px-2 tooltip tooltip-bottom" title="Filter" onClick={toggleFilter} data-tip="Filter">
             <Image
               src="/images/filter-icon.svg"
               alt="Filter"
@@ -128,7 +128,8 @@ const ClaimFilter: React.FC = () => {
           {/* Sort Button */}
           <div className="">
             <button
-              className="px-2"
+              className="px-2 tooltip tooltip-bottom"
+              data-tip="Sort"
               title="Sorting"
               onClick={() => setIsSortingOpen(!isSortingOpen)}
             >

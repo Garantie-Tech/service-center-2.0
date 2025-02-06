@@ -87,7 +87,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   searchTerm: "",
   setSearchTerm: (term) => set({ searchTerm: term }),
 
-  filterStatus: "All Claims",
+  filterStatus: "",
   setFilterStatus: (status) => set({ filterStatus: status }),
 
   isDropdownOpen: false,
@@ -114,13 +114,13 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
 
   claimStatuses: {
     "ALL CLAIMS": "All Claims",
-    NEW: "Estimate Pending",
+    "NEW": "Estimate Pending",
     "IN PROGRESS": "Approval Pending",
-    APPROVED: "Approved",
+    "APPROVED": "Approved",
     "PAYMENT PENDING": "Payment Pending",
-    REJECTED: "Rejected",
-    CLOSED: "Completed",
-    CANCELLED: "Cancelled",
+    "REJECTED": "Rejected",
+    "CLOSED": "Completed",
+    "CANCELLED": "Cancelled",
   },
 
   selectedDropdown: "All Claims",

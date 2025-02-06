@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
             width={120}
             height={64}
           />
-          <button onClick={onRefresh}>
+          <button onClick={onRefresh} className="tooltip" data-tip="Refresh">
             <Image
               src="/images/refresh.svg"
               alt="Refresh"
@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
         </h1>
 
         {/* Profile Section */}
-        <div className="dropdown dropdown-bottom dropdown-end text-gray-600">
+        <div className="dropdown dropdown-bottom dropdown-end text-gray-600 tooltip tooltip-bottom" data-tip="Profile">
           <div tabIndex={0} role="button" className="flex items-center gap-2">
             <Image
               src="/images/user-icon.svg"
