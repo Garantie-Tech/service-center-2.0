@@ -1,10 +1,8 @@
-import Claim from "@/interfaces/ClaimInterface";
+import { useGlobalStore } from "@/store/store";
 
-interface ClaimDetailsProps {
-  selectedClaim: Claim | null;
-}
+const ClaimDetails: React.FC = () => {
+  const { selectedClaim } = useGlobalStore();
 
-const ClaimDetails: React.FC<ClaimDetailsProps> = ({ selectedClaim }) => {
   if (!selectedClaim) {
     return (
       <div className="text-center">

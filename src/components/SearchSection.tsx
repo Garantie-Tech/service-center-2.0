@@ -1,19 +1,11 @@
+"use client";
+
 import Image from "next/image";
-import React from "react";
+import { useGlobalStore } from "@/store/store";
 
-interface SearchSectionProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  handleSearch: () => void;
-  onRefresh: () => void;
-}
+const SearchSection: React.FC = () => {
+  const { searchTerm, setSearchTerm, handleSearch } = useGlobalStore();
 
-const SearchSection: React.FC<SearchSectionProps> = ({
-  searchTerm,
-  setSearchTerm,
-  handleSearch,
-  onRefresh,
-}) => {
   const handleClearSearch = () => {
     setSearchTerm("");
   };
@@ -27,7 +19,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
             <h2 className="text-sm font-bold">Claims</h2>
             <p className="text-xxs text-gray-500">50/1000</p>
           </div>
-          <button onClick={onRefresh}>
+          <button onClick={() => window.location.reload()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -46,38 +38,19 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         </div>
 
         {/* Search Input */}
-
         <div className="flex align-center justify-between gap-2 w-3/4">
-          {/* <div className=""> */}
-            <div className="relative w-auto md:w-1/2">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search Claim number, customer mobile, or IMEI number"
-                className="input input-bordered w-full text-xs pr-10"
-              />
-              {searchTerm && (
-                <button
-                  onClick={handleClearSearch}
-                  className="absolute inset-y-0 right-10 flex items-center text-gray-500 hover:text-gray-800"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
+          <div className="relative w-auto md:w-1/2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search Claim number, customer mobile, or IMEI number"
+              className="input input-bordered w-full text-xs pr-10"
+            />
+            {searchTerm && (
               <button
-                onClick={handleSearch}
-                className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-800"
+                onClick={handleClearSearch}
+                className="absolute inset-y-0 right-10 flex items-center text-gray-500 hover:text-gray-800"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -87,12 +60,28 @@ const SearchSection: React.FC<SearchSectionProps> = ({
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
-            </div>
-          {/* </div> */}
+            )}
+            <button
+              onClick={handleSearch}
+              className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-800"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </div>
 
           {/* Buttons */}
           <div className="flex items-center justify-end gap-4">

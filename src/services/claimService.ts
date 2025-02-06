@@ -11,13 +11,6 @@ export interface ClaimResponse {
   };
 }
 
-export const fetchClaims = async (_params?: Record<string, unknown>) => {
+export const fetchClaims = async (_params?: Record<string, string | number | boolean>) => {
   return await getRequest<ClaimResponse>("partners/claim", _params);
-};
-
-export const fetchClaimStatuses = async (_params?: Record<string, unknown>) => {
-  return await getRequest<{ data: { claimStatuses: Record<string, unknown>[] } }>(
-    "claims/statuses",
-    {}
-  );
 };

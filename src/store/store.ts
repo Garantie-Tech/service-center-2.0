@@ -1,13 +1,187 @@
 "use client";
 
 import { create } from "zustand";
+import Claim from "@/interfaces/ClaimInterface";
+import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
+
+interface FilterProps {
+  fromDate: string;
+  toDate: string;
+  claimTypes: {
+    myClaims: boolean;
+    otherClaims: boolean;
+    pendingClaims: boolean;
+  };
+}
 
 interface StoreType {
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+
+  claims: Claim[];
+  setClaims: (claims: Claim[]) => void;
+
+  filteredClaims: Claim[];
+  setFilteredClaims: (claims: Claim[]) => void;
+
+  selectedClaim: Claim | null;
+  setSelectedClaim: (claim: Claim | null) => void;
+
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+
+  filterStatus: string;
+  setFilterStatus: (status: string) => void;
+
+  isDropdownOpen: boolean;
+  setIsDropdownOpen: (open: boolean) => void;
+
+  isSortingOpen: boolean;
+  setIsSortingOpen: (open: boolean) => void;
+
+  isFilterOpen: boolean;
+  toggleFilter: () => void;
+
+  fromDate: string;
+  setFromDate: (date: string) => void;
+
+  toDate: string;
+  setToDate: (date: string) => void;
+
+  claimTypes: {
+    myClaims: boolean;
+    otherClaims: boolean;
+    pendingClaims: boolean;
+  };
+  setClaimTypes: (types: { myClaims: boolean; otherClaims: boolean; pendingClaims: boolean }) => void;
+
+  claimStatuses: Record<string, string>;
+  selectedDropdown: string;
+  setSelectedDropdown: (dropdown: string) => void;
+
+  sortBy: SortByOptions;
+  setSortBy: (sortKey: SortByOptions) => void;
+
+  sortOrder: SortOrder;
+  setSortOrder: (order: SortOrder) => void;
+
+  handleSearch: () => void;
+  handleFilterChange: (filter: string) => void;
+  handleSortingChange: (sortBy: SortByOptions, order: SortOrder) => void;
+  applyFilters: (filters: FilterProps) => void;
 }
 
-export const useGlobalStore = create<StoreType>((set) => ({
+export const useGlobalStore = create<StoreType>((set, get) => ({
   isLoading: false,
-  setIsLoading: (loading: boolean) => set(() => ({ isLoading: loading })),
+  setIsLoading: (loading) => set({ isLoading: loading }),
+
+  claims: [],
+  setClaims: (claims) => set({ claims, filteredClaims: claims }),
+
+  filteredClaims: [],
+  setFilteredClaims: (claims) => set({ filteredClaims: claims }),
+
+  selectedClaim: null,
+  setSelectedClaim: (claim) => set({ selectedClaim: claim }),
+
+  searchTerm: "",
+  setSearchTerm: (term) => set({ searchTerm: term }),
+
+  filterStatus: "All Claims",
+  setFilterStatus: (status) => set({ filterStatus: status }),
+
+  isDropdownOpen: false,
+  setIsDropdownOpen: (open) => set({ isDropdownOpen: open }),
+
+  isSortingOpen: false,
+  setIsSortingOpen: (open) => set({ isSortingOpen: open }),
+
+  isFilterOpen: false,
+  toggleFilter: () => set((state) => ({ isFilterOpen: !state.isFilterOpen })),
+
+  fromDate: "",
+  setFromDate: (date) => set({ fromDate: date }),
+
+  toDate: "",
+  setToDate: (date) => set({ toDate: date }),
+
+  claimTypes: {
+    myClaims: false,
+    otherClaims: false,
+    pendingClaims: false,
+  },
+  setClaimTypes: (types) => set({ claimTypes: types }),
+
+  claimStatuses: {
+    "ALL CLAIMS": "All Claims",
+    NEW: "Estimate Pending",
+    "IN PROGRESS": "Approval Pending",
+    APPROVED: "Approved",
+    "PAYMENT PENDING": "Payment Pending",
+    REJECTED: "Rejected",
+    CLOSED: "Completed",
+    CANCELLED: "Cancelled",
+  },
+
+  selectedDropdown: "All Claims",
+  setSelectedDropdown: (dropdown) => set({ selectedDropdown: dropdown }),
+
+  sortBy: "SRN",
+  setSortBy: (sortKey: SortByOptions) => set({ sortBy: sortKey }),
+
+  sortOrder: "Ascending",
+  setSortOrder: (order: "Ascending" | "Descending") => set({ sortOrder: order }),
+
+  handleSearch: () => {
+    const { claims, searchTerm, setFilteredClaims } = get();
+    const searchResults = claims.filter(
+      (claim) =>
+        claim.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        claim.id.toString().includes(searchTerm) ||
+        claim.status.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredClaims(searchResults);
+  },
+
+  handleFilterChange: (filter) => {
+    const { claims, setFilterStatus, setFilteredClaims } = get();
+    setFilterStatus(filter);
+    if (filter === "ALL CLAIMS") {
+      setFilteredClaims(claims);
+    } else {
+      setFilteredClaims(
+        claims.filter(
+          (claim) => claim.status.toLowerCase() === filter.toLowerCase()
+        )
+      );
+    }
+  },
+
+  handleSortingChange: (sortBy, order) => {
+    const { filteredClaims, setFilteredClaims } = get();
+    const sortedClaims = [...filteredClaims].sort((a, b) => {
+      const valueA = a[sortBy as keyof Claim] ?? "";
+      const valueB = b[sortBy as keyof Claim] ?? "";
+
+      return order === "Ascending"
+        ? String(valueA).localeCompare(String(valueB))
+        : String(valueB).localeCompare(String(valueA));
+    });
+
+    setFilteredClaims(sortedClaims);
+  },
+
+  applyFilters: (filters) => {
+    const { claims, setFilteredClaims } = get();
+    const { fromDate, toDate } = filters;
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+
+    const filteredResults = claims.filter((claim) => {
+      const claimDate = new Date(claim?.created_at);
+      return claimDate >= from && claimDate <= to;
+    });
+
+    setFilteredClaims(filteredResults);
+  },
 }));

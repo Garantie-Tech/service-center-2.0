@@ -1,70 +1,54 @@
-import { useState, useRef, useEffect } from "react";
+"use client";
+
+import { useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
-import Claim from "@/interfaces/ClaimInterface";
+import { useGlobalStore } from "@/store/store";
+import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
+import { SORT_OPTIONS } from "@/globalConstant";
 
-interface ClaimFilterProps {
-  handleFilterChange: (value: string) => void;
-  applyFilters: (filters: {
-    fromDate: string;
-    toDate: string;
-    claimTypes: {
-      myClaims: boolean;
-      otherClaims: boolean;
-      pendingClaims: boolean;
-    };
-  }) => void;
-  handleSortingChange: (
-    sortBy: keyof Claim,
-    order: "Ascending" | "Descending"
-  ) => void; // Sorting function
-  claimStatuses: Record<string, string>;
-}
-
-const ClaimFilter: React.FC<ClaimFilterProps> = ({
-  handleFilterChange,
-  applyFilters,
-  handleSortingChange,
-  claimStatuses,
-}) => {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [fromDate, setFromDate] = useState<string>("");
-  const [toDate, setToDate] = useState<string>("");
-  const [claimTypes, setClaimTypes] = useState({
-    myClaims: false,
-    otherClaims: false,
-    pendingClaims: false,
-  });
-  const [selectedDropdown, setSelectedDropdown] = useState("All Claims");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSortingOpen, setIsSortingOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<string>("SRN");
-  const [sortOrder, setSortOrder] = useState<string>("Ascending");
+const ClaimFilter: React.FC = () => {
+  const {
+    isFilterOpen,
+    toggleFilter,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    claimTypes,
+    selectedDropdown,
+    setSelectedDropdown,
+    isDropdownOpen,
+    setIsDropdownOpen,
+    isSortingOpen,
+    setIsSortingOpen,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    applyFilters,
+    handleSortingChange,
+    handleFilterChange,
+    claimStatuses,
+  } = useGlobalStore();
 
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const toggleFilter = () => setIsFilterOpen(!isFilterOpen);
-
-  const closeFilter = (e: MouseEvent) => {
+  const closeFilter = useCallback((e: MouseEvent) => {
     if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-      setIsFilterOpen(false);
+      toggleFilter();
     }
-  };
+  }, [toggleFilter]);
 
   useEffect(() => {
     document.addEventListener("mousedown", closeFilter);
     return () => {
       document.removeEventListener("mousedown", closeFilter);
     };
-  }, []);
+  }, [closeFilter]);
 
   const handleApply = () => {
-    const filters = {
-      fromDate,
-      toDate,
-      claimTypes,
-    };
-    applyFilters(filters);
-    setIsFilterOpen(false);
+    applyFilters({ fromDate, toDate, claimTypes });
+    toggleFilter();
   };
 
   const handleDropdownChange = (value: string) => {
@@ -73,26 +57,20 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
     setIsDropdownOpen(false);
   };
 
-  const handleSortChange = (sortKey: string) => {
+  const handleSortChange = (sortKey: SortByOptions) => {
     setSortBy(sortKey);
-    handleSortingChange(
-      sortBy as keyof Claim,
-      sortOrder as "Ascending" | "Descending"
-    ); // Apply sorting immediately
+    handleSortingChange(sortKey, sortOrder as "Ascending" | "Descending");
     setIsSortingOpen(false);
   };
 
-  const toggleSortOrder = (order: string) => {
+  const toggleSortOrder = (order: SortOrder) => {
     setSortOrder(order);
-    handleSortingChange(
-      sortBy as keyof Claim,
-      order as "Ascending" | "Descending"
-    ); // Apply sorting immediately
+    handleSortingChange(sortBy, order as "Ascending" | "Descending");
   };
 
   return (
     <div className="sticky top-0 bg-white h-[50px] mt-2">
-      <div className="relative flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-3">
         {/* Custom Dropdown */}
         <details
           className={`dropdown w-full ${isDropdownOpen ? "open" : ""}`}
@@ -129,8 +107,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
                     height={20}
                     className="mr-2"
                   />
-                  {value}{" "}
-                  {/* ✅ Show the human-readable status instead of the key */}
+                  {value}
                 </button>
               </li>
             ))}
@@ -149,7 +126,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           </button>
 
           {/* Sort Button */}
-          <div className="relative">
+          <div className="">
             <button
               className="px-2"
               title="Sorting"
@@ -188,13 +165,13 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
                   </label>
                 </div>
                 <ul className="text-sm">
-                  {["SRN", "Follow UP", "Time"].map((sortKey) => (
+                  {SORT_OPTIONS.map(({ key, label }) => (
                     <li
-                      key={sortKey}
+                      key={key}
                       className="cursor-pointer px-4 py-2 hover:bg-gray-200"
-                      onClick={() => handleSortChange(sortKey)}
+                      onClick={() => handleSortChange(key)}
                     >
-                      {sortKey}
+                      {label}
                     </li>
                   ))}
                 </ul>
@@ -214,6 +191,7 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
             left: "-80px",
           }}
         >
+          {/* Date Filters */}
           <h3 className="text-sm font-bold mb-3">Date Range</h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
@@ -238,103 +216,48 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
 
           {/* Date Range Buttons */}
           <div className="flex gap-2 justify-between mb-4">
-            <button
-              className="custom-button btn-default w-[32%] text-xs py-1"
-              onClick={() => {
-                setFromDate(new Date().toISOString().split("T")[0]);
-                setToDate(new Date().toISOString().split("T")[0]);
-              }}
-            >
-              Today
-            </button>
-            <button
-              className="custom-button btn-default w-[32%] text-xs py-1"
-              onClick={() => {
-                const today = new Date();
-                const firstDayOfWeek = new Date(
-                  today.setDate(today.getDate() - today.getDay())
-                );
-                setFromDate(firstDayOfWeek.toISOString().split("T")[0]);
-                setToDate(new Date().toISOString().split("T")[0]);
-              }}
-            >
-              This Week
-            </button>
-            <button
-              className="custom-button btn-default w-[32%] text-xs py-1"
-              onClick={() => {
-                const today = new Date();
-                const firstDayOfMonth = new Date(
-                  today.getFullYear(),
-                  today.getMonth(),
-                  1
-                );
-                setFromDate(firstDayOfMonth.toISOString().split("T")[0]);
-                setToDate(new Date().toISOString().split("T")[0]);
-              }}
-            >
-              This Month
-            </button>
+            {["Today", "This Week", "This Month"].map((label, index) => (
+              <button
+                key={index}
+                className="custom-button btn-default w-[32%] text-xs py-1"
+                onClick={() => {
+                  const today = new Date();
+                  if (label === "This Week")
+                    today.setDate(today.getDate() - today.getDay());
+                  if (label === "This Month") today.setDate(1);
+                  setFromDate(today.toISOString().split("T")[0]);
+                  setToDate(new Date().toISOString().split("T")[0]);
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           {/* Claim Types */}
-          <div className="border-t pt-[30px] mt-[20px] mb-[40px]">
-            <div className="text-xs flex flex-wrap gap-4">
-              <label className="flex items-center">
+          <h3 className="text-sm font-bold mb-3">Claim Type</h3>
+          <div className="flex gap-4 mb-4">
+            {["myClaims", "otherClaims", "pendingClaims"].map((type, index) => (
+              <label key={index} className="flex items-center">
                 <input
-                  type="checkbox"
-                  className="checkbox rounded-[4px] checked:bg-primaryBlue"
-                  checked={claimTypes.myClaims}
-                  onChange={() =>
-                    setClaimTypes((prev) => ({
-                      ...prev,
-                      myClaims: !prev.myClaims,
-                    }))
-                  }
+                  type="radio"
+                  name="claimType"
+                  className="radio checked:bg-primaryBlue"
                 />
-                <span className="ml-2 text-xs">My Claims</span>
+                <span className="ml-2 text-xs capitalize">
+                  {type.replace("Claims", " Claims")}
+                </span>
               </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="checkbox rounded-[4px] checked:bg-primaryBlue"
-                  checked={claimTypes.otherClaims}
-                  onChange={() =>
-                    setClaimTypes((prev) => ({
-                      ...prev,
-                      otherClaims: !prev.otherClaims,
-                    }))
-                  }
-                />
-                <span className="ml-2 text-xs">Other Claims</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="checkbox rounded-[4px] checked:bg-primaryBlue"
-                  checked={claimTypes.pendingClaims}
-                  onChange={() =>
-                    setClaimTypes((prev) => ({
-                      ...prev,
-                      pendingClaims: !prev.pendingClaims,
-                    }))
-                  }
-                />
-                <span className="ml-2 text-xs">Pending Claims</span>
-              </label>
-            </div>
+            ))}
           </div>
 
           {/* Action Buttons */}
           <div className="flex justify-center gap-2 mt-4">
-            <button
-              className="custom-button btn-default w-1/2 text-base"
-              onClick={() => setIsFilterOpen(false)}
-            >
+            <button className="btn w-1/2" onClick={toggleFilter}>
               Cancel
             </button>
             <button
-              className="custom-button btn-primary w-1/2 bg-primaryBlue text-white text-base"
+              className="btn bg-primaryBlue text-white w-1/2"
               onClick={handleApply}
             >
               Apply
