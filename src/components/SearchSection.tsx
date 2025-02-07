@@ -44,7 +44,7 @@ const SearchSection: React.FC = () => {
         notifyError("Failed to export data.");
       }
     } catch (e) {
-      notifyError("Failed to export data. Something went wrong");
+      notifyError(`Failed to export data. Something went wrong ${e}`);
     } finally {
       setIsLoading(false);
     }

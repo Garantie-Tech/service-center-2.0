@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import Claim from "@/interfaces/ClaimInterface";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
+import { Tab } from "@/interfaces/GlobalInterface";
 
 interface FilterProps {
   fromDate: string;
@@ -53,7 +54,11 @@ interface StoreType {
     otherClaims: boolean;
     pendingClaims: boolean;
   };
-  setClaimTypes: (types: { myClaims: boolean; otherClaims: boolean; pendingClaims: boolean }) => void;
+  setClaimTypes: (types: {
+    myClaims: boolean;
+    otherClaims: boolean;
+    pendingClaims: boolean;
+  }) => void;
 
   claimStatuses: Record<string, string>;
   selectedDropdown: string;
@@ -69,6 +74,8 @@ interface StoreType {
   handleFilterChange: (filter: string) => void;
   handleSortingChange: (sortBy: SortByOptions, order: SortOrder) => void;
   applyFilters: (filters: FilterProps) => void;
+  activeTab: Tab;
+  setActiveTab: (tab: Tab) => void;
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -114,13 +121,13 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
 
   claimStatuses: {
     "ALL CLAIMS": "All Claims",
-    "NEW": "Estimate Pending",
+    NEW: "Estimate Pending",
     "IN PROGRESS": "Approval Pending",
-    "APPROVED": "Approved",
+    APPROVED: "Approved",
     "PAYMENT PENDING": "Payment Pending",
-    "REJECTED": "Rejected",
-    "CLOSED": "Completed",
-    "CANCELLED": "Cancelled",
+    REJECTED: "Rejected",
+    CLOSED: "Completed",
+    CANCELLED: "Cancelled",
   },
 
   selectedDropdown: "All Claims",
@@ -130,7 +137,8 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setSortBy: (sortKey: SortByOptions) => set({ sortBy: sortKey }),
 
   sortOrder: "Ascending",
-  setSortOrder: (order: "Ascending" | "Descending") => set({ sortOrder: order }),
+  setSortOrder: (order: "Ascending" | "Descending") =>
+    set({ sortOrder: order }),
 
   handleSearch: () => {
     const { claims, searchTerm, setFilteredClaims } = get();
@@ -184,4 +192,6 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
 
     setFilteredClaims(filteredResults);
   },
+  activeTab: "Claim Details",
+  setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 }));

@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
           <ClaimFilter />
           <ClaimList />
         </aside>
-        <main className="bg-white p-3 rounded-md shadow-sm overflow-auto">
+        <main className="bg-white rounded-md shadow-sm overflow-auto">
           <ClaimDetails />
         </main>
       </div>

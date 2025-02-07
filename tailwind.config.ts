@@ -15,6 +15,7 @@ export default {
         primaryBlue: "#3C63FC",
         lightPrimaryBlue: "#5A7CFF",
         claimListBackground:"#EBEFFF",
+        black:"#181D27",
         gray: {
           50: "#F9FAFB",   // Lightest gray
           100: "#F3F4F6",  // Soft gray
@@ -28,6 +29,7 @@ export default {
           900: "#111827",  // Almost black
         },
         lightGray: "#E5E7EB",
+        darkGray: "#757575",
       },
       fontSize: {
         base: "16px",

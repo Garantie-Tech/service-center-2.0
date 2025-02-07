@@ -34,3 +34,14 @@ export interface ExportResponse {
   message: string;
   data: ExportData[];
 }
+
+export const CLAIM_TABS = [
+  "Claim Details",
+  "Estimate",
+  "Approval",
+  "Final Documents",
+] as const;
+
+export type Tab = typeof CLAIM_TABS[number]; 
+
+export type TabStatus = "success" | "error" | "empty";
