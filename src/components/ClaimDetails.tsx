@@ -10,6 +10,7 @@ import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
 import Claim from "@/interfaces/ClaimInterface";
 import { submitEstimate } from "@/services/claimService";
+import ClaimActionsDropdown from "./ClaimActionsDropdown";
 
 const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
   if (!selectedClaim) return "empty";
@@ -114,16 +115,7 @@ const ClaimDetails: React.FC = () => {
               className="cursor-pointer"
             />
           </button>
-          <button title="More Options">
-            <Image
-              src="/images/three-dots.svg"
-              alt="More Options"
-              width={24}
-              height={5}
-              className="cursor-pointer"
-              style={{ height: "20px" }}
-            />
-          </button>
+          <ClaimActionsDropdown />
         </div>
       </div>
 
