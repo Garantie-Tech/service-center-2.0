@@ -45,3 +45,23 @@ export const CLAIM_TABS = [
 export type Tab = typeof CLAIM_TABS[number]; 
 
 export type TabStatus = "success" | "error" | "empty";
+
+export interface SubmitEstimate {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    message: string;
+    claimID: number;
+  };
+}
+
+export interface EstimateDetailsState {
+  estimateAmount: string;
+  jobSheetNumber: string;
+  estimateDetails: string;
+  replacementConfirmed: "yes" | "no" | null;
+  damagePhotos: File[];
+  estimateDocument: File | null;
+}

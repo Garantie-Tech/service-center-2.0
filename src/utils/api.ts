@@ -23,7 +23,7 @@ function formatQueryParams(params: Record<string, string | number | boolean>): s
 export async function apiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  body?: Record<string, unknown>,
+  body?: Record<string, unknown> | FormData,
   params?: Record<string, string | number | boolean>,
   extraHeaders: HeadersInit = {}
 ): Promise<ApiResponse<T>> {
@@ -31,8 +31,8 @@ export async function apiRequest<T>(
     const token = await getCookie("token");
 
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
+      ...(body && !(body instanceof FormData) && { "Content-Type": "application/json" }),
       ...extraHeaders,
     };
 
@@ -42,7 +42,7 @@ export async function apiRequest<T>(
       next: { revalidate: 60 }, // Caching strategy
       method,
       headers,
-      body: method !== "GET" && body ? JSON.stringify(body) : undefined,
+      body: method !== "GET" && body ? (body instanceof FormData ? body : JSON.stringify(body)) : undefined,
     });
 
     // Ensure the response is valid JSON
@@ -65,7 +65,7 @@ export function getRequest<T>(endpoint: string, params?: Record<string, string |
 }
 
 // Generic POST request
-export function postRequest<T>(endpoint: string, body: Record<string, unknown>, extraHeaders?: HeadersInit) {
+export function postRequest<T>(endpoint: string, body: Record<string, unknown> | FormData, extraHeaders?: HeadersInit) {
   return apiRequest<T>(endpoint, "POST", body, undefined, extraHeaders);
 }
 

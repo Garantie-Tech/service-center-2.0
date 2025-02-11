@@ -9,6 +9,7 @@ import { CLAIM_TABS, Tab, TabStatus } from "@/interfaces/GlobalInterface";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
 import Claim from "@/interfaces/ClaimInterface";
+import { submitEstimate } from "@/services/claimService";
 
 const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
   if (!selectedClaim) return "empty";
@@ -17,23 +18,11 @@ const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
     case "Claim Details":
       return selectedClaim ? "success" : "error";
     case "Estimate":
-      return selectedClaim
-        ? "success"
-        : selectedClaim
-        ? "error"
-        : "empty";
+      return selectedClaim ? "success" : "error";
     case "Approval":
-      return selectedClaim
-        ? "success"
-        : selectedClaim
-        ? "error"
-        : "empty";
+      return selectedClaim ? "success" : "error";
     case "Final Documents":
-      return selectedClaim
-        ? "success"
-        : selectedClaim
-        ? "error"
-        : "empty";
+      return selectedClaim ? "success" : "error";
     default:
       return "empty";
   }
@@ -72,9 +61,23 @@ const ClaimDetails: React.FC = () => {
     planType: selectedClaim?.product,
     imei: selectedClaim?.imei_number,
     coPay: {
-      amount: Number(selectedClaim?.copayment_amount) || 0 ,
+      amount: Number(selectedClaim?.copayment_amount) || 0,
     },
-    claimDetails:selectedClaim?.data?.inputs?.damage_details,
+    claimDetails: selectedClaim?.data?.inputs?.damage_details || "",
+  };
+
+  const handleEstimateSubmit = async (formData: FormData) => {
+    try {
+      console.log("Submitting Estimate Data:", formData);
+      const response = await submitEstimate(selectedClaim?.id, formData);
+
+      // if (!response.ok) {
+      //   throw new Error("Failed to submit the estimate");
+      // }
+
+    } catch (error) {
+      console.error("Estimate submission failed:", error);
+    }
   };
 
   return (
@@ -158,7 +161,9 @@ const ClaimDetails: React.FC = () => {
       {/* Tab Content */}
       <div className="px-8 mt-6">
         {activeTab === "Claim Details" && <ClaimDetailsTab data={claimData} />}
-        {activeTab === "Estimate" && <EstimateDetailsTab />}
+        {activeTab === "Estimate" && (
+          <EstimateDetailsTab onSubmit={handleEstimateSubmit} />
+        )}
         {activeTab === "Approval" && <ApprovalDetailsTab />}
         {activeTab === "Final Documents" && <FinalDocumentsTab />}
       </div>

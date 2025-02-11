@@ -30,6 +30,13 @@ export default {
         },
         lightGray: "#E5E7EB",
         darkGray: "#757575",
+        grayBg: "#717680",
+        inputBg:"#F9F9F9",
+        crossBg:"#D9D9D9",
+        grayFont:"#A5A5A5",
+        btnDisabledBg:"#D8D8D8",
+        btnDisabledText:"#979797",
+        checkboxCheckedBg:"#2DC8A8"
       },
       fontSize: {
         base: "16px",

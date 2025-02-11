@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import Claim from "@/interfaces/ClaimInterface";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
-import { Tab } from "@/interfaces/GlobalInterface";
+import { EstimateDetailsState, Tab } from "@/interfaces/GlobalInterface";
 
 interface FilterProps {
   fromDate: string;
@@ -76,6 +76,11 @@ interface StoreType {
   applyFilters: (filters: FilterProps) => void;
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
+  estimateDetailsState: EstimateDetailsState;
+  setEstimateDetailsState: (
+    updatedState: Partial<EstimateDetailsState>
+  ) => void;
+  resetEstimateDetailsState: () => void;
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -194,4 +199,27 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   },
   activeTab: "Claim Details",
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
+  estimateDetailsState: {
+    estimateAmount: "",
+    jobSheetNumber: "",
+    estimateDetails: "",
+    replacementConfirmed: "no",
+    damagePhotos: [],
+    estimateDocument: null,
+  },
+  setEstimateDetailsState: (updatedState) => {
+    const currentState = get().estimateDetailsState;
+    set({ estimateDetailsState: { ...currentState, ...updatedState } });
+  },
+  resetEstimateDetailsState: () =>
+    set({
+      estimateDetailsState: {
+        estimateAmount: "",
+        jobSheetNumber: "",
+        estimateDetails: "",
+        replacementConfirmed: null,
+        damagePhotos: [],
+        estimateDocument: null,
+      },
+    }),
 }));
