@@ -71,9 +71,9 @@ const ClaimDetails: React.FC = () => {
       console.log("Submitting Estimate Data:", formData);
       const response = await submitEstimate(selectedClaim?.id, formData);
 
-      // if (!response.ok) {
-      //   throw new Error("Failed to submit the estimate");
-      // }
+      if (!response.success) {
+        throw new Error("Failed to submit the estimate");
+      }
 
     } catch (error) {
       console.error("Estimate submission failed:", error);

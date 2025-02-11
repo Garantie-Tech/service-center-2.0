@@ -21,9 +21,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     estimateDocument,
   } = estimateDetailsState;
 
-  const handleInputChange = (
-    key: keyof typeof estimateDetailsState,
-    value: any
+  const handleInputChange = <K extends keyof typeof estimateDetailsState>(
+    key: K,
+    value: typeof estimateDetailsState[K]
   ) => {
     setEstimateDetailsState({ [key]: value });
   };
@@ -217,9 +217,11 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     height={50}
                   />
                 ) : (
-                  <img
+                  <Image
                     src={URL.createObjectURL(estimateDocument)}
                     alt="Estimate Document"
+                    width={30}
+                    height={50}
                     className="w-20 h-20 rounded border"
                   />
                 )}
