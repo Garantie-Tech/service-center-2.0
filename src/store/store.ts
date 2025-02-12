@@ -81,6 +81,17 @@ interface StoreType {
     updatedState: Partial<EstimateDetailsState>
   ) => void;
   resetEstimateDetailsState: () => void;
+  // Approval Details State
+  approvalDetails: {
+    estimateAmount: number;
+    approvedAmount: number;
+    approvalType: string;
+    deviceAmount: string;
+    berDecision: string;
+  };
+  setApprovalDetails: (
+    updatedDetails: Partial<StoreType["approvalDetails"]>
+  ) => void;
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -222,4 +233,16 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
         estimateDocument: null,
       },
     }),
+  // Approval Details State
+  approvalDetails: {
+    estimateAmount: 25000,
+    approvedAmount: 9000,
+    approvalType: "Approved",
+    deviceAmount: "9000",
+    berDecision: "Replace Device",
+  },
+  setApprovalDetails: (updatedDetails) =>
+    set((state) => ({
+      approvalDetails: { ...state.approvalDetails, ...updatedDetails },
+    })),
 }));

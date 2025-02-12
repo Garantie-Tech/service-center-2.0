@@ -65,3 +65,14 @@ export interface EstimateDetailsState {
   damagePhotos: File[];
   estimateDocument: File | null;
 }
+
+interface ApprovalState {
+  approvalDetails: {
+    estimateAmount: number;
+    approvedAmount: number;
+    approvalType: string;
+    deviceAmount: string;
+    berDecision: string;
+  };
+  setApprovalDetails: (updatedDetails: Partial<ApprovalState["approvalDetails"]>) => void;
+}
