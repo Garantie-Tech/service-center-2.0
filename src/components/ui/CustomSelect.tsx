@@ -7,6 +7,7 @@ interface CustomSelectProps {
   placeholder?: string; // Default disabled option
   onChange: (value: string) => void;
   className?: string;
+  fontSize?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -14,6 +15,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   placeholder = "Select",
   onChange,
   className = "",
+  fontSize = "text-xs",
 }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -25,10 +27,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div className={`relative w-full ${className}`}>
+    <div className={`relative w-full`}>
       {/* Select Box */}
       <button
-        className={`w-full flex items-center justify-between px-4 py-2 border rounded-lg bg-white shadow-sm focus:outline-none ${className}`}
+        className={`w-full flex items-center justify-between px-4 py-2 border rounded-lg bg-white shadow-sm focus:outline-none ${className} ${fontSize}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{selectedOption || placeholder}</span>
@@ -50,9 +52,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <ul className="absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
+        <ul className={`absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10 ${fontSize}`}>
           {/* Disabled Placeholder Option */}
-          <li className="px-4 py-2 text-gray-400 cursor-not-allowed text-base">
+          <li className={`px-4 py-2 text-gray-400 cursor-not-allowed`}>
             {placeholder}
           </li>
 
@@ -60,7 +62,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           {options.map((option) => (
             <li
               key={option}
-              className="px-4 py-2 hover:bg-[#EDEDED] cursor-pointer text-base"
+              className={`px-4 py-2 hover:bg-[#EDEDED] cursor-pointer`}
               onClick={() => handleSelect(option)}
             >
               {option}

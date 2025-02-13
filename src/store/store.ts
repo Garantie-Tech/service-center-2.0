@@ -236,10 +236,10 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   // Approval Details State
   approvalDetails: {
     estimateAmount: 25000,
-    approvedAmount: 9000,
+    approvedAmount: 2000,
     approvalType: "Approved",
-    deviceAmount: "9000",
-    berDecision: "Replace Device",
+    deviceAmount: "",
+    berDecision: "",
   },
   setApprovalDetails: (updatedDetails) =>
     set((state) => ({

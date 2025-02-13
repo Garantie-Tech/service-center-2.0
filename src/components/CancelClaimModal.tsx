@@ -105,7 +105,8 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
             ]}
             placeholder="Select"
             onChange={(value) => setSelectedReason(value)}
-            className="border-[#D5D7DA] text-[#181D27] h-[50px] text-base" // Additional Styling Example
+            className="border-[#D5D7DA] text-[#181D27] h-[50px]"
+            fontSize="text-base"
           />
         </div>
 

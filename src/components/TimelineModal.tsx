@@ -1,43 +1,42 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 
-interface TimelineEvent {
-  title: string;
-  date: string;
-  completed?: boolean;
-}
+// interface TimelineEvent {
+//   title: string;
+//   date: string;
+//   completed?: boolean;
+// }
 
-const timelineData: TimelineEvent[] = [
-  {
-    title: "Claim Initiated",
-    date: "08 January 2025, 11:00 AM",
-    completed: true,
-  },
-  {
-    title: "Claim Submitted",
-    date: "10 January 2025, 10:00 PM",
-    completed: true,
-  },
-  {
-    title: "Document Verified",
-    date: "10 January 2025, 11:00 AM",
-    completed: true,
-  },
-  { title: "BER Decision", date: "10 January 2025, 11:00 AM", completed: true },
-  {
-    title: "Payment Link Generated",
-    date: "11 January 2025, 11:00 AM",
-    completed: true,
-  },
-  { title: "Payment Done", date: "11 January 2025, 11:00 AM", completed: true },
-  {
-    title: "Settlement Completed",
-    date: "13 January 2025, 11:00 AM",
-    completed: true,
-  },
-];
+// const timelineData: TimelineEvent[] = [
+//   {
+//     title: "Claim Initiated",
+//     date: "08 January 2025, 11:00 AM",
+//     completed: true,
+//   },
+//   {
+//     title: "Claim Submitted",
+//     date: "10 January 2025, 10:00 PM",
+//     completed: true,
+//   },
+//   {
+//     title: "Document Verified",
+//     date: "10 January 2025, 11:00 AM",
+//     completed: true,
+//   },
+//   { title: "BER Decision", date: "10 January 2025, 11:00 AM", completed: true },
+//   {
+//     title: "Payment Link Generated",
+//     date: "11 January 2025, 11:00 AM",
+//     completed: true,
+//   },
+//   { title: "Payment Done", date: "11 January 2025, 11:00 AM", completed: true },
+//   {
+//     title: "Settlement Completed",
+//     date: "13 January 2025, 11:00 AM",
+//     completed: true,
+//   },
+// ];
 
 const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -83,11 +82,8 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         <div className="p-6 relative overflow-y-auto h-[calc(100%-50px)]">
           <div className="relative">
             <ul className="timeline timeline-vertical">
-
               <li>
-                <div className="timeline-start ">
-                  First Macintosh computer
-                </div>
+                <div className="timeline-start ">First Macintosh computer</div>
                 <div className="timeline-middle">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +99,7 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   </svg>
                 </div>
                 <div className="timeline-end ">testing</div>
-                <hr className="bg-primaryBlue w-[2px]"/>
+                <hr className="bg-primaryBlue w-[2px]" />
               </li>
 
               <li>
@@ -125,7 +121,6 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 <div className="timeline-end ">iMac</div>
                 <hr className="bg-primaryBlue w-[2px]" />
               </li>
-
             </ul>
           </div>
         </div>

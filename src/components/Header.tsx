@@ -3,11 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface HeaderProps {
-  onRefresh: () => void;
   onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const user = localStorage.getItem("user");
   const serviceCenterName = user ? JSON.parse(user) : null;
 
@@ -22,14 +21,6 @@ const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
             width={120}
             height={64}
           />
-          <button onClick={onRefresh} className="tooltip" data-tip="Refresh">
-            <Image
-              src="/images/refresh.svg"
-              alt="Refresh"
-              width={20}
-              height={20}
-            />
-          </button>
         </div>
 
         {/* Title Section */}
@@ -38,7 +29,10 @@ const Header: React.FC<HeaderProps> = ({ onRefresh, onLogout }) => {
         </h1>
 
         {/* Profile Section */}
-        <div className="dropdown dropdown-bottom dropdown-end text-gray-600 tooltip tooltip-bottom" data-tip="Profile">
+        <div
+          className="dropdown dropdown-bottom dropdown-end text-gray-600 tooltip tooltip-bottom"
+          data-tip="Profile"
+        >
           <div tabIndex={0} role="button" className="flex items-center gap-2">
             <Image
               src="/images/user-icon.svg"
