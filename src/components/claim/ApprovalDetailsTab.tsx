@@ -3,11 +3,14 @@
 import { useGlobalStore } from "@/store/store";
 import CustomSelect from "@/components/ui/CustomSelect"; // Reusable Select Component
 import { useState } from "react";
+import { formatDate } from "@/helpers/dateHelper";
+import BerRepairModal from "@/components/BerRepairModel";
 
 const ApprovalDetailsTab: React.FC = () => {
   const { approvalDetails, setApprovalDetails } = useGlobalStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isBerModalOpen, setIsBerModalOpen] = useState(false);
 
   const berOptions = ["Repair Device", "Replace Device", "Settle"];
 
@@ -45,10 +48,23 @@ const ApprovalDetailsTab: React.FC = () => {
   const handleSubmit = () => {
     if (errorMessage || !approvalDetails.berDecision) return;
 
+    setIsBerModalOpen(true);
+
     setIsSubmitting(true);
-    console.log("Submitting Approval Details:", approvalDetails);
+    // console.log("Submitting Approval Details:", approvalDetails);
     setTimeout(() => {
       setIsSubmitting(false);
+    }, 1000);
+  };
+
+  const handleBerSubmit = () => {
+    setIsSubmitting(true);
+    console.log("BER Repair Decision:");
+    console.log("Submitting Approval Details:", approvalDetails);
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsBerModalOpen(false); // Close modal after submission
     }, 1000);
   };
 
@@ -63,7 +79,7 @@ const ApprovalDetailsTab: React.FC = () => {
     <div className="text-[#515151]">
       <h2 className="text-lg font-semibold mb-4">Details</h2>
       <div className="flex gap-8">
-        <div className="w-1/2 pr-[50px]">
+        <div className="w-1/2 md:pr-[50px]">
           {/* Estimate Amount */}
           <div className="pb-[30px]">
             <label className="block text-darkGray text-xs font-medium">
@@ -106,19 +122,21 @@ const ApprovalDetailsTab: React.FC = () => {
           )}
 
           {/* Submit Button */}
-          <div className="pb-[30px] w-1/2">
-            <button
-              className={`w-full px-4 py-2 rounded-md text-white text-sm font-semibold ${
-                isSubmitDisabled
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } h-[45px]`}
-              onClick={handleSubmit}
-              disabled={isSubmitDisabled}
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
-          </div>
+          {approvalDetails.berDecision && (
+            <div className="pb-[30px] md:w-1/2">
+              <button
+                className={`w-full px-4 py-2 rounded-md text-white text-sm font-semibold ${
+                  isSubmitDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } h-[45px]`}
+                onClick={handleSubmit}
+                disabled={isSubmitDisabled}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="w-1/2">
@@ -133,19 +151,41 @@ const ApprovalDetailsTab: React.FC = () => {
           </div>
 
           {/* BER Decision Dropdown */}
-          <div className="pb-[30px] w-1/2">
-            <label className="block text-darkGray text-xs font-medium">
-              BER Decision
-            </label>
-            <CustomSelect
-              options={berOptions}
-              onChange={handleBerSelection}
-              className="border-[#D5D7DA] text-[#181D27] h-[50px]"
-              fontSize="text-sm"
-            />
-          </div>
+          {approvalDetails.approvalType != "Approved" && (
+            <div className="pb-[30px] md:w-1/2">
+              <label className="block text-darkGray text-xs font-medium">
+                BER Decision
+              </label>
+              <CustomSelect
+                options={berOptions}
+                onChange={handleBerSelection}
+                className="border-[#D5D7DA] text-[#181D27] h-[50px]"
+                fontSize="text-sm"
+              />
+            </div>
+          )}
+
+          {/* approval date */}
+          {approvalDetails?.approvalType == "Approved" &&
+            approvalDetails?.approvalDate && (
+              <div className="pb-[30px]">
+                <label className="block text-darkGray text-xs font-medium">
+                  Approval Date
+                </label>
+                <p className="text-md font-semibold">
+                  {formatDate(approvalDetails?.approvalDate)}
+                </p>
+              </div>
+            )}
         </div>
       </div>
+
+      {/* modal */}
+      <BerRepairModal
+        isOpen={isBerModalOpen}
+        onClose={() => setIsBerModalOpen(false)}
+        onSubmit={handleBerSubmit}
+      />
     </div>
   );
 };

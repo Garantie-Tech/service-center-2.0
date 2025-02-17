@@ -28,6 +28,9 @@ interface StoreType {
   selectedClaim: Claim | null;
   setSelectedClaim: (claim: Claim | null) => void;
 
+  claimStatus: string;
+  setClaimStatus: (claimStatus: string) => void;
+
   searchTerm: string;
   setSearchTerm: (term: string) => void;
 
@@ -86,8 +89,9 @@ interface StoreType {
     estimateAmount: number;
     approvedAmount: number;
     approvalType: string;
-    deviceAmount: string;
-    berDecision: string;
+    deviceAmount?: string;
+    berDecision?: string;
+    approvalDate?: string;
   };
   setApprovalDetails: (
     updatedDetails: Partial<StoreType["approvalDetails"]>
@@ -106,6 +110,9 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
 
   selectedClaim: null,
   setSelectedClaim: (claim) => set({ selectedClaim: claim }),
+
+  claimStatus: "",
+  setClaimStatus: (claimStatus) => set({ claimStatus }),
 
   searchTerm: "",
   setSearchTerm: (term) => set({ searchTerm: term }),
@@ -235,11 +242,12 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     }),
   // Approval Details State
   approvalDetails: {
-    estimateAmount: 25000,
-    approvedAmount: 2000,
-    approvalType: "Approved",
+    estimateAmount: 0,
+    approvedAmount: 0,
+    approvalType: "",
     deviceAmount: "",
     berDecision: "",
+    approvalDate: "",
   },
   setApprovalDetails: (updatedDetails) =>
     set((state) => ({

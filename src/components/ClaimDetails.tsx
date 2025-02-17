@@ -11,6 +11,7 @@ import { formatDate } from "@/helpers/dateHelper";
 import Claim from "@/interfaces/ClaimInterface";
 import { submitEstimate } from "@/services/claimService";
 import ClaimActionsDropdown from "./ClaimActionsDropdown";
+import { useNotification } from "@/context/NotificationProvider";
 
 const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
   if (!selectedClaim) return "empty";
@@ -19,7 +20,10 @@ const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
     case "Claim Details":
       return selectedClaim ? "success" : "error";
     case "Estimate":
-      return selectedClaim ? "success" : "error";
+      return selectedClaim?.documents?.["15"]?.status_reason_id ||
+        selectedClaim?.documents?.["73"]?.status_reason_id
+        ? "error"
+        : "success";
     case "Approval":
       return selectedClaim ? "success" : "error";
     case "Final Documents":
@@ -42,7 +46,9 @@ const getStatusIcon = (status: TabStatus): string | null => {
 };
 
 const ClaimDetails: React.FC = () => {
-  const { selectedClaim, activeTab, setActiveTab } = useGlobalStore();
+  const { selectedClaim, activeTab, setActiveTab, setIsLoading } =
+    useGlobalStore();
+  const { notifySuccess, notifyError } = useNotification();
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
@@ -69,15 +75,18 @@ const ClaimDetails: React.FC = () => {
 
   const handleEstimateSubmit = async (formData: FormData) => {
     try {
-      console.log("Submitting Estimate Data:", formData);
+      setIsLoading(true);
       const response = await submitEstimate(selectedClaim?.id, formData);
 
       if (!response.success) {
-        throw new Error("Failed to submit the estimate");
+        notifyError("Failed to submit estimate !");
+      } else {
+        notifySuccess("Estimated Submitted Successfully !");
       }
-
     } catch (error) {
-      console.error("Estimate submission failed:", error);
+      notifyError(`Failed to submit estimate ! ${error}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -120,7 +129,7 @@ const ClaimDetails: React.FC = () => {
       </div>
 
       {/* Horizontal Tabs */}
-      <div className="px-8 flex border-b gap-8 items-center">
+      <div className="px-8 flex border-b gap-14 items-center overflow-auto md:overflow-visible">
         {CLAIM_TABS.map((tab) => {
           const tabStatus = getTabStatus(tab, selectedClaim);
           const iconSrc = getStatusIcon(tabStatus);
@@ -131,7 +140,7 @@ const ClaimDetails: React.FC = () => {
               className={`flex items-center py-6 justify-center text-base font-bold ${
                 activeTab === tab
                   ? "border-b-2 border-primaryBlue text-black"
-                  : "text-gray-400"
+                  : "text-black"
               }`}
               onClick={() => handleTabChange(tab)}
             >

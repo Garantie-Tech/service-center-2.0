@@ -32,6 +32,9 @@ const Dashboard: React.FC = () => {
     setSelectedClaim,
     filterStatus,
     claimStatuses,
+    setClaimStatus,
+    setEstimateDetailsState,
+    setApprovalDetails
   } = useGlobalStore();
 
   const logout = useAuthStore((state) => state.logout);
@@ -68,6 +71,21 @@ const Dashboard: React.FC = () => {
           setFilteredClaims(mappedClaims);
           if (mappedClaims.length > 0) {
             setSelectedClaim(mappedClaims[0]);
+            setClaimStatus(mappedClaims[0]["status"]);
+            setEstimateDetailsState({
+              estimateAmount: mappedClaims[0]?.claimed_amount || "",
+              jobSheetNumber: mappedClaims[0]?.job_sheet_number || "",
+              estimateDetails: mappedClaims[0]?.data?.inputs?.estimate_details || "",
+              replacementConfirmed: mappedClaims[0]?.imei_changed ? 'yes' : "no",
+              damagePhotos: mappedClaims[0]?.mobile_damage_photos || [],
+              estimateDocument: mappedClaims[0]?.documents?.["15"]?.url || null,
+            });
+            setApprovalDetails({
+              estimateAmount:Number(mappedClaims[0]?.claimed_amount),
+              approvedAmount:Number(mappedClaims[0]?.approved_amount),
+              approvalType: mappedClaims[0]?.status,
+              approvalDate: mappedClaims[0]?.approval_date,
+            });
           }
         }
       } catch (error) {
@@ -86,6 +104,10 @@ const Dashboard: React.FC = () => {
     setFilteredClaims,
     setSelectedClaim,
     setIsLoading,
+    setApprovalDetails,
+    setClaimStatus,
+    setEstimateDetailsState,
+    
   ]);
 
   if (!hasMounted) return null;

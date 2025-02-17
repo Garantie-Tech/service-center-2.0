@@ -2,6 +2,11 @@
 
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
+import {
+  getEstimateButtonLabel,
+  isEstimateEditable,
+} from "@/helpers/globalHelper";
+import EstimateTabViewComponent from "@/components/claim/view/EstimateTabView";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -10,7 +15,29 @@ interface EstimateDetailsTabProps {
 const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   onSubmit,
 }) => {
-  const { estimateDetailsState, setEstimateDetailsState } = useGlobalStore();
+  const {
+    selectedClaim,
+    estimateDetailsState,
+    setEstimateDetailsState,
+    claimStatus,
+    setClaimStatus,
+  } = useGlobalStore();
+
+  const isFormDisabled = false;
+  const isFormEditable = isEstimateEditable(claimStatus);
+
+  const isInvalidDocument = selectedClaim?.documents?.["15"]?.status_reason_id
+    ? true
+    : false;
+  const invalidDocumentReason = selectedClaim?.documents?.["15"]?.status_reason
+    ? selectedClaim?.documents?.["15"]?.status_reason
+    : "";
+  const isInvalidImages = selectedClaim?.documents?.["73"]?.status_reason_id
+    ? true
+    : false;
+  const invalidImagesReason = selectedClaim?.documents?.["73"]?.status_reason
+    ? selectedClaim?.documents?.["73"]?.status_reason
+    : "";
 
   const {
     estimateAmount,
@@ -23,7 +50,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const handleInputChange = <K extends keyof typeof estimateDetailsState>(
     key: K,
-    value: typeof estimateDetailsState[K]
+    value: (typeof estimateDetailsState)[K]
   ) => {
     setEstimateDetailsState({ [key]: value });
   };
@@ -33,7 +60,10 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   ) => {
     if (event.target.files) {
       setEstimateDetailsState({
-        damagePhotos: [...damagePhotos, ...Array.from(event.target.files)],
+        damagePhotos: [
+          ...estimateDetailsState.damagePhotos,
+          ...Array.from(event.target.files),
+        ],
       });
     }
   };
@@ -60,6 +90,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     !jobSheetNumber ||
     !estimateDetails ||
     !replacementConfirmed ||
+    !estimateDocument ||
     damagePhotos.length < 5;
 
   const handleSubmit = () => {
@@ -74,13 +105,18 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
 
     damagePhotos.forEach((photo, index) => {
-      formData.append(`mobile_damage_photos[${index}]`, photo);
+      if (typeof photo === "string") {
+        formData.append(`mobile_damage_photos_urls[${index}]`, photo);
+      } else {
+        formData.append(`mobile_damage_photos[${index}]`, photo);
+      }
     });
 
     onSubmit(formData);
+    setClaimStatus("Claim Submitted");
   };
 
-  return (
+  return isFormEditable ? (
     <div>
       <h2 className="text-lg font-semibold mb-4">Estimate Form</h2>
       <div className="flex gap-8">
@@ -96,6 +132,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             }
             className="input text-sm input-bordered w-full mb-4 bg-inputBg"
             placeholder="₹ 9000"
+            disabled={isFormDisabled}
           />
 
           <label className="block text-xs font-medium mb-1">
@@ -109,6 +146,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             }
             className="input text-sm input-bordered w-full mb-4 bg-inputBg"
             placeholder="JDHSJKF3248204"
+            disabled={isFormDisabled}
           />
 
           <label className="block text-xs font-medium mb-1">
@@ -121,6 +159,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             }
             className="textarea text-sm textarea-bordered w-full mb-4 bg-inputBg"
             placeholder="Enter estimate details"
+            disabled={isFormDisabled}
           ></textarea>
 
           <div className="mb-4">
@@ -138,6 +177,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     : "bg-inputBg"
                 }`}
                 onClick={() => handleInputChange("replacementConfirmed", "yes")}
+                disabled={isFormDisabled}
               >
                 {replacementConfirmed === "yes" && (
                   <svg
@@ -167,6 +207,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     : "bg-inputBg"
                 }`}
                 onClick={() => handleInputChange("replacementConfirmed", "no")}
+                disabled={isFormDisabled}
               >
                 {replacementConfirmed === "no" && (
                   <svg
@@ -190,7 +231,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           </div>
 
           <button
-            className={`btn w-1/2 ${
+            className={`btn w-1/2 hover:bg-blue-700 ${
               isSubmitDisabled
                 ? "bg-btnDisabledBg text-btnDisabledText"
                 : "bg-primaryBlue text-white"
@@ -198,7 +239,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             disabled={isSubmitDisabled}
             onClick={handleSubmit}
           >
-            Submit Estimate
+            {getEstimateButtonLabel(claimStatus)}
           </button>
         </div>
         <div className="w-1/2">
@@ -209,34 +250,59 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           <div className="mb-4">
             {estimateDocument && (
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE]">
-                {estimateDocument.type === "application/pdf" ? (
-                  <Image
-                    src="/images/pdf-icon.svg"
-                    alt="Estimate Upload"
-                    width={30}
-                    height={50}
-                  />
+                {estimateDocument ? (
+                  typeof estimateDocument === "string" ? (
+                    estimateDocument.endsWith(".pdf") ? (
+                      <Image
+                        src="/images/pdf-icon.svg"
+                        alt="Estimate Upload"
+                        width={30}
+                        height={50}
+                        className="h-[100%]"
+                      />
+                    ) : (
+                      <Image
+                        src={estimateDocument} // Direct URL from API
+                        alt="Estimate Document"
+                        width={30}
+                        height={50}
+                        className="rounded border h-[100%]"
+                      />
+                    )
+                  ) : estimateDocument.type === "application/pdf" ? (
+                    <Image
+                      src="/images/pdf-icon.svg"
+                      alt="Estimate Upload"
+                      width={30}
+                      height={50}
+                      className="h-[100%]"
+                    />
+                  ) : (
+                    <Image
+                      src={URL.createObjectURL(estimateDocument)} // Convert File to preview
+                      alt="Estimate Document"
+                      width={30}
+                      height={50}
+                      className="rounded border h-[100%]"
+                    />
+                  )
                 ) : (
-                  <Image
-                    src={URL.createObjectURL(estimateDocument)}
-                    alt="Estimate Document"
-                    width={30}
-                    height={50}
-                    className="w-20 h-20 rounded border"
-                  />
+                  <></>
                 )}
-                <button
-                  type="button"
-                  className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
-                  onClick={handleRemoveEstimateDocument}
-                >
-                  <Image
-                    src="/images/x-close.svg"
-                    alt="Remove"
-                    width={12}
-                    height={12}
-                  />
-                </button>
+                {!isFormDisabled && (
+                  <button
+                    type="button"
+                    className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
+                    onClick={handleRemoveEstimateDocument}
+                  >
+                    <Image
+                      src="/images/x-close.svg"
+                      alt="Remove"
+                      width={12}
+                      height={12}
+                    />
+                  </button>
+                )}
               </div>
             )}
             {!estimateDocument && (
@@ -256,6 +322,21 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 />
               </label>
             )}
+            {isInvalidDocument ? (
+              <span className="text-[#EB5757] text-xxs font-semibold">
+                Invalid Document : {invalidDocumentReason}
+              </span>
+            ) : (claimStatus === "Claim Submitted" || claimStatus === "Estimate Revised") ? (
+              <span className="text-[#FF9548] text-xxs font-semibold">
+                Under Review
+              </span>
+            ) : claimStatus === "Documents Verified" ? (
+              <span className="text-[#19AD61] text-xxs font-semibold">
+                Valid
+              </span>
+            ) : (
+              <></>
+            )}
           </div>
 
           {/* Upload damage images */}
@@ -263,22 +344,24 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             Damage Mobile Photo (Upload at least 5 images)
           </label>
           <div className="mb-4">
-            <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleDamagePhotoUpload}
-                className="hidden"
-              />
-              <span className="text-grayFont text-sm">Add Photo</span>
-              <Image
-                src="/images/upload-icon.svg"
-                alt="Upload"
-                width={20}
-                height={20}
-              />
-            </label>
+            {!isFormDisabled && (
+              <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleDamagePhotoUpload}
+                  className="hidden"
+                />
+                <span className="text-grayFont text-sm">Add Photo</span>
+                <Image
+                  src="/images/upload-icon.svg"
+                  alt="Upload"
+                  width={20}
+                  height={20}
+                />
+              </label>
+            )}
             <div className="flex justify-start align-center gap-2">
               {damagePhotos.map((photo, index) => (
                 <div
@@ -286,30 +369,56 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   className="relative bg-inputBg w-[60px] h-[50px] mt-2 flex items-center justify-center border border-[#EEEEEE]"
                 >
                   <Image
-                    src={URL.createObjectURL(photo)}
+                    src={
+                      typeof photo === "string"
+                        ? photo
+                        : URL.createObjectURL(photo)
+                    }
                     alt="Damage Image"
                     width={50}
                     height={40}
+                    className="rounded h-[100%]"
                   />
-                  <button
-                    type="button"
-                    className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
-                    onClick={() => handleRemoveDamagePhoto(index)}
-                  >
-                    <Image
-                      src="/images/x-close.svg"
-                      alt="Remove"
-                      width={12}
-                      height={12}
-                    />
-                  </button>
+                  {!isFormDisabled && (
+                    <button
+                      type="button"
+                      className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
+                      onClick={() => handleRemoveDamagePhoto(index)}
+                    >
+                      <Image
+                        src="/images/x-close.svg"
+                        alt="Remove"
+                        width={12}
+                        height={12}
+                      />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
+            {isInvalidImages ? (
+              <span className="text-[#EB5757] text-xxs font-semibold">
+                Invalid Images : {invalidImagesReason}
+              </span>
+            ) : (claimStatus === "Claim Submitted" || claimStatus === "Estimate Revised") ? (
+              <span className="text-[#FF9548] text-xxs font-semibold">
+                Under Review
+              </span>
+            ) : claimStatus === "Documents Verified" ? (
+              <span className="text-[#19AD61] text-xxs font-semibold">
+                Valid
+              </span>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       </div>
     </div>
+  ) : (
+    <>
+      <EstimateTabViewComponent {...estimateDetailsState} />
+    </>
   );
 };
 

@@ -62,17 +62,33 @@ export interface EstimateDetailsState {
   jobSheetNumber: string;
   estimateDetails: string;
   replacementConfirmed: "yes" | "no" | null;
-  damagePhotos: File[];
-  estimateDocument: File | null;
+  damagePhotos: (string | File)[];
+  estimateDocument: File | string | null;
+  documents?: Documents;
 }
 
-interface ApprovalState {
+export interface ApprovalState {
   approvalDetails: {
     estimateAmount: number;
     approvedAmount: number;
     approvalType: string;
-    deviceAmount: string;
-    berDecision: string;
+    deviceAmount?: string;
+    berDecision?: string;
+    approvalDate?: string;
   };
   setApprovalDetails: (updatedDetails: Partial<ApprovalState["approvalDetails"]>) => void;
+}
+
+export interface DocumentItem {
+  title: string;
+  status?: string | number | null;
+  status_reason_id?: string | number | null;
+  status_reason?: string | null;
+  url?: string | null;
+}
+
+// Fixed document keys
+export interface Documents {
+  "15"?: DocumentItem; 
+  "73"?: DocumentItem; 
 }
