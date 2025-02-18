@@ -7,7 +7,7 @@ import { formatDate } from "@/helpers/dateHelper";
 import BerRepairModal from "@/components/BerRepairModel";
 
 const ApprovalDetailsTab: React.FC = () => {
-  const { approvalDetails, setApprovalDetails } = useGlobalStore();
+  const { approvalDetails, setApprovalDetails, claimStatus } = useGlobalStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isBerModalOpen, setIsBerModalOpen] = useState(false);
@@ -151,7 +151,7 @@ const ApprovalDetailsTab: React.FC = () => {
           </div>
 
           {/* BER Decision Dropdown */}
-          {approvalDetails.approvalType != "Approved" && (
+          {(approvalDetails.approvalType != "Approved" && claimStatus === "BER") && (
             <div className="pb-[30px] md:w-1/2">
               <label className="block text-darkGray text-xs font-medium">
                 BER Decision

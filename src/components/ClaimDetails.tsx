@@ -5,13 +5,14 @@ import ClaimDetailsTab from "@/components/claim/ClaimDetailsTab";
 import EstimateDetailsTab from "@/components/claim/EstimateDetailsTab";
 import ApprovalDetailsTab from "@/components/claim/ApprovalDetailsTab";
 import FinalDocumentsTab from "@/components/claim/FinalDocumentsTab";
-import { CLAIM_TABS, Tab, TabStatus } from "@/interfaces/GlobalInterface";
+import { Tab, TabStatus } from "@/interfaces/GlobalInterface";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
 import Claim from "@/interfaces/ClaimInterface";
 import { submitEstimate } from "@/services/claimService";
 import ClaimActionsDropdown from "./ClaimActionsDropdown";
 import { useNotification } from "@/context/NotificationProvider";
+import CustomerDocumentsTab from "@/components/claim/CustomerDocumentsTab";
 
 const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
   if (!selectedClaim) return "empty";
@@ -21,12 +22,15 @@ const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
       return selectedClaim ? "success" : "error";
     case "Estimate":
       return selectedClaim?.documents?.["15"]?.status_reason_id ||
-        selectedClaim?.documents?.["73"]?.status_reason_id
+        selectedClaim?.documents?.["73"]?.status_reason_id ||
+        selectedClaim?.status === "Claim Initiated"
         ? "error"
         : "success";
     case "Approval":
       return selectedClaim ? "success" : "error";
     case "Final Documents":
+      return selectedClaim ? "success" : "error";
+    case "Customer Documents":
       return selectedClaim ? "success" : "error";
     default:
       return "empty";
@@ -46,7 +50,7 @@ const getStatusIcon = (status: TabStatus): string | null => {
 };
 
 const ClaimDetails: React.FC = () => {
-  const { selectedClaim, activeTab, setActiveTab, setIsLoading } =
+  const { selectedClaim, activeTab, setActiveTab, setIsLoading, claimStatus } =
     useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -90,6 +94,19 @@ const ClaimDetails: React.FC = () => {
     }
   };
 
+  const getFilteredTabs = (claimStatus: string): Tab[] => {
+    if (
+      claimStatus === "BER SETTLE" ||
+      claimStatus === "BER Settlement Initiated" ||
+      claimStatus === "BER Settlement Completed"
+    ) {
+      return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
+    }
+    return ["Claim Details", "Estimate", "Approval", "Final Documents"];
+  };
+
+  const filteredTabs: Tab[] = getFilteredTabs(claimStatus);
+
   return (
     <div className="">
       {/* Top Section */}
@@ -130,7 +147,7 @@ const ClaimDetails: React.FC = () => {
 
       {/* Horizontal Tabs */}
       <div className="px-8 flex border-b gap-14 items-center overflow-auto md:overflow-visible">
-        {CLAIM_TABS.map((tab) => {
+        {filteredTabs.map((tab) => {
           const tabStatus = getTabStatus(tab, selectedClaim);
           const iconSrc = getStatusIcon(tabStatus);
 
@@ -167,6 +184,7 @@ const ClaimDetails: React.FC = () => {
         )}
         {activeTab === "Approval" && <ApprovalDetailsTab />}
         {activeTab === "Final Documents" && <FinalDocumentsTab />}
+        {activeTab === "Customer Documents" && <CustomerDocumentsTab />}
       </div>
     </div>
   );

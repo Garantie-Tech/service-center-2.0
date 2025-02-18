@@ -7,6 +7,8 @@ import {
   isEstimateEditable,
 } from "@/helpers/globalHelper";
 import EstimateTabViewComponent from "@/components/claim/view/EstimateTabView";
+import ErrorAlert from "@/components/ui/ErrorAlert";
+import { useState } from "react";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -22,6 +24,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     claimStatus,
     setClaimStatus,
   } = useGlobalStore();
+  const [showError, setShowError] = useState(true);
 
   const isFormDisabled = false;
   const isFormEditable = isEstimateEditable(claimStatus);
@@ -119,6 +122,20 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   return isFormEditable ? (
     <div>
       <h2 className="text-lg font-semibold mb-4">Estimate Form</h2>
+      {isInvalidDocument && showError == true && (
+        <ErrorAlert
+          message={invalidDocumentReason}
+          onClose={() => setShowError(false)}
+        />
+      )}
+
+      {isInvalidImages && showError == true && (
+        <ErrorAlert
+          message={invalidImagesReason}
+          onClose={() => setShowError(false)}
+        />
+      )}
+
       <div className="flex gap-8">
         <div className="w-1/2">
           <label className="block text-xs font-medium mb-1">
@@ -326,7 +343,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Document : {invalidDocumentReason}
               </span>
-            ) : (claimStatus === "Claim Submitted" || claimStatus === "Estimate Revised") ? (
+            ) : claimStatus === "Claim Submitted" ||
+              claimStatus === "Estimate Revised" ? (
               <span className="text-[#FF9548] text-xxs font-semibold">
                 Under Review
               </span>
@@ -400,7 +418,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Images : {invalidImagesReason}
               </span>
-            ) : (claimStatus === "Claim Submitted" || claimStatus === "Estimate Revised") ? (
+            ) : claimStatus === "Claim Submitted" ||
+              claimStatus === "Estimate Revised" ? (
               <span className="text-[#FF9548] text-xxs font-semibold">
                 Under Review
               </span>

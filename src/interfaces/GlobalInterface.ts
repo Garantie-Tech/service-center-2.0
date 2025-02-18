@@ -40,6 +40,7 @@ export const CLAIM_TABS = [
   "Estimate",
   "Approval",
   "Final Documents",
+  "Customer Documents",
 ] as const;
 
 export type Tab = typeof CLAIM_TABS[number]; 

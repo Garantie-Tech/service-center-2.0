@@ -36,5 +36,28 @@ export const getActiveTab = (status: string): string => {
   ) {
     return "Estimate";
   }
+  if (
+    status === "BER" ||
+    status === "BER Repair" ||
+    status === "BER SETTLE" ||
+    status === "BER Replace"
+  ) {
+    return "Approval";
+  }
+  if (
+    status === "Closed" ||
+    status === "BER Repair Approved" ||
+    status === "BER Replacement Approved" ||
+    status === "BER Replace"
+  ) {
+    return "Final Documents";
+  }
+  if (
+    status === "BER SETTLE" ||  
+    status === "BER Settlement Initiated" ||
+    status === "BER Settlement Completed"
+  ) {
+    return "Customer Documents";
+  }
   return "Claim Details";
 };

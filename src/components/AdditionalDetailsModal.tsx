@@ -27,13 +27,15 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
 
       {/* Sidebar Modal (Full Height, 90% of the screen height) */}
       <div
-        className={`w-[450px] h-[94vh] mt-[20px] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
+        className={`w-[450px] h-[95vh] mt-[230px] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b">
-          <h2 className="text-xl font-semibold text-black">Additional Details</h2>
+          <h2 className="text-xl font-semibold text-black">
+            Additional Details
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-gray-900"
@@ -48,8 +50,8 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
         </div>
 
         {/* Details Section */}
-        <div className="p-6 overflow-y-auto h-[calc(100%-50px)]">
-          <div className="grid grid-cols-2 gap-y-4 text-sm">
+        <div className="p-6 overflow-y-auto h-[calc(100%-100px)]">
+          <div className="grid grid-cols-2 gap-y-4 text-sm pb-[100px]">
             {/* Claim Date */}
             <div>
               <p className="text-gray-500">Claim Date</p>
@@ -75,7 +77,7 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
             </div>
 
             {/* IMEI Number */}
-            <div className="col-span-2">
+            <div>
               <p className="text-gray-500">IMEI</p>
               <p className="font-bold">816395305305395903</p>
             </div>
@@ -87,15 +89,15 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
                 200 <span className="text-green-500">(Paid)</span>
               </p>
             </div>
-          </div>
 
-          {/* Claim Details Section */}
-          <div className="mt-6">
-            <p className="text-gray-500">Claim Details</p>
-            <p className="mt-1">
-              I was leaving for office in the morning when the bike from behind
-              hit me, and I fell, and my phone got damaged.
-            </p>
+            {/* Claim Details Section */}
+            <div className="col-span-2 pb-[100px]">
+              <p className="text-gray-500">Claim Details</p>
+              <p className="mt-1">
+                I was leaving for office in the morning when the bike from
+                behind hit me, and I fell, and my phone got damaged.
+              </p>
+            </div>
           </div>
         </div>
       </div>
