@@ -81,7 +81,7 @@ const ClaimFilter: React.FC = () => {
         >
           <summary className="custom-button btn-default w-full flex items-center justify-between cursor-pointer tooltip tooltip-bottom" data-tip="Claim Status">
             <span className="flex items-center text-xs">
-              {selectedDropdown}
+            {claimStatuses[selectedDropdown] || "All Claims"}
             </span>
             <Image
               src="/images/select-dropdown.svg"
@@ -186,11 +186,7 @@ const ClaimFilter: React.FC = () => {
       {isFilterOpen && (
         <div
           ref={filterRef}
-          className="absolute top-0 right-0 transform translate-x-full bg-white p-4 rounded-lg shadow-lg z-50 w-96 text-sm"
-          style={{
-            top: "70px",
-            left: "-80px",
-          }}
+          className="bg-white p-4 rounded-lg shadow-lg z-50 w-96 text-sm"
         >
           {/* Date Filters */}
           <h3 className="text-sm font-bold mb-3">Date Range</h3>

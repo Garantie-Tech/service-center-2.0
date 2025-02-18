@@ -85,6 +85,10 @@ const Dashboard: React.FC = () => {
               approvedAmount:Number(mappedClaims[0]?.approved_amount),
               approvalType: mappedClaims[0]?.status,
               approvalDate: mappedClaims[0]?.approval_date,
+              repairAmount: mappedClaims[0]?.repair_amount,
+              repairPaymentSuccessful: mappedClaims[0]?.repair_payment_successful,
+              repairPaymentLink: mappedClaims[0]?.repair_payment_link,
+              repairRazorpayOrderId: mappedClaims[0]?.repair_razorpay_order_id,
             });
           }
         }

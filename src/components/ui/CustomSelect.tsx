@@ -52,7 +52,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <ul className={`absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10 ${fontSize}`}>
+        <ul
+          className={`absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10 ${fontSize}`}
+        >
           {/* Disabled Placeholder Option */}
           <li className={`px-4 py-2 text-gray-400 cursor-not-allowed`}>
             {placeholder}
@@ -65,7 +67,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               className={`px-4 py-2 hover:bg-[#EDEDED] cursor-pointer`}
               onClick={() => handleSelect(option)}
             >
-              {option}
+              {option.charAt(0).toUpperCase() + option.slice(1).toLowerCase()}
             </li>
           ))}
         </ul>

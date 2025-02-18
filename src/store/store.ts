@@ -92,6 +92,10 @@ interface StoreType {
     deviceAmount?: string;
     berDecision?: string;
     approvalDate?: string;
+    repairAmount?: number;
+    repairPaymentSuccessful?: boolean;
+    repairPaymentLink?: string;
+    repairRazorpayOrderId?: string;
   };
   setApprovalDetails: (
     updatedDetails: Partial<StoreType["approvalDetails"]>
@@ -248,6 +252,10 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     deviceAmount: "",
     berDecision: "",
     approvalDate: "",
+    repairAmount: 0,
+    repairPaymentSuccessful: false,
+    repairPaymentLink: "",
+    repairRazorpayOrderId: "",
   },
   setApprovalDetails: (updatedDetails) =>
     set((state) => ({

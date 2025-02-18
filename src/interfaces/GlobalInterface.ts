@@ -76,6 +76,10 @@ export interface ApprovalState {
     deviceAmount?: string;
     berDecision?: string;
     approvalDate?: string;
+    repairAmount?: number;
+    repairPaymentSuccessful?: boolean;
+    repairPaymentLink?: string;
+    repairRazorpayOrderId?: string;
   };
   setApprovalDetails: (updatedDetails: Partial<ApprovalState["approvalDetails"]>) => void;
 }
@@ -92,4 +96,16 @@ export interface DocumentItem {
 export interface Documents {
   "15"?: DocumentItem; 
   "73"?: DocumentItem; 
+}
+
+export interface BerDecision {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: {
+    claimID: number;
+    berDecision: string;
+    newDeviceAmount?: string;
+  };
 }

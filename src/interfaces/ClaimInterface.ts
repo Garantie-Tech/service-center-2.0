@@ -18,16 +18,20 @@ export default interface Claim {
       estimate_details?: string;
     };
   };
-  claimed_amount?:string;
-  job_sheet_number?:string;
-  imei_changed?:boolean;
+  claimed_amount?: string;
+  job_sheet_number?: string;
+  imei_changed?: boolean;
   mobile_damage_photos?: File[];
   documents?: {
     "15"?: DocumentItem;
     "73"?: DocumentItem;
   };
-  approved_amount?: string
-  approval_date?: string
+  approved_amount?: string;
+  approval_date?: string;
+  repair_amount?: number;
+  repair_payment_successful?: boolean;
+  repair_payment_link?: string;
+  repair_razorpay_order_id?: string;
 }
 
 export interface ClaimDetailsProps {

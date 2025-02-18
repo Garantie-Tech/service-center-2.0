@@ -20,6 +20,8 @@ const ClaimList: React.FC = () => {
         return "bg-primaryBlue";
       case "Invalid Documents":
         return "bg-primaryBlue";
+      case "BER":
+        return "bg-primaryBlue";
       default:
         return "bg-gray-200";
     }
@@ -37,7 +39,7 @@ const ClaimList: React.FC = () => {
                 : "hover:bg-gray-50"
             } cursor-pointer ${
               claim.status === "Invalid Documents" ||
-              claim.status === "Claim Initiated"
+              claim.status === "Claim Initiated" || claim.status === "BER"
                 ? "border-l-4 border-primaryBlue bg-claimListBackground"
                 : ""
             }`}
@@ -50,6 +52,7 @@ const ClaimList: React.FC = () => {
                   | "Estimate"
                   | "Approval"
                   | "Final Documents"
+                  | "Customer Documents"
               );
               setEstimateDetailsState({
                 estimateAmount: claim?.claimed_amount || "",
@@ -64,6 +67,10 @@ const ClaimList: React.FC = () => {
                 approvedAmount: Number(claim?.approved_amount),
                 approvalType: claim?.status,
                 approvalDate: claim?.approval_date,
+                repairAmount: claim?.repair_amount,
+                repairPaymentSuccessful: claim?.repair_payment_successful,
+                repairPaymentLink: claim?.repair_payment_link,
+                repairRazorpayOrderId: claim?.repair_razorpay_order_id,
               });
             }}
           >
@@ -73,7 +80,7 @@ const ClaimList: React.FC = () => {
                   {claim.id}
                 </p>
                 {(claim.status === "Invalid Documents" ||
-                  claim.status === "Claim Initiated") && (
+                  claim.status === "Claim Initiated" || claim.status === "BER") && (
                   <Image
                     src="/images/action-required-icon.svg"
                     alt="Action required"
@@ -90,7 +97,7 @@ const ClaimList: React.FC = () => {
                   claim.status
                 )} mb-1 text-xs px-4 py-[10px] ${
                   claim.status === "Invalid Documents" ||
-                  claim.status === "Claim Initiated"
+                  claim.status === "Claim Initiated" || claim.status === "BER"
                     ? "text-white"
                     : "text-gray-800"
                 }`}

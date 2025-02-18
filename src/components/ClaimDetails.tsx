@@ -96,11 +96,27 @@ const ClaimDetails: React.FC = () => {
 
   const getFilteredTabs = (claimStatus: string): Tab[] => {
     if (
+      claimStatus === "Claim Initiated" ||
+      claimStatus === "Claim Submitted"
+    ) {
+      return ["Claim Details", "Estimate"];
+    }
+
+    if (
+      claimStatus === "Claim Cancelled"
+    ) {
+      return ["Claim Details"];
+    }
+
+    if (
       claimStatus === "BER SETTLE" ||
       claimStatus === "BER Settlement Initiated" ||
       claimStatus === "BER Settlement Completed"
     ) {
       return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
+    }
+    if (claimStatus === "Rejected") {
+      return ["Claim Details", "Estimate"];
     }
     return ["Claim Details", "Estimate", "Approval", "Final Documents"];
   };
