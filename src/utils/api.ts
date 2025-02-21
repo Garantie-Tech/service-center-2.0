@@ -1,3 +1,4 @@
+import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 import { getCookie } from "@/utils/cookieManager";
 
 export interface ApiResponse<T> {
@@ -9,7 +10,7 @@ export interface ApiResponse<T> {
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
 
 // Function to format query parameters into a URL string
-function formatQueryParams(params: Record<string, string | number | boolean>): string {
+function formatQueryParams(params: Record<string, string | number | boolean> | ClaimFetchPayload): string {
   const queryString = new URLSearchParams(
     Object.entries(params).reduce((acc, [key, value]) => {
       acc[key] = String(value);
@@ -24,7 +25,7 @@ export async function apiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: Record<string, unknown> | FormData,
-  params?: Record<string, string | number | boolean>,
+  params?: Record<string, string | number | boolean> | ClaimFetchPayload,
   extraHeaders: HeadersInit = {}
 ): Promise<ApiResponse<T>> {
   try {
@@ -60,7 +61,7 @@ export async function apiRequest<T>(
 }
 
 // Generic GET request
-export function getRequest<T>(endpoint: string, params?: Record<string, string | number | boolean>, extraHeaders?: HeadersInit) {
+export function getRequest<T>(endpoint: string, params?: Record<string, string | number | boolean> | ClaimFetchPayload, extraHeaders?: HeadersInit) {
   return apiRequest<T>(endpoint, "GET", undefined, params, extraHeaders);
 }
 

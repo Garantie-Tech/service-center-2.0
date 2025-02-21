@@ -5,12 +5,14 @@ import Image from "next/image";
 import TimelineModal from "@/components/TimelineModal";
 import CancelClaimModal from "@/components/CancelClaimModal";
 import AdditionalDetailsModal from "./AdditionalDetailsModal";
+import { useGlobalStore } from "@/store/store";
 
 const ClaimActionsDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false);
+  const { selectedClaim, setActiveTab } = useGlobalStore();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -83,32 +85,36 @@ const ClaimActionsDropdown: React.FC = () => {
               />
               Time Line
             </li>
-            <li
-              className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
-              onClick={() => alert("Revise Estimate Clicked")}
-            >
-              <Image
-                src="/images/reload-dark.svg"
-                alt="Revise"
-                width={20}
-                height={20}
-                className="mr-2"
-              />
-              Revise Estimate
-            </li>
-            <li
-              className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
-              onClick={() => setIsCancelModalOpen(true)}
-            >
-              <Image
-                src="/images/cross-dark.svg"
-                alt="Cancel"
-                width={20}
-                height={20}
-                className="mr-2"
-              />
-              Cancel Claim
-            </li>
+            {selectedClaim?.revisable && (
+              <li
+                className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                onClick={() => setActiveTab("Estimate")}
+              >
+                <Image
+                  src="/images/reload-dark.svg"
+                  alt="Revise"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                Revise Estimate
+              </li>
+            )}
+            {selectedClaim?.cancellable && (
+              <li
+                className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                onClick={() => setIsCancelModalOpen(true)}
+              >
+                <Image
+                  src="/images/cross-dark.svg"
+                  alt="Cancel"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                Cancel Claim
+              </li>
+            )}
             <li
               className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
               onClick={() => setIsAdditionalModalOpen(true)}

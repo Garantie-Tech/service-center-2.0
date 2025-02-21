@@ -13,6 +13,7 @@ import { submitEstimate } from "@/services/claimService";
 import ClaimActionsDropdown from "./ClaimActionsDropdown";
 import { useNotification } from "@/context/NotificationProvider";
 import CustomerDocumentsTab from "@/components/claim/CustomerDocumentsTab";
+import CancelledClaim from "@/components/claim/CancelledClaimTab";
 
 const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
   if (!selectedClaim) return "empty";
@@ -32,6 +33,8 @@ const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
       return selectedClaim ? "success" : "error";
     case "Customer Documents":
       return selectedClaim ? "success" : "error";
+    case "Cancelled":
+      return selectedClaim?.cancellation_reason ? "error" : "success";
     default:
       return "empty";
   }
@@ -102,10 +105,8 @@ const ClaimDetails: React.FC = () => {
       return ["Claim Details", "Estimate"];
     }
 
-    if (
-      claimStatus === "Claim Cancelled"
-    ) {
-      return ["Claim Details"];
+    if (claimStatus === "Claim Cancelled") {
+      return ["Claim Details", "Cancelled"];
     }
 
     if (
@@ -122,6 +123,11 @@ const ClaimDetails: React.FC = () => {
   };
 
   const filteredTabs: Tab[] = getFilteredTabs(claimStatus);
+
+  const cancelledData = {
+    cancelledBy: selectedClaim?.cancelled_by,
+    cancelledReason: selectedClaim?.cancellation_reason,
+  };
 
   return (
     <div className="">
@@ -201,6 +207,7 @@ const ClaimDetails: React.FC = () => {
         {activeTab === "Approval" && <ApprovalDetailsTab />}
         {activeTab === "Final Documents" && <FinalDocumentsTab />}
         {activeTab === "Customer Documents" && <CustomerDocumentsTab />}
+        {activeTab === "Cancelled" && <CancelledClaim data={cancelledData} />}
       </div>
     </div>
   );

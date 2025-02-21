@@ -45,6 +45,11 @@ export const getActiveTab = (status: string): string => {
     return "Approval";
   }
   if (
+    status === "Claim Cancelled"
+  ) {
+    return "Cancelled";
+  }
+  if (
     status === "Closed" ||
     status === "BER Repair Approved" ||
     status === "BER Replacement Approved" ||

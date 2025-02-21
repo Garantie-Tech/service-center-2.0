@@ -6,6 +6,8 @@ import { useAuthStore } from "@/store/authStore";
 import { fetchClaims } from "@/services/claimService";
 import { useGlobalStore } from "@/store/store";
 import { useRouter } from "next/navigation";
+import { getActiveTab } from "@/helpers/globalHelper";
+import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 
 // Dynamically import components for performance optimization
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
@@ -34,7 +36,9 @@ const Dashboard: React.FC = () => {
     claimStatuses,
     setClaimStatus,
     setEstimateDetailsState,
-    setApprovalDetails
+    setApprovalDetails,
+    setActiveTab,
+    appliedFilters
   } = useGlobalStore();
 
   const logout = useAuthStore((state) => state.logout);
@@ -53,13 +57,23 @@ const Dashboard: React.FC = () => {
     const fetchClaimsData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetchClaims({
+        const payload: ClaimFetchPayload = {
           page: 0,
           partner_id: 191,
-          date: "allTime",
           source: "service_centre",
           claim_status: filterStatus,
-        });
+        };
+      
+        if(appliedFilters?.fromDate && appliedFilters?.toDate) {
+          payload.duration = 'custom';
+          if (appliedFilters?.fromDate) payload.startDate = appliedFilters?.fromDate;
+          if (appliedFilters?.toDate) payload.endDate = appliedFilters?.toDate;
+        } else {
+          payload.date= "allTime";
+
+        }
+
+        const response = await fetchClaims(payload);
 
         if (response.success && response.data?.data?.claims) {
           const mappedClaims = response.data.data.claims.map((claim) => ({
@@ -75,21 +89,34 @@ const Dashboard: React.FC = () => {
             setEstimateDetailsState({
               estimateAmount: mappedClaims[0]?.claimed_amount || "",
               jobSheetNumber: mappedClaims[0]?.job_sheet_number || "",
-              estimateDetails: mappedClaims[0]?.data?.inputs?.estimate_details || "",
-              replacementConfirmed: mappedClaims[0]?.imei_changed ? 'yes' : "no",
+              estimateDetails:
+                mappedClaims[0]?.data?.inputs?.estimate_details || "",
+              replacementConfirmed: mappedClaims[0]?.imei_changed
+                ? "yes"
+                : "no",
               damagePhotos: mappedClaims[0]?.mobile_damage_photos || [],
               estimateDocument: mappedClaims[0]?.documents?.["15"]?.url || null,
             });
             setApprovalDetails({
-              estimateAmount:Number(mappedClaims[0]?.claimed_amount),
-              approvedAmount:Number(mappedClaims[0]?.approved_amount),
+              estimateAmount: Number(mappedClaims[0]?.claimed_amount),
+              approvedAmount: Number(mappedClaims[0]?.approved_amount),
               approvalType: mappedClaims[0]?.status,
               approvalDate: mappedClaims[0]?.approval_date,
               repairAmount: mappedClaims[0]?.repair_amount,
-              repairPaymentSuccessful: mappedClaims[0]?.repair_payment_successful,
+              repairPaymentSuccessful:
+                mappedClaims[0]?.repair_payment_successful,
               repairPaymentLink: mappedClaims[0]?.repair_payment_link,
               repairRazorpayOrderId: mappedClaims[0]?.repair_razorpay_order_id,
             });
+            setActiveTab(
+              getActiveTab(mappedClaims[0]?.status) as
+                | "Claim Details"
+                | "Estimate"
+                | "Approval"
+                | "Final Documents"
+                | "Customer Documents"
+                | "Cancelled"
+            );
           }
         }
       } catch (error) {
@@ -111,7 +138,8 @@ const Dashboard: React.FC = () => {
     setApprovalDetails,
     setClaimStatus,
     setEstimateDetailsState,
-    
+    appliedFilters,
+    setActiveTab
   ]);
 
   if (!hasMounted) return null;

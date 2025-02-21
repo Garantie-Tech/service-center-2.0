@@ -32,6 +32,10 @@ export default interface Claim {
   repair_payment_successful?: boolean;
   repair_payment_link?: string;
   repair_razorpay_order_id?: string;
+  cancellation_reason?: string;
+  cancelled_by?: string;
+  revisable?: boolean;
+  cancellable?: boolean;
 }
 
 export interface ClaimDetailsProps {

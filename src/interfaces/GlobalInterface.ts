@@ -41,6 +41,7 @@ export const CLAIM_TABS = [
   "Approval",
   "Final Documents",
   "Customer Documents",
+  "Cancelled",
 ] as const;
 
 export type Tab = typeof CLAIM_TABS[number]; 
@@ -108,4 +109,15 @@ export interface BerDecision {
     berDecision: string;
     newDeviceAmount?: string;
   };
+}
+
+export interface ClaimFetchPayload {
+  page: number;
+  partner_id: number;
+  date?: string;
+  source: string;
+  duration?: string;
+  claim_status?: string | null;
+  startDate?: string;
+  endDate?: string;
 }

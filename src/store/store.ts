@@ -15,6 +15,8 @@ interface FilterProps {
   };
 }
 
+type AppliedFilters = FilterProps;
+
 interface StoreType {
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
@@ -23,7 +25,7 @@ interface StoreType {
   setClaims: (claims: Claim[]) => void;
 
   filteredClaims: Claim[];
-  setFilteredClaims: (claims: Claim[]) => void;
+  setFilteredClaims: (claims: Claim[] | ((prevClaims: Claim[]) => Claim[])) => void;
 
   selectedClaim: Claim | null;
   setSelectedClaim: (claim: Claim | null) => void;
@@ -76,7 +78,9 @@ interface StoreType {
   handleSearch: () => void;
   handleFilterChange: (filter: string) => void;
   handleSortingChange: (sortBy: SortByOptions, order: SortOrder) => void;
-  applyFilters: (filters: FilterProps) => void;
+  appliedFilters: AppliedFilters | null; 
+  setAppliedFilters: (filters: AppliedFilters) => void;
+  applyFilters: (filters: AppliedFilters) => void;
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
   estimateDetailsState: EstimateDetailsState;
@@ -110,7 +114,10 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setClaims: (claims) => set({ claims, filteredClaims: claims }),
 
   filteredClaims: [],
-  setFilteredClaims: (claims) => set({ filteredClaims: claims }),
+  setFilteredClaims: (claims) =>
+    set((state) => ({
+      filteredClaims: typeof claims === "function" ? claims(state.filteredClaims || []) : claims || [],
+    })),
 
   selectedClaim: null,
   setSelectedClaim: (claim) => set({ selectedClaim: claim }),
@@ -211,6 +218,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     const { fromDate, toDate } = filters;
     const from = new Date(fromDate);
     const to = new Date(toDate);
+    set({ appliedFilters: filters });
 
     const filteredResults = claims.filter((claim) => {
       const claimDate = new Date(claim?.created_at);
@@ -261,4 +269,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     set((state) => ({
       approvalDetails: { ...state.approvalDetails, ...updatedDetails },
     })),
+    appliedFilters: null,
+
+    setAppliedFilters: (filters) => set({ appliedFilters: filters }),
 }));
