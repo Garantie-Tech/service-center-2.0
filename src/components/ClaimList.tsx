@@ -107,7 +107,25 @@ const ClaimList: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!isInitialLoad.current) {
+    if (isInitialLoad.current) {
+      // Runs only on first render
+      isInitialLoad.current = false;
+      setPage(0);
+      setHasMore(true);
+      setFilteredClaims([]);
+
+      const delayDebounce = setTimeout(() => {
+        loadMoreClaims(0, true);
+      }, 300);
+
+      return () => clearTimeout(delayDebounce);
+    } else if (
+      appliedFilters ||
+      filterStatus ||
+      selectedDropdown ||
+      globalSearch
+    ) {
+      // Runs when filter/search changes
       setPage(0);
       setHasMore(true);
       setFilteredClaims([]);
@@ -118,7 +136,6 @@ const ClaimList: React.FC = () => {
 
       return () => clearTimeout(delayDebounce);
     }
-    isInitialLoad.current = false;
   }, [appliedFilters, filterStatus, selectedDropdown, globalSearch]);
 
   // infinite scroll
