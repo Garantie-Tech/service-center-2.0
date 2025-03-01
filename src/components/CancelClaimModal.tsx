@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import {
+  fetchClaimCancelReason,
+} from "@/services/claimService";
 import CustomSelect from "@/components/ui/CustomSelect";
+
 
 interface CancelClaimModalProps {
   isOpen: boolean;
@@ -17,15 +21,66 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
 }) => {
   const [selectedReason, setSelectedReason] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
+  const [reasons, setReasons] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Handle fade-in and fade-out effect
+  // Fetch cancellation reasons from API
   useEffect(() => {
+    const getReasons = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchClaimCancelReason();
+
+        if (response.success && response.data.data) {
+          // Extract only the values (reason texts) from API response
+          const formattedReasons = Object.values(response.data.data);
+          console.log(formattedReasons);
+          setReasons(formattedReasons);
+        } else {
+          setReasons([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reasons:", error);
+        setReasons([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (isOpen) {
       setShowModal(true);
+      getReasons();
     } else {
-      setTimeout(() => setShowModal(false), 300); // Wait for animation to finish before removing
+      setTimeout(() => setShowModal(false), 300);
     }
   }, [isOpen]);
+
+  // const handleSubmit = async () => {
+  //   if (!selectedReason) return;
+
+  //   try {
+  //     setIsLoading(true);
+
+  //     // API Call to submit cancellation reason
+  //     const response = await handleCancelClaim(
+  //       Number(selectedClaim?.id),
+  //       String(selectedReason)
+  //     );
+
+  //     if (!response.data) {
+  //       notifyError("Failed to cancel the claim. Please try again.");
+  //     } else {
+  //       notifySuccess("Claim cancelled successfully!");
+  //       onSubmit(selectedReason);
+  //       onClose();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error cancelling claim:", error);
+  //     notifyError("An error occurred while cancelling the claim.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleSubmit = () => {
     if (!selectedReason) return;
@@ -33,7 +88,7 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
     onClose(); // Close modal after submission
   };
 
-  if (!showModal) return null; // Don't render if modal is not open
+  if (!showModal) return null;
 
   return (
     <div
@@ -41,7 +96,6 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
         isOpen ? "opacity-100" : "opacity-0"
       }`}
     >
-      {/* Modal Box */}
       <div
         className={`bg-white rounded-lg shadow-lg px-[30px] py-[40px] w-[410px] relative transform transition-all duration-300 ${
           isOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
@@ -87,8 +141,8 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
 
         {/* Subtitle */}
         <p className="text-center text-base text-[#414651] font-medium my-4">
-          Are you sure? You are cancel the claim <br />
-          please select reason!
+          Are you sure? You are canceling the claim <br />
+          Please select a reason!
         </p>
 
         {/* Select Dropdown */}
@@ -96,18 +150,17 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
           <label className="block text-sm font-medium mb-1 text-[#414651]">
             Select Reason
           </label>
-
-          <CustomSelect
-            options={[
-              "Duplicate Claim",
-              "Incorrect Details",
-              "No Longer Needed",
-            ]}
-            placeholder="Select"
-            onChange={(value) => setSelectedReason(value)}
-            className="border-[#D5D7DA] text-[#181D27] h-[50px]"
-            fontSize="text-base"
-          />
+          {loading ? (
+            <p className="text-gray-500 text-sm">Loading reasons...</p>
+          ) : (
+            <CustomSelect
+              options={reasons}
+              placeholder="Select"
+              onChange={(value) => setSelectedReason(value)}
+              className="border-[#D5D7DA] text-[#181D27] h-[50px]"
+              fontSize="text-sm"
+            />
+          )}
         </div>
 
         {/* Buttons */}

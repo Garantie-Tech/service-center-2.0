@@ -121,7 +121,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   return isFormEditable ? (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Estimate Form</h2>
+      <h2 className="text-lg font-semibold mb-4">Estimate Details</h2>
       {isInvalidDocument && showError == true && (
         <ErrorAlert
           message={invalidDocumentReason}
@@ -137,6 +137,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       )}
 
       <div className="flex gap-8">
+
         <div className="w-1/2">
           <label className="block text-xs font-medium mb-1">
             Estimate Amount *
@@ -259,6 +260,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             {getEstimateButtonLabel(claimStatus)}
           </button>
         </div>
+
         <div className="w-1/2">
           {/* Upload document */}
           <label className="block text-xs font-medium mb-2">
@@ -432,6 +434,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             )}
           </div>
         </div>
+
       </div>
     </div>
   ) : (

@@ -12,17 +12,17 @@ export interface ExportData {
   "IMEI Number": string;
   "Preferred Service Centre": string;
   "Estimation Provided By": string;
-  "State": string;
+  State: string;
   "Estimate Date": string;
   "Approved Date": string;
   "Final Doc Received Date": string | null;
   "Final Doc Validated Date": string | null;
   "Payment to Service Centre": string | null;
   "Payment Date": string | null;
-  "UTRN": string | null;
+  UTRN: string | null;
   "Claim Status": string;
   "Pending With": string;
-  "Remarks": string;
+  Remarks: string;
   "Doc Dependency": string;
   "Rejection Reason": string;
 }
@@ -42,9 +42,10 @@ export const CLAIM_TABS = [
   "Final Documents",
   "Customer Documents",
   "Cancelled",
+  "Rejected",
 ] as const;
 
-export type Tab = typeof CLAIM_TABS[number]; 
+export type Tab = (typeof CLAIM_TABS)[number];
 
 export type TabStatus = "success" | "error" | "empty";
 
@@ -82,7 +83,9 @@ export interface ApprovalState {
     repairPaymentLink?: string;
     repairRazorpayOrderId?: string;
   };
-  setApprovalDetails: (updatedDetails: Partial<ApprovalState["approvalDetails"]>) => void;
+  setApprovalDetails: (
+    updatedDetails: Partial<ApprovalState["approvalDetails"]>
+  ) => void;
 }
 
 export interface DocumentItem {
@@ -95,8 +98,8 @@ export interface DocumentItem {
 
 // Fixed document keys
 export interface Documents {
-  "15"?: DocumentItem; 
-  "73"?: DocumentItem; 
+  "15"?: DocumentItem;
+  "73"?: DocumentItem;
 }
 
 export interface BerDecision {
@@ -111,6 +114,18 @@ export interface BerDecision {
   };
 }
 
+export interface CancelClaim {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: {
+    cancellation_reason: string;
+    cancelled_by: string;
+    update_type?: string;
+  };
+}
+
 export interface ClaimFetchPayload {
   page: number;
   partner_id: number;
@@ -120,4 +135,18 @@ export interface ClaimFetchPayload {
   claim_status?: string | null;
   startDate?: string;
   endDate?: string;
+  claim_search?: string;
+}
+
+export interface UploadFinalDocuments {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    documentId: number;
+    documentTypeId: string;
+    fileCount: number;
+    thumbnail: string;
+  };
 }

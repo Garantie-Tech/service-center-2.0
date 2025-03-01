@@ -6,7 +6,7 @@ import { formatDate } from "@/helpers/dateHelper";
 import { getActiveTab } from "@/helpers/globalHelper";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchClaims } from "@/services/claimService";
-import Claim from "@/interfaces/ClaimInterface";
+import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 
 const ClaimList: React.FC = () => {
   const {
@@ -18,64 +18,117 @@ const ClaimList: React.FC = () => {
     setApprovalDetails,
     setActiveTab,
     setFilteredClaims,
+    appliedFilters,
+    filterStatus,
+    setIsLoading,
+    selectedDropdown,
+    globalSearch,
   } = useGlobalStore();
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
   const lastClaimRef = useRef<HTMLLIElement | null>(null);
+  const isInitialLoad = useRef(true);
+  const actionRequiredStatus = [
+    "Invalid Documents",
+    "Claim Initiated",
+    "BER Marked",
+  ];
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Claim Initiated":
-      case "Invalid Documents":
-      case "BER":
-        return "bg-primaryBlue text-white";
-      default:
-        return "bg-gray-200 text-gray-800";
-    }
-  };
+  const loadMoreClaims = useCallback(
+    async (pageNumber: number, reset: boolean = false) => {
+      if (loading || (!hasMore && !reset)) return;
+      setLoading(true);
+      setIsLoading(true);
 
-  const loadMoreClaims = useCallback(async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
+      try {
+        const payload: ClaimFetchPayload = {
+          page: pageNumber,
+          partner_id: 191,
+          source: "service_centre",
+          claim_status: filterStatus || "ALL CLAIMS",
+        };
 
-    try {
-      const response = await fetchClaims({
-        page,
-        partner_id: 191,
-        date: "allTime",
-        source: "service_centre",
-      });
-
-      if (response.success && Array.isArray(response.data?.data?.claims)) {
-        const newClaims: Claim[] = response.data.data.claims.map((claim) => ({
-          ...claim,
-          claimed_amount: claim.claimed_amount ?? "",
-        }));
-
-        if (newClaims.length === 0) {
-          setHasMore(false);
+        if (appliedFilters?.fromDate && appliedFilters?.toDate) {
+          payload.duration = "custom";
+          payload.startDate = appliedFilters.fromDate;
+          payload.endDate = appliedFilters.toDate;
         } else {
-          setFilteredClaims((prevClaims) => [...prevClaims, ...newClaims]);
-          setPage((prevPage) => prevPage + 1);
+          payload.date = "allTime";
         }
+        if (globalSearch) {
+          payload.claim_search = globalSearch;
+        }
+
+        const response = await fetchClaims(payload);
+
+        if (response.success && Array.isArray(response.data?.data?.claims)) {
+          const newClaims = response.data.data.claims;
+
+          if (newClaims.length === 0) {
+            if (reset) {
+              setFilteredClaims([]);
+              setSelectedClaim(null);
+            }
+            setHasMore(false);
+          } else {
+            setFilteredClaims((prevClaims) => {
+              if (reset) return newClaims;
+
+              const uniqueClaims = newClaims.filter(
+                (claim) => !prevClaims.some((prev) => prev.id === claim.id)
+              );
+
+              return [...prevClaims, ...uniqueClaims];
+            });
+
+            if (!reset) {
+              setPage((prevPage) => prevPage + 1);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error loading more claims:", error);
+      } finally {
+        setLoading(false);
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading more claims:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, loading, hasMore, setFilteredClaims]);
+    },
+    [
+      loading,
+      hasMore,
+      setFilteredClaims,
+      appliedFilters,
+      selectedDropdown,
+      globalSearch,
+    ]
+  );
 
   useEffect(() => {
-    if (!lastClaimRef.current) return;
+    if (!isInitialLoad.current) {
+      setPage(0);
+      setHasMore(true);
+      setFilteredClaims([]);
+
+      const delayDebounce = setTimeout(() => {
+        loadMoreClaims(0, true);
+      }, 300);
+
+      return () => clearTimeout(delayDebounce);
+    }
+    isInitialLoad.current = false;
+  }, [appliedFilters, filterStatus, selectedDropdown, globalSearch]);
+
+  // infinite scroll
+  useEffect(() => {
+    if (!lastClaimRef.current || !hasMore || loading) return;
 
     observer.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          loadMoreClaims();
+        if (entries[0].isIntersecting) {
+          loadMoreClaims(page);
         }
       },
       { threshold: 1.0 }
@@ -85,10 +138,44 @@ const ClaimList: React.FC = () => {
       observer.current.observe(lastClaimRef.current);
     }
 
-    return () => {
-      if (observer.current) observer.current.disconnect();
-    };
-  }, [filteredClaims.length, hasMore, loadMoreClaims]);
+    if (filteredClaims.length > 0) {
+      setSelectedClaim(filteredClaims[0]);
+      setClaimStatus(filteredClaims[0]["status"]);
+      setEstimateDetailsState({
+        estimateAmount: filteredClaims[0]?.claimed_amount || "",
+        jobSheetNumber: filteredClaims[0]?.job_sheet_number || "",
+        estimateDetails:
+          filteredClaims[0]?.data?.inputs?.estimate_details || "",
+        replacementConfirmed: filteredClaims[0]?.imei_changed ? "yes" : "no",
+        damagePhotos: filteredClaims[0]?.mobile_damage_photos || [],
+        estimateDocument: filteredClaims[0]?.documents?.["15"]?.url || null,
+      });
+      setApprovalDetails({
+        estimateAmount: Number(filteredClaims[0]?.claimed_amount),
+        approvedAmount: Number(filteredClaims[0]?.approved_amount),
+        approvalType: filteredClaims[0]?.status,
+        approvalDate: filteredClaims[0]?.approval_date,
+        repairAmount: filteredClaims[0]?.repair_amount,
+        repairPaymentSuccessful: filteredClaims[0]?.repair_payment_successful,
+        repairPaymentLink: filteredClaims[0]?.repair_payment_link,
+        repairRazorpayOrderId: filteredClaims[0]?.repair_razorpay_order_id,
+      });
+      setActiveTab(
+        getActiveTab(filteredClaims[0]?.status) as
+          | "Claim Details"
+          | "Estimate"
+          | "Approval"
+          | "Final Documents"
+          | "Customer Documents"
+          | "Cancelled"
+          | "Rejected"
+      );
+    } else {
+      setSelectedClaim(null);
+    }
+
+    return () => observer.current?.disconnect();
+  }, [page, hasMore, loading]);
 
   return (
     <div className="w-full max-w-lg mx-auto">
@@ -99,9 +186,11 @@ const ClaimList: React.FC = () => {
               key={claim.id}
               ref={index === filteredClaims.length - 1 ? lastClaimRef : null}
               className={`flex items-center justify-between shadow-sm p-4 ${
-                selectedClaim?.id === claim.id ? "bg-claimListBackground" : "hover:bg-gray-50"
+                selectedClaim?.id === claim.id
+                  ? "bg-claimListBackground"
+                  : "hover:bg-gray-50"
               } cursor-pointer ${
-                ["Invalid Documents", "Claim Initiated", "BER"].includes(claim.status)
+                actionRequiredStatus.includes(claim.status)
                   ? "border-l-4 border-primaryBlue bg-claimListBackground"
                   : ""
               }`}
@@ -116,6 +205,7 @@ const ClaimList: React.FC = () => {
                     | "Final Documents"
                     | "Customer Documents"
                     | "Cancelled"
+                    | "Rejected"
                 );
                 setEstimateDetailsState({
                   estimateAmount: claim.claimed_amount || "",
@@ -139,18 +229,33 @@ const ClaimList: React.FC = () => {
             >
               <div>
                 <div className="flex items-center">
-                  <p className="text-base font-semibold text-gray-800 mr-2">{claim.id}</p>
-                  {["Invalid Documents", "Claim Initiated", "BER"].includes(claim.status) && (
-                    <Image src="/images/action-required-icon.svg" alt="Action required" width={14} height={14} />
+                  <p className="text-base font-semibold text-gray-800 mr-2">
+                    {claim.id}
+                  </p>
+                  {actionRequiredStatus.includes(claim.status) && (
+                    <Image
+                      src="/images/action-required-icon.svg"
+                      alt="Action required"
+                      width={14}
+                      height={14}
+                    />
                   )}
                 </div>
                 <p className="text-xs text-gray-600">{claim.name}</p>
               </div>
               <div className="text-xs text-right">
-                <span className={`badge font-semibold ${getStatusBadge(claim.status)} mb-1 text-xs px-4 py-[10px]`}>
+                <span
+                  className={`badge font-semibold ${
+                    actionRequiredStatus.includes(claim.status)
+                      ? "bg-primaryBlue text-white"
+                      : "bg-gray-200 text-gray-800"
+                  } mb-1 text-xs px-4 py-[10px]`}
+                >
                   {claim.status}
                 </span>
-                <p className="text-xs text-gray-500">{formatDate(claim?.created_at)}</p>
+                <p className="text-xs text-gray-500">
+                  {formatDate(claim?.created_at)}
+                </p>
               </div>
             </li>
           ))
@@ -159,10 +264,14 @@ const ClaimList: React.FC = () => {
         )}
       </ul>
 
-      {loading && <p className="text-center text-gray-500 py-8">
-        <span className="loading loading-ring loading-lg"></span>
-        </p>}
-      {!hasMore && <p className="text-center text-gray-400 py-4">No more claims</p>}
+      {loading && (
+        <p className="text-center text-gray-500 py-8">
+          <span className="loading loading-ring loading-lg"></span>
+        </p>
+      )}
+      {!hasMore && filteredClaims.length > 0 && (
+        <p className="text-center text-gray-400 py-4">No more claims</p>
+      )}
     </div>
   );
 };

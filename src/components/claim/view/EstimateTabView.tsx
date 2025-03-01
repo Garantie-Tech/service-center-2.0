@@ -37,7 +37,7 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
         <div>
           <h4 className="text-xs text-gray-500">Is Motherboard Replaced ?</h4>
           <p className="text-sm text-gray-700">
-            {estimateDetailsState.replacementConfirmed === 'yes' ? "Yes" : "No"}
+            {estimateDetailsState.replacementConfirmed === "yes" ? "Yes" : "No"}
           </p>
         </div>
       </div>
@@ -59,20 +59,22 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
                 {estimateDetailsState?.estimateDocument ? (
                   typeof estimateDetailsState?.estimateDocument === "string" ? (
                     estimateDetailsState?.estimateDocument.endsWith(".pdf") ? (
-                      <Image
-                        src="/images/pdf-icon.svg"
-                        alt="Estimate Upload"
-                        width={30}
-                        height={50}
-                        className="h-[100%]"
-                      />
+                      <a
+                        href={estimateDetailsState?.estimateDocument}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Image
+                          src="/images/pdf-icon.svg"
+                          alt="Estimate Upload"
+                          width={30}
+                          height={50}
+                          className="h-[100%]"
+                        />
+                      </a>
                     ) : (
-                      <Image
-                        src={estimateDetailsState?.estimateDocument} // Direct URL from API
-                        alt="Estimate Document"
-                        width={30}
-                        height={50}
-                        className="rounded border h-[100%]"
+                      <GalleryPopup
+                        images={[estimateDetailsState?.estimateDocument]}
                       />
                     )
                   ) : estimateDetailsState?.estimateDocument.type ===

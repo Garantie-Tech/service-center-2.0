@@ -1,5 +1,11 @@
 import Claim from "@/interfaces/ClaimInterface";
-import { BerDecision, ClaimFetchPayload, SubmitEstimate } from "@/interfaces/GlobalInterface";
+import {
+  BerDecision,
+  CancelClaim,
+  ClaimFetchPayload,
+  SubmitEstimate,
+  UploadFinalDocuments,
+} from "@/interfaces/GlobalInterface";
 import { getRequest, postRequest } from "@/utils/api";
 
 export interface ClaimResponse {
@@ -12,16 +18,21 @@ export interface ClaimResponse {
   };
 }
 
+interface ClaimCancelReasonResponse {
+  success: boolean;
+  data: Record<string, string>;
+}
+
 export const fetchClaims = async (
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload
 ) => {
-  return await getRequest<ClaimResponse>("partners/service-center-claim", _params);
+  return await getRequest<ClaimResponse>(
+    "partners/service-center-claim",
+    _params
+  );
 };
 
-export const submitEstimate = async (
-  claimID: number,
-  body: FormData
-) => {
+export const submitEstimate = async (claimID: number, body: FormData) => {
   const endpoint = `submit/estimate/${claimID}`;
   return await postRequest<SubmitEstimate>(endpoint, body);
 };
@@ -29,7 +40,7 @@ export const submitEstimate = async (
 export const handleBerDecision = async (
   claimID: number,
   berDecision: string,
-  newDeviceAmount?: string 
+  newDeviceAmount?: string
 ) => {
   const endpoint = `claim/update/${claimID}`;
   const body: Record<string, string> = {
@@ -50,14 +61,43 @@ export const handleBerDecision = async (
   }
 };
 
-export const fetchClaimCancelReason = async (
-  _params?: Record<string, string | number | boolean>
+export const fetchClaimCancelReason =
+  async (): Promise<ClaimCancelReasonResponse> => {
+    try {
+      const response = await getRequest("claims/reasons");
+
+      if (response && response.success) {
+        return response as ClaimCancelReasonResponse; // Explicitly cast response
+      }
+
+      return { success: false, data: {} };
+    } catch (error) {
+      console.error("Error fetching claim cancel reasons:", error);
+      return { success: false, data: {} };
+    }
+  };
+
+export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
+  const endpoint = `service-claim/document/submit/${claimID}`;
+  return await postRequest<UploadFinalDocuments>(endpoint, body);
+};
+
+export const handleCancelClaim = async (
+  claimID: number,
+  reason: string,
 ) => {
+  const endpoint = `claim/update/${claimID}`;
+  const body: Record<string, string> = {
+    cancellation_reason: reason,
+    cancelled_by: 'Service Centre',
+    update_type: 'cancel_claim',
+  };
+
   try {
-    const response = await getRequest("claims/reasons", _params);
+    const response = await postRequest<CancelClaim>(endpoint, body);
     return response;
   } catch (error) {
-    console.error("Error fetching claim cancel reasons:", error);
-    return { success: false, data: {} };
+    console.error("Error Canceling Claim:", error);
+    throw error;
   }
 };

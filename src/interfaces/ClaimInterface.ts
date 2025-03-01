@@ -25,6 +25,9 @@ export default interface Claim {
   documents?: {
     "15"?: DocumentItem;
     "73"?: DocumentItem;
+    "16"?: DocumentItem;
+    "74"?: DocumentItem;
+    "75"?: DocumentItem;
   };
   approved_amount?: string;
   approval_date?: string;
@@ -36,6 +39,8 @@ export default interface Claim {
   cancelled_by?: string;
   revisable?: boolean;
   cancellable?: boolean;
+  is_rejected?: boolean;
+  rejection_reason?: string;
 }
 
 export interface ClaimDetailsProps {

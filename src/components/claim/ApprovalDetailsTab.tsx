@@ -65,8 +65,8 @@ const ApprovalDetailsTab: React.FC = () => {
   };
 
   const handleBerSubmit = async () => {
+    setIsLoading(true);
     if (approvalDetails.berDecision != "Replace Device") {
-      setIsLoading(true);
       try {
         const response = await handleBerDecision(
           Number(selectedClaim?.id),
@@ -208,7 +208,7 @@ const ApprovalDetailsTab: React.FC = () => {
 
           {/* BER Decision Dropdown */}
           {approvalDetails.approvalType != "Approved" &&
-            claimStatus === "BER" && (
+            claimStatus === "BER Marked" && (
               <div className="pb-[30px] md:w-1/2">
                 <label className="block text-darkGray text-xs font-medium">
                   BER Decision

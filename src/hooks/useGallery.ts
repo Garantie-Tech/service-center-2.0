@@ -1,28 +1,32 @@
 import { useState } from "react";
 
 export const useGallery = (images: (string | File)[]) => {
-  const fileImages: File[] = images.filter((img): img is File => img instanceof File);
-
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [selectedImage, setSelectedImage] = useState<string | File | null>(null);
 
   const openGallery = (index: number) => {
-    setSelectedImage(fileImages[index]);
+    setSelectedImage(images[index]);
     setCurrentIndex(index);
   };
 
   const nextImage = () => {
-    if (currentIndex !== null && currentIndex < fileImages.length - 1) {
-      setSelectedImage(fileImages[currentIndex + 1]);
-      setCurrentIndex(currentIndex + 1);
-    }
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex < images.length - 1) {
+        setSelectedImage(images[prevIndex + 1]);
+        return prevIndex + 1;
+      }
+      return prevIndex;
+    });
   };
 
   const prevImage = () => {
-    if (currentIndex !== null && currentIndex > 0) {
-      setSelectedImage(fileImages[currentIndex - 1]);
-      setCurrentIndex(currentIndex - 1);
-    }
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex > 0) {
+        setSelectedImage(images[prevIndex - 1]);
+        return prevIndex - 1;
+      }
+      return prevIndex;
+    });
   };
 
   return {
@@ -31,7 +35,7 @@ export const useGallery = (images: (string | File)[]) => {
     openGallery,
     closeGallery: () => {
       setSelectedImage(null);
-      setCurrentIndex(null);
+      setCurrentIndex(0);
     },
     nextImage,
     prevImage,

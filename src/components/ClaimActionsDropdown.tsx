@@ -6,13 +6,16 @@ import TimelineModal from "@/components/TimelineModal";
 import CancelClaimModal from "@/components/CancelClaimModal";
 import AdditionalDetailsModal from "./AdditionalDetailsModal";
 import { useGlobalStore } from "@/store/store";
+import { useNotification } from "@/context/NotificationProvider";
+import { handleCancelClaim } from "@/services/claimService";
 
 const ClaimActionsDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false);
-  const { selectedClaim, setActiveTab } = useGlobalStore();
+  const { selectedClaim, setActiveTab, setIsLoading } = useGlobalStore();
+  const { notifySuccess, notifyError } = useNotification();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -24,35 +27,29 @@ const ClaimActionsDropdown: React.FC = () => {
   };
   const closeTimeline = () => setShowTimeline(false);
 
-  const handleCancelClaim = async (reason: string) => {
+  const handleCancelClaimFn = async (reason: string) => {
     console.log("Canceling claim for reason:", reason);
 
-    // try {
-    //   // Example API call to cancel claim
-    //   const response = await fetch("/api/cancel-claim", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ reason }),
-    //   });
+    try {
+      setIsLoading(true);
 
-    //   const data = await response.json();
+      // API Call to submit cancellation reason
+      const response = await handleCancelClaim(
+        Number(selectedClaim?.id),
+        String(reason)
+      );
 
-    //   if (response.ok) {
-    //     console.log("Claim successfully canceled:", data);
-    //     alert("Claim canceled successfully!");
-    //   } else {
-    //     console.error("Failed to cancel claim:", data);
-    //     alert("Failed to cancel claim. Please try again.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error canceling claim:", error);
-    //   alert("An error occurred while canceling the claim.");
-    // }
-
-    // // Close the modal after submission
-    // setIsCancelModalOpen(false);
+      if (!response.data) {
+        notifyError("Failed to cancel the claim. Please try again.");
+      } else {
+        notifySuccess("Claim cancelled successfully!");
+      }
+    } catch (error) {
+      console.error("Error cancelling claim:", error);
+      notifyError("An error occurred while cancelling the claim.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -135,7 +132,7 @@ const ClaimActionsDropdown: React.FC = () => {
       <CancelClaimModal
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
-        onSubmit={handleCancelClaim} // Calls API when submitting reason
+        onSubmit={handleCancelClaimFn} // Calls API when submitting reason
       />
       <AdditionalDetailsModal
         isOpen={isAdditionalModalOpen}

@@ -25,7 +25,7 @@ const ClaimFilter: React.FC = () => {
     setSortBy,
     sortOrder,
     setSortOrder,
-    applyFilters,
+    setAppliedFilters,
     handleSortingChange,
     handleFilterChange,
     claimStatuses,
@@ -33,12 +33,13 @@ const ClaimFilter: React.FC = () => {
 
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const closeFilter = useCallback((e: MouseEvent) => {
-    if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-      toggleFilter();
+  const closeFilter = useCallback((event: MouseEvent) => {
+    if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+      if (isFilterOpen) toggleFilter();
     }
-  }, [toggleFilter]);
-
+  }, [isFilterOpen, toggleFilter]);
+  
+  
   useEffect(() => {
     document.addEventListener("mousedown", closeFilter);
     return () => {
@@ -47,7 +48,7 @@ const ClaimFilter: React.FC = () => {
   }, [closeFilter]);
 
   const handleApply = () => {
-    applyFilters({ fromDate, toDate, claimTypes });
+    setAppliedFilters({ fromDate, toDate, claimTypes });
     toggleFilter();
   };
 
@@ -79,9 +80,12 @@ const ClaimFilter: React.FC = () => {
             setIsDropdownOpen((e.target as HTMLDetailsElement).open)
           }
         >
-          <summary className="custom-button btn-default w-full flex items-center justify-between cursor-pointer tooltip tooltip-bottom" data-tip="Claim Status">
+          <summary
+            className="custom-button btn-default w-full flex items-center justify-between cursor-pointer tooltip tooltip-bottom"
+            data-tip="Claim Status"
+          >
             <span className="flex items-center text-xs">
-            {claimStatuses[selectedDropdown] || "All Claims"}
+              {claimStatuses[selectedDropdown] || "All Claims"}
             </span>
             <Image
               src="/images/select-dropdown.svg"
@@ -116,7 +120,12 @@ const ClaimFilter: React.FC = () => {
 
         {/* Filter Button */}
         <div className="flex justify-between items-center pl-4">
-          <button className="px-2 tooltip tooltip-bottom" title="Filter" onClick={toggleFilter} data-tip="Filter">
+          <button
+            className="px-2 tooltip tooltip-bottom"
+            title="Filter"
+            onClick={toggleFilter}
+            data-tip="Filter"
+          >
             <Image
               src="/images/filter-icon.svg"
               alt="Filter"
@@ -186,7 +195,7 @@ const ClaimFilter: React.FC = () => {
       {isFilterOpen && (
         <div
           ref={filterRef}
-          className="bg-white p-4 rounded-lg shadow-lg z-50 w-96 text-sm"
+          className="bg-white p-4 rounded-lg shadow-lg z-50 md:w-90 w-90 text-sm"
         >
           {/* Date Filters */}
           <h3 className="text-sm font-bold mb-3">Date Range</h3>
@@ -233,13 +242,13 @@ const ClaimFilter: React.FC = () => {
 
           {/* Claim Types */}
           <h3 className="text-sm font-bold mb-3">Claim Type</h3>
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-2 mb-4">
             {["myClaims", "otherClaims", "pendingClaims"].map((type, index) => (
               <label key={index} className="flex items-center">
                 <input
                   type="radio"
                   name="claimType"
-                  className="radio checked:bg-primaryBlue"
+                  className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
                 />
                 <span className="ml-2 text-xs capitalize">
                   {type.replace("Claims", " Claims")}

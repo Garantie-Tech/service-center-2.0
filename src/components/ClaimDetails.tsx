@@ -5,7 +5,7 @@ import ClaimDetailsTab from "@/components/claim/ClaimDetailsTab";
 import EstimateDetailsTab from "@/components/claim/EstimateDetailsTab";
 import ApprovalDetailsTab from "@/components/claim/ApprovalDetailsTab";
 import FinalDocumentsTab from "@/components/claim/FinalDocumentsTab";
-import { Tab, TabStatus } from "@/interfaces/GlobalInterface";
+import { Tab } from "@/interfaces/GlobalInterface";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
 import Claim from "@/interfaces/ClaimInterface";
@@ -14,46 +14,17 @@ import ClaimActionsDropdown from "./ClaimActionsDropdown";
 import { useNotification } from "@/context/NotificationProvider";
 import CustomerDocumentsTab from "@/components/claim/CustomerDocumentsTab";
 import CancelledClaim from "@/components/claim/CancelledClaimTab";
+import RejectedClaim from "@/components/claim/RejectedClaim";
+import {
+  getFilteredTabs,
+  getStatusIcon,
+  getTabStatus,
+} from "@/helpers/globalHelper";
 
-const getTabStatus = (tab: Tab, selectedClaim: Claim): TabStatus => {
-  if (!selectedClaim) return "empty";
-
-  switch (tab) {
-    case "Claim Details":
-      return selectedClaim ? "success" : "error";
-    case "Estimate":
-      return selectedClaim?.documents?.["15"]?.status_reason_id ||
-        selectedClaim?.documents?.["73"]?.status_reason_id ||
-        selectedClaim?.status === "Claim Initiated"
-        ? "error"
-        : "success";
-    case "Approval":
-      return selectedClaim ? "success" : "error";
-    case "Final Documents":
-      return selectedClaim ? "success" : "error";
-    case "Customer Documents":
-      return selectedClaim ? "success" : "error";
-    case "Cancelled":
-      return selectedClaim?.cancellation_reason ? "error" : "success";
-    default:
-      return "empty";
-  }
-};
-
-const getStatusIcon = (status: TabStatus): string | null => {
-  switch (status) {
-    case "success":
-      return "/images/check-icon.svg";
-    case "error":
-      return "/images/action-required-icon.svg";
-    case "empty":
-    default:
-      return null;
-  }
-};
-
-const ClaimDetails: React.FC = () => {
-  const { selectedClaim, activeTab, setActiveTab, setIsLoading, claimStatus } =
+const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
+  selectedClaim,
+}) => {
+  const { activeTab, setActiveTab, setIsLoading, claimStatus } =
     useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -63,9 +34,9 @@ const ClaimDetails: React.FC = () => {
 
   if (!selectedClaim) {
     return (
-      <div className="text-center">
-        <h2 className="text-lg font-semibold">Select an item to read</h2>
-        <p className="text-gray-500">Nothing is selected</p>
+      <div className="flex flex-col items-center justify-center h-full py-10">
+        <h2 className="text-lg font-semibold">No Claim Selected</h2>
+        <p className="text-gray-500">Please select a claim to view details.</p>
       </div>
     );
   }
@@ -86,40 +57,15 @@ const ClaimDetails: React.FC = () => {
       const response = await submitEstimate(selectedClaim?.id, formData);
 
       if (!response.success) {
-        notifyError("Failed to submit estimate !");
+        notifyError("Failed to submit estimate!");
       } else {
-        notifySuccess("Estimated Submitted Successfully !");
+        notifySuccess("Estimate Submitted Successfully!");
       }
     } catch (error) {
-      notifyError(`Failed to submit estimate ! ${error}`);
+      notifyError(`Failed to submit estimate! ${error}`);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const getFilteredTabs = (claimStatus: string): Tab[] => {
-    if (
-      claimStatus === "Claim Initiated" ||
-      claimStatus === "Claim Submitted"
-    ) {
-      return ["Claim Details", "Estimate"];
-    }
-
-    if (claimStatus === "Claim Cancelled") {
-      return ["Claim Details", "Cancelled"];
-    }
-
-    if (
-      claimStatus === "BER SETTLE" ||
-      claimStatus === "BER Settlement Initiated" ||
-      claimStatus === "BER Settlement Completed"
-    ) {
-      return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
-    }
-    if (claimStatus === "Rejected") {
-      return ["Claim Details", "Estimate"];
-    }
-    return ["Claim Details", "Estimate", "Approval", "Final Documents"];
   };
 
   const filteredTabs: Tab[] = getFilteredTabs(claimStatus);
@@ -129,10 +75,13 @@ const ClaimDetails: React.FC = () => {
     cancelledReason: selectedClaim?.cancellation_reason,
   };
 
+  const rejectedData = {
+    rejectedReason: selectedClaim?.rejection_reason,
+  };
+
   return (
-    <div className="">
-      {/* Top Section */}
-      <div className="py-3 px-8 flex items-center justify-between pb-3 border-b">
+    <div className="w-full">
+      <div className="py-3 px-8 flex items-center justify-between border-b">
         <div className="flex items-start gap-3">
           <Image
             src="/images/chevron-down.svg"
@@ -208,6 +157,7 @@ const ClaimDetails: React.FC = () => {
         {activeTab === "Final Documents" && <FinalDocumentsTab />}
         {activeTab === "Customer Documents" && <CustomerDocumentsTab />}
         {activeTab === "Cancelled" && <CancelledClaim data={cancelledData} />}
+        {activeTab === "Rejected" && <RejectedClaim data={rejectedData} />}
       </div>
     </div>
   );

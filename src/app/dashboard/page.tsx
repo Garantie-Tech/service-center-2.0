@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useAuthStore } from "@/store/authStore";
-import { fetchClaims } from "@/services/claimService";
-import { useGlobalStore } from "@/store/store";
 import { useRouter } from "next/navigation";
-import { getActiveTab } from "@/helpers/globalHelper";
-import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
+import { useGlobalStore } from "@/store/store";
 
 // Dynamically import components for performance optimization
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
@@ -25,124 +21,14 @@ const ClaimDetails = dynamic(() => import("@/components/ClaimDetails"), {
 const Header = dynamic(() => import("@/components/Header"), { ssr: false });
 
 const Dashboard: React.FC = () => {
-  const [hasMounted, setHasMounted] = useState(false);
   const router = useRouter();
-  const {
-    setIsLoading,
-    setClaims,
-    setFilteredClaims,
-    setSelectedClaim,
-    filterStatus,
-    claimStatuses,
-    setClaimStatus,
-    setEstimateDetailsState,
-    setApprovalDetails,
-    setActiveTab,
-    appliedFilters
-  } = useGlobalStore();
+  const { selectedClaim } = useGlobalStore();
 
   const logout = useAuthStore((state) => state.logout);
   const handleLogout = () => {
     logout();
     router.push("/");
   };
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted || Object.keys(claimStatuses).length === 0) return;
-
-    const fetchClaimsData = async () => {
-      try {
-        setIsLoading(true);
-        const payload: ClaimFetchPayload = {
-          page: 0,
-          partner_id: 191,
-          source: "service_centre",
-          claim_status: filterStatus,
-        };
-      
-        if(appliedFilters?.fromDate && appliedFilters?.toDate) {
-          payload.duration = 'custom';
-          if (appliedFilters?.fromDate) payload.startDate = appliedFilters?.fromDate;
-          if (appliedFilters?.toDate) payload.endDate = appliedFilters?.toDate;
-        } else {
-          payload.date= "allTime";
-
-        }
-
-        const response = await fetchClaims(payload);
-
-        if (response.success && response.data?.data?.claims) {
-          const mappedClaims = response.data.data.claims.map((claim) => ({
-            ...claim,
-            status: claimStatuses[claim.status] || claim.status,
-          }));
-
-          setClaims(mappedClaims);
-          setFilteredClaims(mappedClaims);
-          if (mappedClaims.length > 0) {
-            setSelectedClaim(mappedClaims[0]);
-            setClaimStatus(mappedClaims[0]["status"]);
-            setEstimateDetailsState({
-              estimateAmount: mappedClaims[0]?.claimed_amount || "",
-              jobSheetNumber: mappedClaims[0]?.job_sheet_number || "",
-              estimateDetails:
-                mappedClaims[0]?.data?.inputs?.estimate_details || "",
-              replacementConfirmed: mappedClaims[0]?.imei_changed
-                ? "yes"
-                : "no",
-              damagePhotos: mappedClaims[0]?.mobile_damage_photos || [],
-              estimateDocument: mappedClaims[0]?.documents?.["15"]?.url || null,
-            });
-            setApprovalDetails({
-              estimateAmount: Number(mappedClaims[0]?.claimed_amount),
-              approvedAmount: Number(mappedClaims[0]?.approved_amount),
-              approvalType: mappedClaims[0]?.status,
-              approvalDate: mappedClaims[0]?.approval_date,
-              repairAmount: mappedClaims[0]?.repair_amount,
-              repairPaymentSuccessful:
-                mappedClaims[0]?.repair_payment_successful,
-              repairPaymentLink: mappedClaims[0]?.repair_payment_link,
-              repairRazorpayOrderId: mappedClaims[0]?.repair_razorpay_order_id,
-            });
-            setActiveTab(
-              getActiveTab(mappedClaims[0]?.status) as
-                | "Claim Details"
-                | "Estimate"
-                | "Approval"
-                | "Final Documents"
-                | "Customer Documents"
-                | "Cancelled"
-            );
-          }
-        }
-      } catch (error) {
-        console.error("API Error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchClaimsData();
-  }, [
-    filterStatus,
-    hasMounted,
-    claimStatuses,
-    setClaims,
-    setFilteredClaims,
-    setSelectedClaim,
-    setIsLoading,
-    setApprovalDetails,
-    setClaimStatus,
-    setEstimateDetailsState,
-    appliedFilters,
-    setActiveTab
-  ]);
-
-  if (!hasMounted) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -154,7 +40,7 @@ const Dashboard: React.FC = () => {
           <ClaimList />
         </aside>
         <main className="bg-white rounded-md shadow-sm overflow-auto">
-          <ClaimDetails />
+          <ClaimDetails selectedClaim={selectedClaim} />
         </main>
       </div>
     </div>

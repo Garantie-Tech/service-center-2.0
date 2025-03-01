@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useGallery } from "@/hooks/useGallery";
+import { useEffect, useMemo } from "react";
 
 interface GalleryPopupProps {
   images: (string | File)[];
@@ -17,22 +18,53 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({ images }) => {
     prevImage,
   } = useGallery(images);
 
+  // 🔹 Memoized Image URLs (Handles Files and URLs efficiently)
+  const imageUrls = useMemo(
+    () =>
+      images.map((img) =>
+        typeof img === "string" ? img : URL.createObjectURL(img)
+      ),
+    [images]
+  );
+
+  // 🔹 Cleanup URLs for File objects when unmounting (Memory Optimization)
+  useEffect(() => {
+    return () => {
+      imageUrls.forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+    };
+  }, [imageUrls]);
+
+  // 🔹 Handle Keyboard Navigation for Modal
+  useEffect(() => {
+    if (!selectedImage) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "Escape") closeGallery();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImage, nextImage, prevImage, closeGallery]);
+
   return (
     <div className="container mx-auto p-2">
       {/* Image Grid */}
-
       <div className="flex justify-start align-center gap-2">
-        {images.map((src, index) => (
+        {imageUrls.map((src, index) => (
           <div
             key={index}
-            className="relative bg-inputBg w-[60px] h-[60px] mt-2 flex items-center justify-center border border-[#EEEEEE] p-[5px] cursor-pointer"
+            className="relative bg-inputBg w-[60px] h-[50px] mt-2 flex items-center justify-center border border-[#EEEEEE] p-[5px] cursor-pointer"
             onClick={() => openGallery(index)}
           >
             <Image
-              src={typeof src === "string" ? src : URL.createObjectURL(src)}
-              alt="`Gallery image ${index + 1}`"
-              width={200}
-              height={200}
+              src={src}
+              alt={`Gallery image ${index + 1}`}  
+              width={60}
+              height={60}
               className="rounded h-[100%]"
             />
           </div>
@@ -42,7 +74,7 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({ images }) => {
       {/* Popup Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 w-[100%]"
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 w-full"
           onClick={closeGallery}
         >
           <div
@@ -51,27 +83,31 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({ images }) => {
           >
             {/* Close Button */}
             <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              className="absolute top-[-5px] right-[-5px] hover:text-gray-700"
               onClick={closeGallery}
             >
-              ✕
+              <Image
+                src="/images/cross-square.svg"
+                alt="close gallery "
+                width={30}
+                height={30}
+                className="rounded-lg"
+              />
             </button>
 
             {/* Image Display */}
             <Image
-              src={
-                typeof selectedImage === "string"
-                  ? selectedImage
-                  : URL.createObjectURL(selectedImage)
-              }
-              alt="Selected"
+              src={imageUrls[currentIndex ?? 0]}
+              alt={`Selected Image ${
+                currentIndex !== null ? currentIndex + 1 : "1"
+              }`}
               width={300}
               height={300}
-              className="rounded-lg w-[100%]"
+              className="rounded-lg"
             />
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-4 text-xs">
               <button
                 className={`px-4 py-2 bg-gray-300 rounded-md ${
                   currentIndex === 0

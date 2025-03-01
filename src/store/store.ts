@@ -25,16 +25,23 @@ interface StoreType {
   setClaims: (claims: Claim[]) => void;
 
   filteredClaims: Claim[];
-  setFilteredClaims: (claims: Claim[] | ((prevClaims: Claim[]) => Claim[])) => void;
+  setFilteredClaims: (
+    claims: Claim[] | ((prevClaims: Claim[]) => Claim[])
+  ) => void;
 
   selectedClaim: Claim | null;
-  setSelectedClaim: (claim: Claim | null) => void;
+  setSelectedClaim: (
+    claim: Claim | null | ((prevClaim: Claim | null) => Claim | null)
+  ) => void;
 
   claimStatus: string;
   setClaimStatus: (claimStatus: string) => void;
 
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+
+  globalSearch: string;
+  setGlobalSearch: (search: string) => void;
 
   filterStatus: string;
   setFilterStatus: (status: string) => void;
@@ -78,7 +85,7 @@ interface StoreType {
   handleSearch: () => void;
   handleFilterChange: (filter: string) => void;
   handleSortingChange: (sortBy: SortByOptions, order: SortOrder) => void;
-  appliedFilters: AppliedFilters | null; 
+  appliedFilters: AppliedFilters | null;
   setAppliedFilters: (filters: AppliedFilters) => void;
   applyFilters: (filters: AppliedFilters) => void;
   activeTab: Tab;
@@ -116,11 +123,18 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   filteredClaims: [],
   setFilteredClaims: (claims) =>
     set((state) => ({
-      filteredClaims: typeof claims === "function" ? claims(state.filteredClaims || []) : claims || [],
+      filteredClaims:
+        typeof claims === "function"
+          ? claims(state.filteredClaims || [])
+          : claims || [],
     })),
 
   selectedClaim: null,
-  setSelectedClaim: (claim) => set({ selectedClaim: claim }),
+  setSelectedClaim: (claim) =>
+    set((state) => ({
+      selectedClaim:
+        typeof claim === "function" ? claim(state.selectedClaim) : claim,
+    })),
 
   claimStatus: "",
   setClaimStatus: (claimStatus) => set({ claimStatus }),
@@ -174,15 +188,12 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setSortOrder: (order: "Ascending" | "Descending") =>
     set({ sortOrder: order }),
 
+  globalSearch: "",
+  setGlobalSearch: (search) => set({ globalSearch: search }),
+
   handleSearch: () => {
-    const { claims, searchTerm, setFilteredClaims } = get();
-    const searchResults = claims.filter(
-      (claim) =>
-        claim.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        claim.id.toString().includes(searchTerm) ||
-        claim.status.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredClaims(searchResults);
+    const { searchTerm, setGlobalSearch } = get();
+    setGlobalSearch(searchTerm);
   },
 
   handleFilterChange: (filter) => {
@@ -269,7 +280,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     set((state) => ({
       approvalDetails: { ...state.approvalDetails, ...updatedDetails },
     })),
-    appliedFilters: null,
+  appliedFilters: null,
 
-    setAppliedFilters: (filters) => set({ appliedFilters: filters }),
+  setAppliedFilters: (filters) => set({ appliedFilters: filters }),
 }));
