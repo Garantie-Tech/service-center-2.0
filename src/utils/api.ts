@@ -1,4 +1,4 @@
-import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
+import { ClaimFetchPayload, GenerateLinkPaymentBody } from "@/interfaces/GlobalInterface";
 import { getCookie } from "@/utils/cookieManager";
 
 export interface ApiResponse<T> {
@@ -24,7 +24,7 @@ function formatQueryParams(params: Record<string, string | number | boolean> | C
 export async function apiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  body?: Record<string, unknown> | FormData,
+  body?: Record<string, unknown> | FormData | GenerateLinkPaymentBody,
   params?: Record<string, string | number | boolean> | ClaimFetchPayload,
   extraHeaders: HeadersInit = {}
 ): Promise<ApiResponse<T>> {
@@ -66,7 +66,7 @@ export function getRequest<T>(endpoint: string, params?: Record<string, string |
 }
 
 // Generic POST request
-export function postRequest<T>(endpoint: string, body: Record<string, unknown> | FormData, extraHeaders?: HeadersInit) {
+export function postRequest<T>(endpoint: string, body: Record<string, unknown> | FormData | GenerateLinkPaymentBody, extraHeaders?: HeadersInit) {
   return apiRequest<T>(endpoint, "POST", body, undefined, extraHeaders);
 }
 

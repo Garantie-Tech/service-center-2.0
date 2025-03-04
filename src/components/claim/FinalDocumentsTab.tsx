@@ -13,7 +13,7 @@ const FinalDocumentsTab: React.FC = () => {
   const [repairInvoice, setRepairInvoice] = useState<File[]>([]);
   const [replacementReceipt, setReplacementReceipt] = useState<File[]>([]);
   const [repairedMobilePhotos, setRepairedMobilePhotos] = useState<File[]>([]);
-  const { selectedClaim, setIsLoading } = useGlobalStore();
+  const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
   const [showRepairInvoiceError, setShowRepairInvoiceError] = useState(true);
   const [showRepairMobilePhotoError, setShowRepairMobilePhotoError] =
@@ -30,7 +30,7 @@ const FinalDocumentsTab: React.FC = () => {
   const handleSubmit = async () => {
     const formData = new FormData();
 
-    console.log(repairInvoice, repairedMobilePhotos, replacementReceipt);
+    // console.log(repairInvoice, repairedMobilePhotos, replacementReceipt);
 
     try {
       if (!repairInvoice || repairInvoice.length === 0) {
@@ -78,6 +78,7 @@ const FinalDocumentsTab: React.FC = () => {
       if (!response.data) {
         notifyError("Failed to upload documents. Please try again.");
       } else {
+        triggerClaimRefresh();
         notifySuccess("Final documents uploaded successfully!");
       }
     } catch (error) {
@@ -143,7 +144,7 @@ const FinalDocumentsTab: React.FC = () => {
     repairInvoiceImage: selectedClaim?.documents?.["16"]?.url ?? "",
     repairMobilePhoto: selectedClaim?.documents?.["74"]?.url ?? "",
     replacementReceiptImage: selectedClaim?.documents?.["75"]?.url ?? "",
-    isImeiChanged: selectedClaim?.imei_changed ? true : false,
+    isImeiChanged: isImeiChanged,
   };
 
   const isEditable =
@@ -224,10 +225,12 @@ const FinalDocumentsTab: React.FC = () => {
             <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
               Uploaded (Under Review)
             </span>
-          ) : (
+          ) : finalDocuments?.repairInvoiceImage ? (
             <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
               Valid
             </span>
+          ) : (
+            <></>
           )}
         </div>
 
@@ -274,10 +277,12 @@ const FinalDocumentsTab: React.FC = () => {
             <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
               Uploaded (Under Review)
             </span>
-          ) : (
+          ) : finalDocuments?.repairMobilePhoto ? (
             <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
               Valid
             </span>
+          ) : (
+            <></>
           )}
         </div>
       </div>
@@ -332,10 +337,12 @@ const FinalDocumentsTab: React.FC = () => {
               <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
                 Uploaded (Under Review)
               </span>
-            ) : (
-              <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
+            ) : finalDocuments?.replacementReceiptImage ? (
+              <span className="p-2 text-[#19AD61] text-xxs font-semibold">
                 Valid
               </span>
+            ) : (
+              <></>
             )}
           </div>
         </div>

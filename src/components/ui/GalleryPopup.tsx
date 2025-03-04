@@ -6,9 +6,15 @@ import { useEffect, useMemo } from "react";
 
 interface GalleryPopupProps {
   images: (string | File)[];
+  onRemoveImage?: (index: number) => void; // 🆕 Optional Callback for image removal
+  allowRemoval?: boolean; // 🆕 New Prop to control remove button visibility
 }
 
-const GalleryPopup: React.FC<GalleryPopupProps> = ({ images }) => {
+const GalleryPopup: React.FC<GalleryPopupProps> = ({
+  images,
+  onRemoveImage,
+  allowRemoval = true, // Default: Allow removal
+}) => {
   const {
     selectedImage,
     currentIndex,
@@ -53,20 +59,40 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({ images }) => {
   return (
     <div className="container mx-auto p-2">
       {/* Image Grid */}
-      <div className="flex justify-start align-center gap-2">
+      <div className="flex justify-start align-center gap-2 flex-wrap">
         {imageUrls.map((src, index) => (
           <div
             key={index}
             className="relative bg-inputBg w-[60px] h-[50px] mt-2 flex items-center justify-center border border-[#EEEEEE] p-[5px] cursor-pointer"
             onClick={() => openGallery(index)}
           >
+            {/* Image Preview */}
             <Image
               src={src}
-              alt={`Gallery image ${index + 1}`}  
+              alt={`Gallery image ${index + 1}`}
               width={60}
               height={60}
               className="rounded h-[100%]"
             />
+
+            {/* 🆕 Remove Button - Only Show If `allowRemoval` is True */}
+            {allowRemoval && onRemoveImage && (
+              <button
+                type="button"
+                className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveImage(index);
+                }}
+              >
+                <Image
+                  src="/images/x-close.svg"
+                  alt="Remove"
+                  width={12}
+                  height={12}
+                />
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -88,7 +114,7 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({ images }) => {
             >
               <Image
                 src="/images/cross-square.svg"
-                alt="close gallery "
+                alt="close gallery"
                 width={30}
                 height={30}
                 className="rounded-lg"

@@ -2,31 +2,25 @@ import Claim from "@/interfaces/ClaimInterface";
 import { Tab, TabStatus } from "@/interfaces/GlobalInterface";
 
 export const getEstimateButtonLabel = (claimStatus: string): string => {
-  if (claimStatus === "Claim Initiated") {
+  if (
+    claimStatus === "Claim Initiated" ||
+    claimStatus === "Invalid Documents"
+  ) {
     return "Submit Estimate";
   }
-  if (claimStatus === "Claim Submitted") {
-    return "Edit Estimate";
-  }
-  if (
-    claimStatus !== "BER Settlement Completed" &&
-    claimStatus !== "Closed" &&
-    claimStatus !== "Rejected"
-  ) {
-    return "Revise Estimate";
-  }
+
   return "Submit Estimate";
 };
 
 export const isEstimateEditable = (claimStatus: string): boolean => {
   if (
-    claimStatus === "BER Settlement Completed" ||
-    claimStatus === "Closed" ||
-    claimStatus === "Rejected"
+    claimStatus === "Claim Submitted" ||
+    claimStatus === "Claim Initiated" ||
+    claimStatus === "Invalid Documents"
   ) {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 };
 
 export const getActiveTab = (status: string): string => {
@@ -34,8 +28,7 @@ export const getActiveTab = (status: string): string => {
     status === "Claim Initiated" ||
     status === "Estimate Revised" ||
     status === "Invalid Documents" ||
-    status === "Claim Submitted" ||
-    status === "Documents Verified"
+    status === "Claim Submitted"
   ) {
     return "Estimate";
   }
@@ -43,34 +36,36 @@ export const getActiveTab = (status: string): string => {
     status === "BER Marked" ||
     status === "BER Repair" ||
     status === "BER SETTLE" ||
-    status === "BER Replace"
+    status === "BER Replace" ||
+    status === "Partially Approved"
   ) {
     return "Approval";
   }
-  if (
-    status === "Claim Cancelled"
-  ) {
+  if (status === "Claim Cancelled") {
     return "Cancelled";
   }
-  if (
-    status === "Rejected"
-  ) {
+  if (status === "Rejected") {
     return "Rejected";
   }
   if (
     status === "Closed" ||
     status === "BER Repair Approved" ||
     status === "BER Replacement Approved" ||
-    status === "BER Replace"
+    status === "BER Replace" ||
+    status === "Approved"
   ) {
     return "Final Documents";
   }
   if (
-    status === "BER SETTLE" ||  
+    status === "BER SETTLE" ||
     status === "BER Settlement Initiated" ||
     status === "BER Settlement Completed"
   ) {
     return "Customer Documents";
+  }
+
+  if (status === "Documents Verified") {
+    return "Estimate";
   }
   return "Claim Details";
 };
@@ -88,10 +83,16 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
     return ["Claim Details", "Estimate", "Approval"];
   }
 
+  if (claimStatus === "Documents Verified") {
+    return ["Claim Details", "Estimate"];
+  }
+
   if (
-    ["BER SETTLE", "BER Settlement Initiated", "BER Settlement Completed"].includes(
-      claimStatus
-    )
+    [
+      "BER SETTLE",
+      "BER Settlement Initiated",
+      "BER Settlement Completed",
+    ].includes(claimStatus)
   ) {
     return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
   }
@@ -103,7 +104,10 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
   return ["Claim Details", "Estimate", "Approval", "Final Documents"];
 };
 
-export const getTabStatus = (tab: Tab, selectedClaim: Claim | null): TabStatus => {
+export const getTabStatus = (
+  tab: Tab,
+  selectedClaim: Claim | null
+): TabStatus => {
   if (!selectedClaim) return "empty";
 
   switch (tab) {

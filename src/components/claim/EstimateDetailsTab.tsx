@@ -8,7 +8,8 @@ import {
 } from "@/helpers/globalHelper";
 import EstimateTabViewComponent from "@/components/claim/view/EstimateTabView";
 import ErrorAlert from "@/components/ui/ErrorAlert";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import GalleryPopup from "@/components/ui/GalleryPopup";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -17,16 +18,73 @@ interface EstimateDetailsTabProps {
 const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   onSubmit,
 }) => {
+  const MAX_DAMAGE_IMAGES = 11;
+  const [damagePhotosError, setDamagePhotosError] = useState<string | null>(
+    null
+  );
+
   const {
     selectedClaim,
     estimateDetailsState,
     setEstimateDetailsState,
     claimStatus,
-    setClaimStatus,
+    claimRevised,
+    setClaimRevised,
   } = useGlobalStore();
-  const [showError, setShowError] = useState(true);
+  const [showDamageImagesError, setShowDamageImagesError] = useState(true);
+  const [showEstimateDocumentError, setShowEstimateDocumentError] =
+    useState(true);
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
+  const [showReplacementConfirmation, setShowReplacementConfirmation] =
+    useState(false);
+  const [pendingReplacementValue, setPendingReplacementValue] = useState<
+    string | null
+  >(null);
+  const [isReplacementConfirmed, setIsReplacementConfirmed] = useState(false);
 
-  const isFormDisabled = false;
+  useEffect(() => {
+    setIsFormDisabled(
+      claimStatus === "Claim Submitted" || claimStatus === "Invalid Documents"
+    );
+  }, [claimStatus, selectedClaim]);
+
+  useEffect(() => {
+    if (selectedClaim) {
+      // Reset estimateDetailsState whenever selectedClaim changes
+      setEstimateDetailsState({
+        estimateAmount: selectedClaim?.claimed_amount || "",
+        jobSheetNumber: selectedClaim?.job_sheet_number || "",
+        estimateDetails: selectedClaim?.data?.inputs?.estimate_details || "",
+        replacementConfirmed: "",
+        damagePhotos: selectedClaim?.mobile_damage_photos || [],
+        estimateDocument: selectedClaim?.documents?.["15"]?.url || null,
+      });
+      setIsReplacementConfirmed(false);
+    }
+  }, [selectedClaim, setEstimateDetailsState]);
+
+  // ✅ Handle Replacement Confirmation
+  const handleReplacementSelection = (value: string) => {
+    setPendingReplacementValue(value);
+    setShowReplacementConfirmation(true);
+    console.log(pendingReplacementValue);
+  };
+
+  const confirmReplacementSelection = () => {
+    if (pendingReplacementValue) {
+      setEstimateDetailsState({
+        replacementConfirmed: pendingReplacementValue,
+      });
+      setIsReplacementConfirmed(true);
+    }
+    setShowReplacementConfirmation(false);
+  };
+
+  const cancelReplacementSelection = () => {
+    setPendingReplacementValue(null);
+    setShowReplacementConfirmation(false);
+  };
+
   const isFormEditable = isEstimateEditable(claimStatus);
 
   const isInvalidDocument = selectedClaim?.documents?.["15"]?.status_reason_id
@@ -62,12 +120,19 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files) {
+      const newFiles = Array.from(event.target.files);
+
+      if (damagePhotos.length + newFiles.length > MAX_DAMAGE_IMAGES) {
+        setDamagePhotosError(
+          `You can upload up to ${MAX_DAMAGE_IMAGES} images.`
+        );
+        return;
+      }
+
       setEstimateDetailsState({
-        damagePhotos: [
-          ...estimateDetailsState.damagePhotos,
-          ...Array.from(event.target.files),
-        ],
+        damagePhotos: [...damagePhotos, ...newFiles],
       });
+      setDamagePhotosError(null);
     }
   };
 
@@ -90,11 +155,13 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const isSubmitDisabled =
     !estimateAmount ||
+    Number(estimateAmount) < 0 ||
     !jobSheetNumber ||
     !estimateDetails ||
-    !replacementConfirmed ||
+    !isReplacementConfirmed ||
     !estimateDocument ||
-    damagePhotos.length < 5;
+    damagePhotos.length < 5 ||
+    damagePhotos.length > 11;
 
   const handleSubmit = () => {
     const formData = new FormData();
@@ -115,29 +182,43 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       }
     });
 
-    onSubmit(formData);
-    setClaimStatus("Claim Submitted");
+    try {
+      onSubmit(formData);
+    } catch (error) {
+      setIsFormDisabled(false);
+      console.error("Failed to fetch reasons:", error);
+    }
+
+    // setClaimStatus("Claim Submitted");
+    setClaimRevised(false);
+  };
+
+  const handleEditButtonClick = () => {
+    setIsFormDisabled(false);
+    setEstimateDetailsState({ ...estimateDetailsState, damagePhotos: [] });
+    setEstimateDetailsState({ estimateDocument: null });
   };
 
   return isFormEditable ? (
     <div>
       <h2 className="text-lg font-semibold mb-4">Estimate Details</h2>
-      {isInvalidDocument && showError == true && (
+      {isInvalidDocument && showDamageImagesError == true && isFormDisabled && (
         <ErrorAlert
           message={invalidDocumentReason}
-          onClose={() => setShowError(false)}
+          onClose={() => setShowDamageImagesError(false)}
         />
       )}
 
-      {isInvalidImages && showError == true && (
-        <ErrorAlert
-          message={invalidImagesReason}
-          onClose={() => setShowError(false)}
-        />
-      )}
+      {isInvalidImages &&
+        showEstimateDocumentError == true &&
+        isFormDisabled && (
+          <ErrorAlert
+            message={invalidImagesReason}
+            onClose={() => setShowEstimateDocumentError(false)}
+          />
+        )}
 
       <div className="flex gap-8">
-
         <div className="w-1/2">
           <label className="block text-xs font-medium mb-1">
             Estimate Amount *
@@ -149,7 +230,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               handleInputChange("estimateAmount", e.target.value)
             }
             className="input text-sm input-bordered w-full mb-4 bg-inputBg"
-            placeholder="₹ 9000"
+            placeholder="Ex: ₹ 9000"
             disabled={isFormDisabled}
           />
 
@@ -163,7 +244,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               handleInputChange("jobSheetNumber", e.target.value)
             }
             className="input text-sm input-bordered w-full mb-4 bg-inputBg"
-            placeholder="JDHSJKF3248204"
+            placeholder="Ex: JDHSJKF3248204"
             disabled={isFormDisabled}
           />
 
@@ -194,7 +275,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
-                onClick={() => handleInputChange("replacementConfirmed", "yes")}
+                onClick={() => handleReplacementSelection("yes")}
                 disabled={isFormDisabled}
               >
                 {replacementConfirmed === "yes" && (
@@ -224,7 +305,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
-                onClick={() => handleInputChange("replacementConfirmed", "no")}
+                onClick={() => handleReplacementSelection("no")}
                 disabled={isFormDisabled}
               >
                 {replacementConfirmed === "no" && (
@@ -246,42 +327,75 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               </button>
               <span className="text-sm">No</span>
             </div>
+            {/* // setIsFormDisabled */}
           </div>
-
-          <button
-            className={`btn w-1/2 hover:bg-blue-700 ${
-              isSubmitDisabled
-                ? "bg-btnDisabledBg text-btnDisabledText"
-                : "bg-primaryBlue text-white"
-            }`}
-            disabled={isSubmitDisabled}
-            onClick={handleSubmit}
-          >
-            {getEstimateButtonLabel(claimStatus)}
-          </button>
+          {isFormDisabled ? (
+            <button
+              className={`btn w-1/2 hover:bg-blue-700 bg-primaryBlue text-white`}
+              onClick={() => handleEditButtonClick()}
+            >
+              Edit Estimate
+            </button>
+          ) : (
+            <button
+              className={`btn w-1/2 hover:bg-blue-700 ${
+                isSubmitDisabled
+                  ? "bg-btnDisabledBg text-btnDisabledText"
+                  : "bg-primaryBlue text-white"
+              }`}
+              disabled={isSubmitDisabled}
+              onClick={handleSubmit}
+            >
+              {getEstimateButtonLabel(claimStatus)}
+            </button>
+          )}
         </div>
 
         <div className="w-1/2">
           {/* Upload document */}
           <label className="block text-xs font-medium mb-2">
-            Estimate Document (jpeg, png, pdf)
+            Estimate Document (pdf)
           </label>
           <div className="mb-4">
+            {!isFormDisabled && (
+              <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleEstimateDocumentUpload}
+                  className="hidden"
+                />
+                <span className="text-grayFont text-sm">Add Document</span>
+                <Image
+                  src="/images/upload-icon.svg"
+                  alt="Upload"
+                  width={20}
+                  height={20}
+                />
+              </label>
+            )}
+
             {estimateDocument && (
-              <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE]">
+              <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
                 {estimateDocument ? (
                   typeof estimateDocument === "string" ? (
                     estimateDocument.endsWith(".pdf") ? (
-                      <Image
-                        src="/images/pdf-icon.svg"
-                        alt="Estimate Upload"
-                        width={30}
-                        height={50}
-                        className="h-[100%]"
-                      />
+                      <a
+                        href={estimateDocument}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Image
+                          src="/images/pdf-icon.svg"
+                          alt="Estimate Upload"
+                          width={30}
+                          height={50}
+                          className="h-[100%]"
+                        />
+                      </a>
                     ) : (
                       <Image
-                        src={estimateDocument} // Direct URL from API
+                        src={estimateDocument}
                         alt="Estimate Document"
                         width={30}
                         height={50}
@@ -298,7 +412,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     />
                   ) : (
                     <Image
-                      src={URL.createObjectURL(estimateDocument)} // Convert File to preview
+                      src={URL.createObjectURL(estimateDocument)}
                       alt="Estimate Document"
                       width={30}
                       height={50}
@@ -324,23 +438,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 )}
               </div>
             )}
-            {!estimateDocument && (
-              <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-                <input
-                  type="file"
-                  accept=".jpeg, .png, .pdf"
-                  onChange={handleEstimateDocumentUpload}
-                  className="hidden"
-                />
-                <span className="text-grayFont text-sm">Add Document</span>
-                <Image
-                  src="/images/upload-icon.svg"
-                  alt="Upload"
-                  width={20}
-                  height={20}
-                />
-              </label>
-            )}
+
             {isInvalidDocument ? (
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Document : {invalidDocumentReason}
@@ -372,6 +470,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   accept="image/*"
                   onChange={handleDamagePhotoUpload}
                   className="hidden"
+                  disabled={damagePhotos.length >= MAX_DAMAGE_IMAGES}
                 />
                 <span className="text-grayFont text-sm">Add Photo</span>
                 <Image
@@ -382,40 +481,24 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 />
               </label>
             )}
-            <div className="flex justify-start align-center gap-2">
-              {damagePhotos.map((photo, index) => (
-                <div
-                  key={index}
-                  className="relative bg-inputBg w-[60px] h-[50px] mt-2 flex items-center justify-center border border-[#EEEEEE]"
-                >
-                  <Image
-                    src={
-                      typeof photo === "string"
-                        ? photo
-                        : URL.createObjectURL(photo)
-                    }
-                    alt="Damage Image"
-                    width={50}
-                    height={40}
-                    className="rounded h-[100%]"
-                  />
-                  {!isFormDisabled && (
-                    <button
-                      type="button"
-                      className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
-                      onClick={() => handleRemoveDamagePhoto(index)}
-                    >
-                      <Image
-                        src="/images/x-close.svg"
-                        alt="Remove"
-                        width={12}
-                        height={12}
-                      />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+
+            {damagePhotos && (
+              <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
+                <GalleryPopup
+                  images={estimateDetailsState?.damagePhotos}
+                  onRemoveImage={handleRemoveDamagePhoto}
+                  allowRemoval={!isFormDisabled}
+                />
+              </div>
+            )}
+
+            {damagePhotosError && (
+              <ErrorAlert
+                message={damagePhotosError}
+                onClose={() => setDamagePhotosError(null)}
+              />
+            )}
+
             {isInvalidImages ? (
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Images : {invalidImagesReason}
@@ -434,9 +517,44 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             )}
           </div>
         </div>
-
       </div>
+
+      {showReplacementConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+            <p className="text-lg font-medium">Are you sure?</p>
+            {pendingReplacementValue == "yes" ? (
+              <p className="text-sm text-gray-600">
+                Motherboard/Phone is getting replaced.
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Motherboard/Phone is not getting replace.
+              </p>
+            )}
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-md"
+                onClick={cancelReplacementSelection}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded-md"
+                onClick={confirmReplacementSelection}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  ) : claimRevised ? (
+    <>
+      <p>revised component will be here</p>
+    </>
   ) : (
     <>
       <EstimateTabViewComponent {...estimateDetailsState} />

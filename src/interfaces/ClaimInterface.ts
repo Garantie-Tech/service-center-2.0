@@ -41,6 +41,7 @@ export default interface Claim {
   cancellable?: boolean;
   is_rejected?: boolean;
   rejection_reason?: string;
+  service_centre_id: number;
 }
 
 export interface ClaimDetailsProps {

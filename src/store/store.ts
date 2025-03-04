@@ -37,6 +37,9 @@ interface StoreType {
   claimStatus: string;
   setClaimStatus: (claimStatus: string) => void;
 
+  claimRevised: boolean;
+  setClaimRevised: (claimRevised: boolean) => void;
+
   searchTerm: string;
   setSearchTerm: (term: string) => void;
 
@@ -111,6 +114,8 @@ interface StoreType {
   setApprovalDetails: (
     updatedDetails: Partial<StoreType["approvalDetails"]>
   ) => void;
+  refreshClaimsTrigger: number;
+  triggerClaimRefresh: () => void;
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -283,4 +288,9 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   appliedFilters: null,
 
   setAppliedFilters: (filters) => set({ appliedFilters: filters }),
+  refreshClaimsTrigger: 0,
+  triggerClaimRefresh: () =>
+    set((state) => ({ refreshClaimsTrigger: state.refreshClaimsTrigger + 1 })),
+  claimRevised: false,
+  setClaimRevised:  (claimRevised) => set({ claimRevised: claimRevised }),
 }));

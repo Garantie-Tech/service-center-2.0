@@ -24,8 +24,13 @@ import {
 const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
   selectedClaim,
 }) => {
-  const { activeTab, setActiveTab, setIsLoading, claimStatus } =
-    useGlobalStore();
+  const {
+    activeTab,
+    setActiveTab,
+    setIsLoading,
+    claimStatus,
+    triggerClaimRefresh,
+  } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
 
   const handleTabChange = (tab: Tab) => {
@@ -60,6 +65,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
         notifyError("Failed to submit estimate!");
       } else {
         notifySuccess("Estimate Submitted Successfully!");
+        triggerClaimRefresh();
       }
     } catch (error) {
       notifyError(`Failed to submit estimate! ${error}`);
@@ -77,6 +83,13 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
 
   const rejectedData = {
     rejectedReason: selectedClaim?.rejection_reason,
+  };
+
+  const customerDocuments = {
+    aadharFront: "/uploads/aadhar-front.jpg",
+    aadharBack: "/uploads/aadhar-back.jpg",
+    bankDetails: "/uploads/bank-passbook.pdf",
+    panCard: "/uploads/pan-card.jpg",
   };
 
   return (
@@ -155,7 +168,9 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
         )}
         {activeTab === "Approval" && <ApprovalDetailsTab />}
         {activeTab === "Final Documents" && <FinalDocumentsTab />}
-        {activeTab === "Customer Documents" && <CustomerDocumentsTab />}
+        {activeTab === "Customer Documents" && (
+          <CustomerDocumentsTab documents={customerDocuments} />
+        )}
         {activeTab === "Cancelled" && <CancelledClaim data={cancelledData} />}
         {activeTab === "Rejected" && <RejectedClaim data={rejectedData} />}
       </div>

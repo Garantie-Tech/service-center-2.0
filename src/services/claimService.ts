@@ -3,6 +3,8 @@ import {
   BerDecision,
   CancelClaim,
   ClaimFetchPayload,
+  GenerateLinkPaymentBody,
+  GeneratePaymentLink,
   SubmitEstimate,
   UploadFinalDocuments,
 } from "@/interfaces/GlobalInterface";
@@ -98,6 +100,30 @@ export const handleCancelClaim = async (
     return response;
   } catch (error) {
     console.error("Error Canceling Claim:", error);
+    throw error;
+  }
+};
+
+export const generatePaymentLink = async (
+  claimID: number,
+  paymentType: string,
+  type: string
+) => {
+  const endpoint = `payments/link`;
+  const body: GenerateLinkPaymentBody = {
+    entity_id: claimID,
+    payment_type : paymentType,
+    entity: type,
+    is_monthly: false,
+    is_recurring: false,
+    payment_method: false,
+  };
+
+  try {
+    const response = await postRequest<GeneratePaymentLink>(endpoint, body);
+    return response;
+  } catch (error) {
+    console.error("Error Generating Payment Link:", error);
     throw error;
   }
 };

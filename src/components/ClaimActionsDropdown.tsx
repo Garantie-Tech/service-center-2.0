@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import TimelineModal from "@/components/TimelineModal";
 import CancelClaimModal from "@/components/CancelClaimModal";
@@ -14,8 +14,27 @@ const ClaimActionsDropdown: React.FC = () => {
   const [showTimeline, setShowTimeline] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false);
-  const { selectedClaim, setActiveTab, setIsLoading } = useGlobalStore();
+  const { selectedClaim, setActiveTab, setIsLoading, setClaimRevised } =
+    useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
+  const [serviceCenterId, setServiceCenterId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const getServiceCenterId = async () => {
+      try {
+        const user = localStorage.getItem("user");
+        const serviceCenter = user ? JSON.parse(user) : null;
+
+        if (serviceCenter) {
+          setServiceCenterId(serviceCenter?.id);
+        }
+      } catch (error) {
+        console.error("Error fetching service center ID:", error);
+      }
+    };
+
+    getServiceCenterId();
+  });
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -85,7 +104,10 @@ const ClaimActionsDropdown: React.FC = () => {
             {selectedClaim?.revisable && (
               <li
                 className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
-                onClick={() => setActiveTab("Estimate")}
+                onClick={() => {
+                  setActiveTab("Estimate");
+                  setClaimRevised(true);
+                }}
               >
                 <Image
                   src="/images/reload-dark.svg"
@@ -97,21 +119,22 @@ const ClaimActionsDropdown: React.FC = () => {
                 Revise Estimate
               </li>
             )}
-            {selectedClaim?.cancellable && (
-              <li
-                className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
-                onClick={() => setIsCancelModalOpen(true)}
-              >
-                <Image
-                  src="/images/cross-dark.svg"
-                  alt="Cancel"
-                  width={20}
-                  height={20}
-                  className="mr-2"
-                />
-                Cancel Claim
-              </li>
-            )}
+            {selectedClaim?.cancellable &&
+              serviceCenterId == selectedClaim?.service_centre_id && (
+                <li
+                  className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsCancelModalOpen(true)}
+                >
+                  <Image
+                    src="/images/cross-dark.svg"
+                    alt="Cancel"
+                    width={20}
+                    height={20}
+                    className="mr-2"
+                  />
+                  Cancel Claim
+                </li>
+              )}
             <li
               className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
               onClick={() => setIsAdditionalModalOpen(true)}

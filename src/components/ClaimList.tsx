@@ -4,25 +4,26 @@ import { useGlobalStore } from "@/store/store";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
 import { getActiveTab } from "@/helpers/globalHelper";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fetchClaims } from "@/services/claimService";
 import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 
 const ClaimList: React.FC = () => {
   const {
-    filteredClaims = [],
+    filteredClaims,
+    setFilteredClaims,
     selectedClaim,
     setSelectedClaim,
     setClaimStatus,
     setEstimateDetailsState,
     setApprovalDetails,
     setActiveTab,
-    setFilteredClaims,
     appliedFilters,
     filterStatus,
     setIsLoading,
-    selectedDropdown,
     globalSearch,
+    refreshClaimsTrigger,
+    setClaimRevised,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -30,169 +31,207 @@ const ClaimList: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
   const lastClaimRef = useRef<HTMLLIElement | null>(null);
-  const isInitialLoad = useRef(true);
-  const actionRequiredStatus = [
-    "Invalid Documents",
-    "Claim Initiated",
-    "BER Marked",
-  ];
+  const isFetching = useRef(false);
 
-  const loadMoreClaims = useCallback(
+  const actionRequiredStatus = useMemo(
+    () => ["Invalid Documents", "Claim Initiated", "BER Marked"],
+    []
+  );
+
+  // Generates API payload dynamically
+  const generatePayload = useCallback(
+    (pageNumber: number): ClaimFetchPayload => ({
+      page: pageNumber,
+      partner_id: 191,
+      source: "service_centre",
+      claim_status: filterStatus || "ALL CLAIMS",
+      ...(appliedFilters?.fromDate &&
+        appliedFilters?.toDate && {
+          duration: "custom",
+          startDate: appliedFilters.fromDate,
+          endDate: appliedFilters.toDate,
+        }),
+      ...(globalSearch && { claim_search: globalSearch }),
+    }),
+    [appliedFilters, filterStatus, globalSearch]
+  );
+
+  // Fetch claims (main function)
+  const fetchClaimsData = useCallback(
     async (pageNumber: number, reset: boolean = false) => {
-      if (loading || (!hasMore && !reset)) return;
+      if (loading || (!hasMore && !reset) || isFetching.current) return;
+
+      isFetching.current = true; // Prevent duplicate calls
       setLoading(true);
       setIsLoading(true);
 
       try {
-        const payload: ClaimFetchPayload = {
-          page: pageNumber,
-          partner_id: 191,
-          source: "service_centre",
-          claim_status: filterStatus || "ALL CLAIMS",
-        };
-
-        if (appliedFilters?.fromDate && appliedFilters?.toDate) {
-          payload.duration = "custom";
-          payload.startDate = appliedFilters.fromDate;
-          payload.endDate = appliedFilters.toDate;
-        } else {
-          payload.date = "allTime";
-        }
-        if (globalSearch) {
-          payload.claim_search = globalSearch;
-        }
-
+        const payload = generatePayload(pageNumber);
         const response = await fetchClaims(payload);
 
         if (response.success && Array.isArray(response.data?.data?.claims)) {
           const newClaims = response.data.data.claims;
 
-          if (newClaims.length === 0) {
-            if (reset) {
-              setFilteredClaims([]);
-              setSelectedClaim(null);
-            }
-            setHasMore(false);
+          if (reset) {
+            setFilteredClaims(newClaims);
+            setPage(1); // Reset pagination
           } else {
-            setFilteredClaims((prevClaims) => {
-              if (reset) return newClaims;
-
-              const uniqueClaims = newClaims.filter(
+            setFilteredClaims((prevClaims) => [
+              ...prevClaims,
+              ...newClaims.filter(
                 (claim) => !prevClaims.some((prev) => prev.id === claim.id)
-              );
-
-              return [...prevClaims, ...uniqueClaims];
-            });
-
-            if (!reset) {
-              setPage((prevPage) => prevPage + 1);
-            }
+              ),
+            ]);
+            setPage((prev) => prev + 1);
           }
+
+          setHasMore(newClaims.length > 0);
+        } else {
+          setHasMore(false);
         }
       } catch (error) {
-        console.error("Error loading more claims:", error);
+        console.error("Error loading claims:", error);
       } finally {
         setLoading(false);
         setIsLoading(false);
+        isFetching.current = false; // Allow next fetch
+        setClaimRevised(false);
       }
     },
-    [
-      loading,
-      hasMore,
-      setFilteredClaims,
-      appliedFilters,
-      selectedDropdown,
-      globalSearch,
-    ]
+    [loading, hasMore, generatePayload]
   );
 
-  useEffect(() => {
-    if (isInitialLoad.current) {
-      // Runs only on first render
-      isInitialLoad.current = false;
-      setPage(0);
-      setHasMore(true);
-      setFilteredClaims([]);
+  // Fetch claims in the background when triggered
+  const refreshClaimsInBackground = useCallback(async () => {
+    if (!refreshClaimsTrigger) return;
+    setClaimRevised(false);
 
-      const delayDebounce = setTimeout(() => {
-        loadMoreClaims(0, true);
-      }, 300);
+    try {
+      const payload = generatePayload(0);
+      const response = await fetchClaims(payload);
 
-      return () => clearTimeout(delayDebounce);
-    } else if (
-      appliedFilters ||
-      filterStatus ||
-      selectedDropdown ||
-      globalSearch
-    ) {
-      // Runs when filter/search changes
-      setPage(0);
-      setHasMore(true);
-      setFilteredClaims([]);
+      if (response.success && Array.isArray(response.data?.data?.claims)) {
+        const newClaims = response.data.data.claims;
 
-      const delayDebounce = setTimeout(() => {
-        loadMoreClaims(0, true);
-      }, 300);
+        setFilteredClaims((prevClaims) => {
+          const updatedClaimsMap = new Map(
+            prevClaims.map((claim) => [claim.id, claim])
+          );
 
-      return () => clearTimeout(delayDebounce);
+          // Update existing claims or add new ones
+          newClaims.forEach((newClaim) => {
+            updatedClaimsMap.set(newClaim.id, newClaim);
+          });
+
+          const updatedClaims = Array.from(updatedClaimsMap.values());
+
+          // Preserve selected claim if it still exists
+          const existingSelectedClaim = updatedClaims.find(
+            (claim) => claim.id === selectedClaim?.id
+          );
+
+          if (existingSelectedClaim) {
+            setSelectedClaim(existingSelectedClaim);
+            setClaimStatus(existingSelectedClaim.status);
+            setActiveTab(
+              getActiveTab(existingSelectedClaim.status) as
+                | "Claim Details"
+                | "Estimate"
+                | "Approval"
+                | "Final Documents"
+                | "Customer Documents"
+                | "Cancelled"
+                | "Rejected"
+            );
+            setClaimRevised(false);
+          }
+
+          return updatedClaims;
+        });
+      }
+    } catch (error) {
+      console.error("Background refresh failed:", error);
     }
-  }, [appliedFilters, filterStatus, selectedDropdown, globalSearch]);
+  }, [refreshClaimsTrigger, generatePayload, selectedClaim]);
 
-  // infinite scroll
+  // Initial & Filter/Search API Call
+  useEffect(() => {
+    setPage(0);
+    setHasMore(true);
+    fetchClaimsData(0, true);
+  }, [appliedFilters, filterStatus, globalSearch]);
+
+  // Background refresh effect
+  useEffect(() => {
+    refreshClaimsInBackground();
+  }, [refreshClaimsTrigger]);
+
+  // Infinite scrolling observer
   useEffect(() => {
     if (!lastClaimRef.current || !hasMore || loading) return;
 
     observer.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMoreClaims(page);
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          fetchClaimsData(page);
         }
       },
       { threshold: 1.0 }
     );
 
-    if (lastClaimRef.current) {
-      observer.current.observe(lastClaimRef.current);
-    }
-
-    if (filteredClaims.length > 0) {
-      setSelectedClaim(filteredClaims[0]);
-      setClaimStatus(filteredClaims[0]["status"]);
-      setEstimateDetailsState({
-        estimateAmount: filteredClaims[0]?.claimed_amount || "",
-        jobSheetNumber: filteredClaims[0]?.job_sheet_number || "",
-        estimateDetails:
-          filteredClaims[0]?.data?.inputs?.estimate_details || "",
-        replacementConfirmed: filteredClaims[0]?.imei_changed ? "yes" : "no",
-        damagePhotos: filteredClaims[0]?.mobile_damage_photos || [],
-        estimateDocument: filteredClaims[0]?.documents?.["15"]?.url || null,
-      });
-      setApprovalDetails({
-        estimateAmount: Number(filteredClaims[0]?.claimed_amount),
-        approvedAmount: Number(filteredClaims[0]?.approved_amount),
-        approvalType: filteredClaims[0]?.status,
-        approvalDate: filteredClaims[0]?.approval_date,
-        repairAmount: filteredClaims[0]?.repair_amount,
-        repairPaymentSuccessful: filteredClaims[0]?.repair_payment_successful,
-        repairPaymentLink: filteredClaims[0]?.repair_payment_link,
-        repairRazorpayOrderId: filteredClaims[0]?.repair_razorpay_order_id,
-      });
-      setActiveTab(
-        getActiveTab(filteredClaims[0]?.status) as
-          | "Claim Details"
-          | "Estimate"
-          | "Approval"
-          | "Final Documents"
-          | "Customer Documents"
-          | "Cancelled"
-          | "Rejected"
-      );
-    } else {
-      setSelectedClaim(null);
-    }
+    observer.current.observe(lastClaimRef.current);
 
     return () => observer.current?.disconnect();
   }, [page, hasMore, loading]);
+
+  useEffect(() => {
+    if (!selectedClaim) {
+      // If there's no selected claim, select the first available claim
+      if (filteredClaims.length > 0) {
+        const firstClaim = filteredClaims[0];
+        setSelectedClaim(firstClaim);
+        setClaimStatus(firstClaim.status);
+        setEstimateDetailsState({
+          estimateAmount: firstClaim?.claimed_amount || "",
+          jobSheetNumber: firstClaim?.job_sheet_number || "",
+          estimateDetails: firstClaim?.data?.inputs?.estimate_details || "",
+          replacementConfirmed: "",
+          damagePhotos: firstClaim?.mobile_damage_photos || [],
+          estimateDocument: firstClaim?.documents?.["15"]?.url || null,
+        });
+        setApprovalDetails({
+          estimateAmount: Number(firstClaim?.claimed_amount),
+          approvedAmount: Number(firstClaim?.approved_amount),
+          approvalType: firstClaim?.status,
+          approvalDate: firstClaim?.approval_date,
+          repairAmount: firstClaim?.repair_amount,
+          repairPaymentSuccessful: firstClaim?.repair_payment_successful,
+          repairPaymentLink: firstClaim?.repair_payment_link,
+          repairRazorpayOrderId: firstClaim?.repair_razorpay_order_id,
+        });
+        setActiveTab(
+          getActiveTab(firstClaim.status) as
+            | "Claim Details"
+            | "Estimate"
+            | "Approval"
+            | "Final Documents"
+            | "Customer Documents"
+            | "Cancelled"
+            | "Rejected"
+        );
+      } else {
+        setSelectedClaim(null);
+      }
+    } else {
+      // If the selected claim exists in the updated list, do nothing
+      const stillExists = filteredClaims.some(
+        (claim) => claim.id === selectedClaim.id
+      );
+      if (!stillExists) {
+        setSelectedClaim(filteredClaims[0] || null);
+      }
+    }
+  }, [filteredClaims]);
 
   return (
     <div className="w-full max-w-lg mx-auto">
@@ -212,6 +251,7 @@ const ClaimList: React.FC = () => {
                   : ""
               }`}
               onClick={() => {
+                setClaimRevised(false);
                 setSelectedClaim(claim);
                 setClaimStatus(claim.status);
                 setActiveTab(
@@ -228,7 +268,7 @@ const ClaimList: React.FC = () => {
                   estimateAmount: claim.claimed_amount || "",
                   jobSheetNumber: claim.job_sheet_number || "",
                   estimateDetails: claim.data?.inputs?.estimate_details || "",
-                  replacementConfirmed: claim.imei_changed ? "yes" : "no",
+                  replacementConfirmed: "",
                   damagePhotos: claim.mobile_damage_photos || [],
                   estimateDocument: claim.documents?.["15"]?.url || null,
                 });

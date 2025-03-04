@@ -64,7 +64,7 @@ export interface EstimateDetailsState {
   estimateAmount: string;
   jobSheetNumber: string;
   estimateDetails: string;
-  replacementConfirmed: "yes" | "no" | null;
+  replacementConfirmed: string | "yes" | "no" | null | '';
   damagePhotos: (string | File)[];
   estimateDocument: File | string | null;
   documents?: Documents;
@@ -149,4 +149,28 @@ export interface UploadFinalDocuments {
     fileCount: number;
     thumbnail: string;
   };
+}
+
+export interface GeneratePaymentLink {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: {
+    entity_id: number,
+    payment_type: string,
+    entity: string,
+    is_monthly: boolean,
+    is_recurring: string,
+    payment_method: string,
+  };
+}
+
+export interface GenerateLinkPaymentBody {
+  entity_id: number;
+  payment_type: string;
+  entity: string;
+  is_monthly: boolean;
+  is_recurring: boolean;
+  payment_method: boolean;
 }

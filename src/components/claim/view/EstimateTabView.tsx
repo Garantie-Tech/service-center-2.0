@@ -44,13 +44,7 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
 
       {/* Right Column */}
       <div className="space-y-8">
-        {/* IMEI */}
-        <div>
-          <h4 className="text-xs text-gray-500">Damage Mobile Photo</h4>
-          <GalleryPopup images={estimateDetailsState?.damagePhotos} />
-        </div>
-
-        {/* Co-pay */}
+        {/* Estimate Document*/}
         <div>
           <h4 className="text-xs text-gray-500">Estimate Document</h4>
           <div className="mb-4">
@@ -103,6 +97,12 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
               </div>
             )}
           </div>
+        </div>
+
+        {/* Damage Mobile Photo */}
+        <div>
+          <h4 className="text-xs text-gray-500">Damage Mobile Photo</h4>
+          <GalleryPopup images={estimateDetailsState?.damagePhotos} />
         </div>
       </div>
     </div>

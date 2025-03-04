@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-interface BerRepairModalProps {
+interface BerSettleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
 }
 
-const BerRepairModal: React.FC<BerRepairModalProps> = ({
+const BerSettleModal: React.FC<BerSettleModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
@@ -76,7 +76,7 @@ const BerRepairModal: React.FC<BerRepairModalProps> = ({
 
         {/* Subtitle */}
         <p className="text-center text-base text-[#414651] font-medium my-4">
-          Are you sure? You are choosing to repair the device
+          Are you sure? You are choosing to settle the device
         </p>
 
         {/* Buttons */}
@@ -100,4 +100,4 @@ const BerRepairModal: React.FC<BerRepairModalProps> = ({
   );
 };
 
-export default BerRepairModal;
+export default BerSettleModal;
