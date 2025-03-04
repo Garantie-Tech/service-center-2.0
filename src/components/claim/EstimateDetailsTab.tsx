@@ -451,8 +451,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Document : {invalidDocumentReason}
               </span>
-            ) : claimStatus === "Claim Submitted" ||
-              claimStatus === "Estimate Revised" ? (
+            ) : (claimStatus === "Claim Submitted" ||
+                claimStatus === "Estimate Revised") &&
+              isFormDisabled ? (
               <span className="text-[#FF9548] text-xxs font-semibold">
                 Under Review
               </span>
@@ -511,8 +512,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Images : {invalidImagesReason}
               </span>
-            ) : claimStatus === "Claim Submitted" ||
-              claimStatus === "Estimate Revised" ? (
+            ) : (claimStatus === "Claim Submitted" ||
+                claimStatus === "Estimate Revised") &&
+              isFormDisabled ? (
               <span className="text-[#FF9548] text-xxs font-semibold">
                 Under Review
               </span>
