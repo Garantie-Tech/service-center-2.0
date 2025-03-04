@@ -4,7 +4,8 @@ import { Tab, TabStatus } from "@/interfaces/GlobalInterface";
 export const getEstimateButtonLabel = (claimStatus: string): string => {
   if (
     claimStatus === "Claim Initiated" ||
-    claimStatus === "Invalid Documents"
+    claimStatus === "Invalid Documents" ||
+    claimStatus === "Estimate Revised"
   ) {
     return "Submit Estimate";
   }
@@ -16,7 +17,8 @@ export const isEstimateEditable = (claimStatus: string): boolean => {
   if (
     claimStatus === "Claim Submitted" ||
     claimStatus === "Claim Initiated" ||
-    claimStatus === "Invalid Documents"
+    claimStatus === "Invalid Documents" ||
+    claimStatus === "Estimate Revised"
   ) {
     return true;
   }

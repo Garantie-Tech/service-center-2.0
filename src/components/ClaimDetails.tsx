@@ -54,6 +54,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
       amount: Number(selectedClaim?.copayment_amount) || 0,
     },
     claimDetails: selectedClaim?.data?.inputs?.damage_details || "",
+    service_centre_name: selectedClaim?.service_centre_name || "",
   };
 
   const handleEstimateSubmit = async (formData: FormData) => {

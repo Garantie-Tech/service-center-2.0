@@ -46,6 +46,9 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
               ) : (
                 <GalleryPopup images={[finalDocuments.repairInvoiceImage]} />
               ))}
+            <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+              Valid
+            </span>
           </div>
 
           <div className="mt-4">
@@ -73,6 +76,9 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
                   images={[finalDocuments.replacementReceiptImage]}
                 />
               ))}
+            <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+              Valid
+            </span>
           </div>
         </div>
 
@@ -82,6 +88,9 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
           {finalDocuments?.repairMobilePhoto && (
             <GalleryPopup images={[finalDocuments.repairMobilePhoto]} />
           )}
+          <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+            Valid
+          </span>
         </div>
       </div>
     </div>

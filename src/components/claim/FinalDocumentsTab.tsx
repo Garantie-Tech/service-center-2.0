@@ -33,18 +33,25 @@ const FinalDocumentsTab: React.FC = () => {
     // console.log(repairInvoice, repairedMobilePhotos, replacementReceipt);
 
     try {
-      if (!repairInvoice || repairInvoice.length === 0) {
+      if (
+        (!repairInvoice || repairInvoice.length === 0) &&
+        !selectedClaim?.documents?.["16"]?.url
+      ) {
         notifyError("Please Upload Repair Invoice");
         return;
       }
-      if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
+      if (
+        (!repairedMobilePhotos || repairedMobilePhotos.length === 0) &&
+        !selectedClaim?.documents?.["74"]?.url
+      ) {
         notifyError("Please Upload Repair Mobile Images");
         return;
       }
 
       if (
-        (selectedClaim?.imei_changed && !replacementReceipt) ||
-        replacementReceipt.length === 0
+        ((selectedClaim?.imei_changed && !replacementReceipt) ||
+          replacementReceipt.length === 0) &&
+        !selectedClaim?.documents?.["75"]?.url
       ) {
         notifyError("Please Upload Replacement Receipt");
         return;
@@ -63,8 +70,12 @@ const FinalDocumentsTab: React.FC = () => {
         });
       };
 
-      appendFiles(repairInvoice, 16);
-      appendFiles(repairedMobilePhotos, 74);
+      if (repairInvoice) {
+        appendFiles(repairInvoice, 16);
+      }
+      if (repairedMobilePhotos) {
+        appendFiles(repairedMobilePhotos, 74);
+      }
       if (selectedClaim?.imei_changed) {
         appendFiles(replacementReceipt, 75);
       }
@@ -185,7 +196,7 @@ const FinalDocumentsTab: React.FC = () => {
       <div className="flex gap-8">
         {/* Repair Invoice PDF */}
         <div className="w-1/2">
-          {!selectedClaim?.documents?.["16"] || reupload ? (
+          {!selectedClaim?.documents?.["16"] || isInvalidRepairInvoice ? (
             <PdfUpload
               label="Repair Invoice(Please add Invoice document)"
               pdfs={repairInvoice}
@@ -236,7 +247,7 @@ const FinalDocumentsTab: React.FC = () => {
 
         {/* Repaired Mobile Photos */}
         <div className="w-1/2">
-          {!selectedClaim?.documents?.["74"] || reupload ? (
+          {!selectedClaim?.documents?.["74"] || isInvalidRepairMobilePhoto ? (
             <ImageUpload
               label="Repaired Mobile( Add repaired mobile photo)"
               images={repairedMobilePhotos}
@@ -290,7 +301,8 @@ const FinalDocumentsTab: React.FC = () => {
         <div className="w-1/2">
           {/* Replacement Receipt PDF */}
           <div className="">
-            {!selectedClaim?.documents?.["75"] || reupload ? (
+            {!selectedClaim?.documents?.["75"] ||
+            isInvalidReplacementReceipt ? (
               <PdfUpload
                 label="Replacement Receipt( Add replacement receipts)"
                 pdfs={replacementReceipt}
@@ -348,7 +360,7 @@ const FinalDocumentsTab: React.FC = () => {
         </div>
       </div>
       <div className="flex gap-8">
-        {isEditable && !reupload ? (
+        {!reupload ? (
           <button
             className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
             onClick={() => setReupload(true)}

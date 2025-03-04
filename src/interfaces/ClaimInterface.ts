@@ -42,6 +42,7 @@ export default interface Claim {
   is_rejected?: boolean;
   rejection_reason?: string;
   service_centre_id: number;
+  service_centre_name: string;
 }
 
 export interface ClaimDetailsProps {
@@ -53,6 +54,7 @@ export interface ClaimDetailsProps {
       amount: string | number;
     };
     claimDetails?: string;
+    service_centre_name:string;
   };
 }
 

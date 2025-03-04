@@ -40,21 +40,30 @@ const ClaimList: React.FC = () => {
 
   // Generates API payload dynamically
   const generatePayload = useCallback(
-    (pageNumber: number): ClaimFetchPayload => ({
-      page: pageNumber,
-      partner_id: 191,
-      source: "service_centre",
-      claim_status: filterStatus || "ALL CLAIMS",
-      ...(appliedFilters?.fromDate &&
-        appliedFilters?.toDate && {
-          duration: "custom",
-          startDate: appliedFilters.fromDate,
-          endDate: appliedFilters.toDate,
-        }),
-      ...(globalSearch && { claim_search: globalSearch }),
-    }),
+    (pageNumber: number): ClaimFetchPayload => {
+      const basePayload: ClaimFetchPayload = {
+        page: pageNumber,
+        partner_id: 191,
+        source: "service_centre",
+      };
+  
+      if (globalSearch) {
+        basePayload.claim_search = globalSearch; // Include globalSearch, exclude other filters
+      } else {
+        basePayload.claim_status = filterStatus || "ALL CLAIMS"; // Default claim status
+  
+        if (appliedFilters?.fromDate && appliedFilters?.toDate) {
+          basePayload.duration = "custom";
+          basePayload.startDate = appliedFilters.fromDate;
+          basePayload.endDate = appliedFilters.toDate;
+        }
+      }
+  
+      return basePayload;
+    },
     [appliedFilters, filterStatus, globalSearch]
   );
+  
 
   // Fetch claims (main function)
   const fetchClaimsData = useCallback(

@@ -102,6 +102,7 @@ const ApprovalDetailsTab: React.FC = () => {
     approvalDetails.deviceAmount === "";
 
   const handleGenerateLink = async (type: string) => {
+    setIsLoading(true);
     try {
       const response = await generatePaymentLink(
         Number(selectedClaim?.id),
@@ -257,7 +258,7 @@ const ApprovalDetailsTab: React.FC = () => {
               !approvalDetails.repairPaymentLink ? (
                 <button
                   className={`btn bg-primaryBlue text-white w-1/2 hover:bg-blue-700`}
-                  onClick={() => handleGenerateLink("BER_REPLACE")}
+                  onClick={() => handleGenerateLink("CLAIM_REPAIR")}
                 >
                   Generate Payment Link
                 </button>

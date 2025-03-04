@@ -44,7 +44,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   useEffect(() => {
     setIsFormDisabled(
-      claimStatus === "Claim Submitted" || claimStatus === "Invalid Documents"
+      claimStatus === "Claim Submitted" ||
+        claimStatus === "Invalid Documents" ||
+        claimStatus === "Estimate Revised"
     );
   }, [claimStatus, selectedClaim]);
 
@@ -56,8 +58,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         jobSheetNumber: selectedClaim?.job_sheet_number || "",
         estimateDetails: selectedClaim?.data?.inputs?.estimate_details || "",
         replacementConfirmed: "",
-        damagePhotos: selectedClaim?.mobile_damage_photos || [],
-        estimateDocument: selectedClaim?.documents?.["15"]?.url || null,
+        damagePhotos:
+          selectedClaim?.mobile_damage_photos && !claimRevised
+            ? selectedClaim?.mobile_damage_photos
+            : [],
+        estimateDocument:
+          selectedClaim?.documents?.["15"]?.url && !claimRevised
+            ? selectedClaim?.documents?.["15"]?.url
+            : null,
       });
       setIsReplacementConfirmed(false);
     }
@@ -534,14 +542,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             )}
             <div className="flex justify-center gap-4 mt-4">
               <button
-                className="bg-red-500 text-white px-4 py-2 rounded-md"
+                className="bg-darkGray text-white px-4 py-2 rounded-md"
                 onClick={cancelReplacementSelection}
               >
                 Cancel
               </button>
 
               <button
-                className="bg-green-600 text-white px-4 py-2 rounded-md"
+                className="bg-primaryBlue text-white px-4 py-2 rounded-md"
                 onClick={confirmReplacementSelection}
               >
                 Yes
@@ -553,7 +561,283 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     </div>
   ) : claimRevised ? (
     <>
-      <p>revised component will be here</p>
+      <div className="flex gap-8">
+        <div className="w-1/2">
+          <label className="block text-xs font-medium mb-1">
+            Estimate Amount *
+          </label>
+          <input
+            type="number"
+            onChange={(e) =>
+              handleInputChange("estimateAmount", e.target.value)
+            }
+            className="input text-sm input-bordered w-full mb-4 bg-inputBg"
+            placeholder="Ex: ₹ 9000"
+            disabled={isFormDisabled}
+          />
+
+          <label className="block text-xs font-medium mb-1">
+            Job Sheet Number *
+          </label>
+          <input
+            type="text"
+            onChange={(e) =>
+              handleInputChange("jobSheetNumber", e.target.value)
+            }
+            className="input text-sm input-bordered w-full mb-4 bg-inputBg"
+            placeholder="Ex: JDHSJKF3248204"
+            disabled={isFormDisabled}
+          />
+
+          <label className="block text-xs font-medium mb-1">
+            Estimate Details *
+          </label>
+          <textarea
+            onChange={(e) =>
+              handleInputChange("estimateDetails", e.target.value)
+            }
+            className="textarea text-sm textarea-bordered w-full mb-4 bg-inputBg"
+            placeholder="Enter estimate details"
+            disabled={isFormDisabled}
+          ></textarea>
+
+          <div className="mb-4">
+            <label className="block text-xs font-medium mb-2">
+              Motherboard/Phone is getting replaced?
+            </label>
+
+            <div className="flex items-center gap-4">
+              {/* Yes Option */}
+              <button
+                type="button"
+                className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
+                  replacementConfirmed === "yes"
+                    ? "bg-checkboxCheckedBg"
+                    : "bg-inputBg"
+                }`}
+                onClick={() => handleReplacementSelection("yes")}
+                disabled={isFormDisabled}
+              >
+                {replacementConfirmed === "yes" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+              <span className="text-sm">Yes</span>
+
+              {/* No Option */}
+              <button
+                type="button"
+                className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
+                  replacementConfirmed === "no"
+                    ? "bg-checkboxCheckedBg"
+                    : "bg-inputBg"
+                }`}
+                onClick={() => handleReplacementSelection("no")}
+                disabled={isFormDisabled}
+              >
+                {replacementConfirmed === "no" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+              <span className="text-sm">No</span>
+            </div>
+            {/* // setIsFormDisabled */}
+          </div>
+
+          <button
+            className={`btn w-1/2 hover:bg-blue-700 bg-primaryBlue text-white`}
+            disabled={isSubmitDisabled}
+            onClick={handleSubmit}
+          >
+            Revise Estimate
+          </button>
+        </div>
+
+        <div className="w-1/2">
+          {/* Upload document */}
+          <label className="block text-xs font-medium mb-2">
+            Estimate Document (pdf)
+          </label>
+          <div className="mb-4">
+            <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleEstimateDocumentUpload}
+                className="hidden"
+              />
+              <span className="text-grayFont text-sm">Add Document</span>
+              <Image
+                src="/images/upload-icon.svg"
+                alt="Upload"
+                width={20}
+                height={20}
+              />
+            </label>
+
+            {estimateDocument && (
+              <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
+                {estimateDocument ? (
+                  typeof estimateDocument === "string" ? (
+                    estimateDocument.endsWith(".pdf") ? (
+                      <a
+                        href={estimateDocument}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Image
+                          src="/images/pdf-icon.svg"
+                          alt="Estimate Upload"
+                          width={30}
+                          height={50}
+                          className="h-[100%]"
+                        />
+                      </a>
+                    ) : (
+                      <Image
+                        src={estimateDocument}
+                        alt="Estimate Document"
+                        width={30}
+                        height={50}
+                        className="rounded border h-[100%]"
+                      />
+                    )
+                  ) : estimateDocument.type === "application/pdf" ? (
+                    <Image
+                      src="/images/pdf-icon.svg"
+                      alt="Estimate Upload"
+                      width={30}
+                      height={50}
+                      className="h-[100%]"
+                    />
+                  ) : (
+                    <Image
+                      src={URL.createObjectURL(estimateDocument)}
+                      alt="Estimate Document"
+                      width={30}
+                      height={50}
+                      className="rounded border h-[100%]"
+                    />
+                  )
+                ) : (
+                  <></>
+                )}
+                <button
+                  type="button"
+                  className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
+                  onClick={handleRemoveEstimateDocument}
+                >
+                  <Image
+                    src="/images/x-close.svg"
+                    alt="Remove"
+                    width={12}
+                    height={12}
+                  />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Upload damage images */}
+          <label className="block text-xs font-medium mb-2">
+            Damage Mobile Photo (Upload at least 5 images)
+          </label>
+          <div className="mb-4">
+            <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleDamagePhotoUpload}
+                className="hidden"
+                disabled={damagePhotos.length >= MAX_DAMAGE_IMAGES}
+              />
+              <span className="text-grayFont text-sm">Add Photo</span>
+              <Image
+                src="/images/upload-icon.svg"
+                alt="Upload"
+                width={20}
+                height={20}
+              />
+            </label>
+
+            {damagePhotos && (
+              <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
+                <GalleryPopup
+                  images={estimateDetailsState?.damagePhotos}
+                  onRemoveImage={handleRemoveDamagePhoto}
+                  allowRemoval={true}
+                />
+              </div>
+            )}
+
+            {damagePhotosError && (
+              <ErrorAlert
+                message={damagePhotosError}
+                onClose={() => setDamagePhotosError(null)}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showReplacementConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+            <p className="text-lg font-medium">Are you sure?</p>
+            {pendingReplacementValue == "yes" ? (
+              <p className="text-sm text-gray-600">
+                Motherboard/Phone is getting replaced.
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Motherboard/Phone is not getting replace.
+              </p>
+            )}
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                className="bg-darkGray text-white px-4 py-2 rounded-md"
+                onClick={cancelReplacementSelection}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="bg-primaryBlue text-white px-4 py-2 rounded-md"
+                onClick={confirmReplacementSelection}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   ) : (
     <>
