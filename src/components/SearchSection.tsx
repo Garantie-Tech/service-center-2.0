@@ -16,9 +16,9 @@ const SearchSection: React.FC = () => {
     filterStatus,
   } = useGlobalStore();
 
-  const handleClearSearch = () => {
-    setSearchTerm("");
-  };
+  // const handleClearSearch = () => {
+  //   setSearchTerm("");
+  // };
 
   const { notifySuccess, notifyError } = useNotification();
 
@@ -56,8 +56,8 @@ const SearchSection: React.FC = () => {
         {/* Claims Summary */}
         <div className="flex w-1/4 items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-bold">Claims</h2>
-            <p className="text-xxs text-gray-500">50/1000</p>
+            {/* <h2 className="text-sm font-bold">Claims</h2>
+            <p className="text-xxs text-gray-500">50/1000</p> */}
           </div>
           <button
             onClick={() => window.location.reload()}
@@ -93,7 +93,10 @@ const SearchSection: React.FC = () => {
             />
             {searchTerm && (
               <button
-                onClick={handleClearSearch}
+                onClick={() => {
+                  setSearchTerm("");
+                  handleSearch();
+                }}
                 className="absolute inset-y-0 right-10 flex items-center text-gray-500 hover:text-gray-800 tooltip"
                 data-tip="Clear Search"
               >

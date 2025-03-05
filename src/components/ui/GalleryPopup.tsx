@@ -104,19 +104,19 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
           onClick={closeGallery}
         >
           <div
-            className="relative p-4 bg-white rounded-lg shadow-lg"
+            className="relative p-[30px] bg-white rounded-lg shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
-              className="absolute top-[-5px] right-[-5px] hover:text-gray-700"
+              className="absolute top-0 right-0 hover:text-gray-700"
               onClick={closeGallery}
             >
               <Image
                 src="/images/cross-square.svg"
                 alt="close gallery"
-                width={30}
-                height={30}
+                width={40}
+                height={40}
                 className="rounded-lg"
               />
             </button>
@@ -127,13 +127,13 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
               alt={`Selected Image ${
                 currentIndex !== null ? currentIndex + 1 : "1"
               }`}
-              width={300}
+              width={400}
               height={300}
               className="rounded-lg"
             />
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-4 text-xs">
+            <div className="flex justify-center gap-4 mt-4 text-xs">
               <button
                 className={`px-4 py-2 bg-gray-300 rounded-md ${
                   currentIndex === 0
@@ -143,7 +143,7 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
                 onClick={prevImage}
                 disabled={currentIndex === 0}
               >
-                ◀ Prev
+                ◀
               </button>
 
               <button
@@ -155,7 +155,7 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
                 onClick={nextImage}
                 disabled={currentIndex === images.length - 1}
               >
-                Next ▶
+                ▶
               </button>
             </div>
           </div>

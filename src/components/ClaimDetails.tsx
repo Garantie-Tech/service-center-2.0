@@ -117,7 +117,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <button title="Edit">
+          <button className="tooltip tooltip-bottom" data-tip="Remarks">
             <Image
               src="/images/edit-icon.svg"
               alt="Edit"

@@ -126,10 +126,20 @@ const ApprovalDetailsTab: React.FC = () => {
   return (
     <div className="text-[#515151]">
       <h2 className="text-lg font-semibold mb-4">Details</h2>
-      <div className="flex gap-8">
-        <div className="w-1/2 md:pr-[50px]">
-          {/* Estimate Amount */}
-          <div className="pb-[30px]">
+      <div className="flex gap-8 flex-wrap">
+        {/* estimate date */}
+        {approvalDetails?.estimateDate && (
+          <div className="pb-[10px] w-[45%]">
+            <label className="block text-darkGray text-xs font-medium">
+              Estimate Date
+            </label>
+            <p className="text-sm font-bold">{approvalDetails?.estimateDate}</p>
+          </div>
+        )}
+
+        {/* Estimate Amount */}
+        {approvalDetails.estimateAmount && (
+          <div className="pb-[10px] w-[45%]">
             <label className="block text-darkGray text-xs font-medium">
               Estimate Amount
             </label>
@@ -137,9 +147,34 @@ const ApprovalDetailsTab: React.FC = () => {
               ₹ {approvalDetails.estimateAmount}
             </p>
           </div>
+        )}
 
-          {/* Approval Type */}
-          <div className="pb-[30px]">
+        {/* approval date */}
+        {approvalDetails?.approvalDate && (
+          <div className="pb-[10px] w-[45%]">
+            <label className="block text-darkGray text-xs font-medium">
+              Approval Date
+            </label>
+            <p className="text-sm font-semibold">
+              {/* {formatDate(approvalDetails?.approvalDate)} */}
+              {approvalDetails?.approvalDate}
+            </p>
+          </div>
+        )}
+
+        {/* Approved Amount */}
+        <div className="pb-[10px] w-[45%]">
+          <label className="block text-darkGray text-xs font-medium">
+            Approved Amount
+          </label>
+          <p className="text-sm font-bold">
+            ₹ {approvalDetails.approvedAmount}
+          </p>
+        </div>
+
+        {/* Approval Type */}
+        {approvalDetails.approvalType && (
+          <div className="pb-[10px] w-[45%]">
             <label className="block text-darkGray text-xs font-medium">
               Approval Type
             </label>
@@ -147,83 +182,80 @@ const ApprovalDetailsTab: React.FC = () => {
               {approvalDetails.approvalType}
             </p>
           </div>
+        )}
 
-          {/* Conditionally show Device Amount Input only when BER Decision is replace */}
-          {approvalDetails.berDecision == "replace" && (
-            <div className="pb-[30px]">
-              <label className="block text-darkGray text-xs font-medium">
-                Add Device Amount *
-              </label>
-              <input
-                type="text"
-                className={`w-full border px-4 py-2 rounded-md text-sm bg-inputBg text-[#181D27] focus:outline-none hover:bg-gray-100 h-[45px] ${
-                  errorMessage ? "border-red-500" : "border-gray-300"
-                }`}
-                value={approvalDetails.deviceAmount}
-                onChange={handleDeviceAmountChange}
-                onBlur={handleDeviceAmountBlur}
-              />
-              {errorMessage && (
-                <p className="text-red-500 text-xs mt-1">{errorMessage}</p>
-              )}
-            </div>
-          )}
-
-          {/* Submit Button */}
-          {approvalDetails.berDecision == "replace" && (
-            <div className="pb-[30px] md:w-1/2">
-              <button
-                className={`w-full px-4 py-2 rounded-md text-white text-sm font-semibold ${
-                  isSubmitDisabled
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                } h-[45px]`}
-                onClick={handleSubmit}
-                disabled={isSubmitDisabled}
-              >
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
-            </div>
-          )}
-
-          {approvalDetails.repairAmount &&
-            approvalDetails.repairPaymentSuccessful && (
-              <div className="pb-[30px]">
-                <label className="block text-darkGray text-xs font-medium">
-                  Payment:
-                </label>
-                <p className="text-sm font-semibold text-[#23A047]">
-                  ₹ {approvalDetails.repairAmount} (Paid)
-                </p>
-              </div>
-            )}
-        </div>
-
-        <div className="w-1/2">
-          {/* Approved Amount */}
-          <div className="pb-[30px]">
+        {/* Conditionally show Device Amount Input only when BER Decision is replace */}
+        {approvalDetails.berDecision == "replace" && (
+          <div className="pb-[10px] w-[45%]">
             <label className="block text-darkGray text-xs font-medium">
-              Approved Amount
+              Add Device Amount *
             </label>
-            <p className="text-sm font-bold">
-              ₹ {approvalDetails.approvedAmount}
-            </p>
+            <input
+              type="text"
+              className={`w-full border px-4 py-2 rounded-md text-sm bg-inputBg text-[#181D27] focus:outline-none hover:bg-gray-100 h-[45px] ${
+                errorMessage ? "border-red-500" : "border-gray-300"
+              }`}
+              value={approvalDetails.deviceAmount}
+              onChange={handleDeviceAmountChange}
+              onBlur={handleDeviceAmountBlur}
+            />
+            {errorMessage && (
+              <p className="text-red-500 text-xs mt-1">{errorMessage}</p>
+            )}
           </div>
+        )}
 
-          {/* {claimStatus == "Partially Approved" && (
-            <div className="pb-[30px]">
+        {/* Submit Button */}
+        {approvalDetails.berDecision == "replace" && (
+          <div className="pb-[10px] w-[45%] md:w-1/2">
+            <button
+              className={`w-full px-4 py-2 rounded-md text-white text-sm font-semibold ${
+                isSubmitDisabled
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } h-[45px]`}
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </button>
+          </div>
+        )}
+
+        {approvalDetails.repairAmount &&
+          approvalDetails.repairPaymentSuccessful && (
+            <div className="pb-[10px] w-[45%]">
               <label className="block text-darkGray text-xs font-medium">
                 Partial Payment:
               </label>
-              {approvalDetails.repairAmount &&
+              <p className="text-sm font-semibold text-[#23A047]">
+                ₹ {approvalDetails.repairAmount} (Paid)
+              </p>
+            </div>
+          )}
+
+        {(claimStatus === "BER Repair" ||
+          claimStatus === "Partially Approved") && (
+          <div className="pb-[10px] w-[45%]">
+            <label className="block text-darkGray text-xs font-medium">
+              Partial Payment:
+            </label>
+
+            {!approvalDetails.repairPaymentSuccessful &&
+            !approvalDetails.repairPaymentLink ? (
+              <button
+                className={`btn bg-primaryBlue text-white w-1/2 hover:bg-blue-700`}
+                onClick={() => handleGenerateLink("CLAIM_REPAIR")}
+              >
+                Generate Payment Link
+              </button>
+            ) : approvalDetails.repairAmount &&
               !approvalDetails.repairPaymentSuccessful ? (
-                <>
-                  <p className="text-sm font-semibold text-[#CC4244]">
-                    ₹ {approvalDetails.repairAmount}{" "}
-                    {!approvalDetails.repairPaymentSuccessful
-                      ? "(Pending)"
-                      : ""}
-                  </p>
+              <>
+                <p className="text-sm font-semibold text-[#CC4244]">
+                  ₹ {approvalDetails.repairAmount} (Pending)
+                </p>
+                {approvalDetails.repairPaymentLink && (
                   <p className="flex justify-start gap-1 items-center text-xs text-[#5C5C5C] font-semibold mt-2">
                     <span>Payment Link: </span>
                     <Link
@@ -237,99 +269,31 @@ const ApprovalDetailsTab: React.FC = () => {
                       text={String(approvalDetails.repairPaymentLink)}
                     />
                   </p>
-                </>
-              ) : (
-                <p className="text-sm font-semibold text-[#23A047] font-semibold">
-                  ₹ {approvalDetails.repairAmount}{" "}
-                  {approvalDetails.repairPaymentSuccessful ? "(Paid)" : ""}
-                </p>
-              )}
-            </div>
-          )} */}
-
-          {(claimStatus === "BER Repair" ||
-            claimStatus === "Partially Approved") && (
-            <div className="pb-[30px]">
-              <label className="block text-darkGray text-xs font-medium">
-                Payment:
-              </label>
-
-              {!approvalDetails.repairPaymentSuccessful &&
-              !approvalDetails.repairPaymentLink ? (
-                <button
-                  className={`btn bg-primaryBlue text-white w-1/2 hover:bg-blue-700`}
-                  onClick={() => handleGenerateLink("CLAIM_REPAIR")}
-                >
-                  Generate Payment Link
-                </button>
-              ) : approvalDetails.repairAmount &&
-                !approvalDetails.repairPaymentSuccessful ? (
-                <>
-                  <p className="text-sm font-semibold text-[#CC4244]">
-                    ₹ {approvalDetails.repairAmount} (Pending)
-                  </p>
-                  {approvalDetails.repairPaymentLink && (
-                    <p className="flex justify-start gap-1 items-center text-xs text-[#5C5C5C] font-semibold mt-2">
-                      <span>Payment Link: </span>
-                      <Link
-                        className="text-xs text-[#3C63FC]"
-                        href={String(approvalDetails.repairPaymentLink)}
-                        target="_blank"
-                      >
-                        {approvalDetails.repairPaymentLink}
-                      </Link>
-                      <CopyToClipboardButton
-                        text={String(approvalDetails.repairPaymentLink)}
-                      />
-                    </p>
-                  )}
-                </>
-              ) : (
-                <p className="text-sm font-semibold text-[#23A047]">
-                  ₹ {approvalDetails.repairAmount} (Paid)
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* BER Decision Dropdown */}
-          {approvalDetails.approvalType != "Approved" &&
-            claimStatus === "BER Marked" && (
-              <div className="pb-[30px] md:w-1/2">
-                <label className="block text-darkGray text-xs font-medium">
-                  BER Decision
-                </label>
-                <CustomSelect
-                  options={berOptions}
-                  onChange={handleBerSelection}
-                  className="border-[#D5D7DA] text-[#181D27] h-[50px]"
-                  fontSize="text-sm"
-                />
-              </div>
-            )}
-
-          {/* approval date */}
-          {approvalDetails?.approvalDate && (
-            <div className="pb-[30px]">
-              <label className="block text-darkGray text-xs font-medium">
-                Approval Date
-              </label>
-              <p className="text-sm font-semibold">
-                {/* {formatDate(approvalDetails?.approvalDate)} */}
-                {approvalDetails?.approvalDate}
+                )}
+              </>
+            ) : (
+              <p className="text-sm font-semibold text-[#23A047]">
+                ₹ {approvalDetails.repairAmount} (Paid)
               </p>
+            )}
+          </div>
+        )}
+
+        {/* BER Decision Dropdown */}
+        {approvalDetails.approvalType != "Approved" &&
+          claimStatus === "BER Marked" && (
+            <div className="pb-[10px] w-[45%] md:w-1/2">
+              <label className="block text-darkGray text-xs font-medium">
+                BER Decision
+              </label>
+              <CustomSelect
+                options={berOptions}
+                onChange={handleBerSelection}
+                className="border-[#D5D7DA] text-[#181D27] h-[50px]"
+                fontSize="text-sm"
+              />
             </div>
           )}
-
-          {/* <div className="pb-[30px]">
-            <label className="block text-darkGray text-xs font-medium">
-              BER Decision
-            </label>
-            <p className="text-sm font-semibold">
-              {approvalDetails.approvalType}
-            </p>
-          </div> */}
-        </div>
       </div>
 
       {/* modal */}

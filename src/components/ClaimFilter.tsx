@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
@@ -17,8 +17,6 @@ const ClaimFilter: React.FC = () => {
     claimTypes,
     selectedDropdown,
     setSelectedDropdown,
-    isDropdownOpen,
-    setIsDropdownOpen,
     isSortingOpen,
     setIsSortingOpen,
     sortBy,
@@ -31,15 +29,42 @@ const ClaimFilter: React.FC = () => {
     claimStatuses,
   } = useGlobalStore();
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDetailsElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
+
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const closeFilter = useCallback((event: MouseEvent) => {
-    if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-      if (isFilterOpen) toggleFilter();
-    }
-  }, [isFilterOpen, toggleFilter]);
-  
-  
+  const closeFilter = useCallback(
+    (event: MouseEvent) => {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        if (isFilterOpen) toggleFilter();
+      }
+    },
+    [isFilterOpen, toggleFilter]
+  );
+
   useEffect(() => {
     document.addEventListener("mousedown", closeFilter);
     return () => {
@@ -69,11 +94,30 @@ const ClaimFilter: React.FC = () => {
     handleSortingChange(sortBy, order as "Ascending" | "Descending");
   };
 
+  const sortingRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sortingRef.current && !sortingRef.current.contains(event.target as Node)) {
+        setIsSortingOpen(false);
+      }
+    }
+
+    if (isSortingOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSortingOpen]);
+
   return (
     <div className="sticky top-0 bg-white h-[50px] mt-2">
       <div className="flex justify-between items-center mb-3">
         {/* Custom Dropdown */}
         <details
+          ref={dropdownRef}
           className={`dropdown w-full ${isDropdownOpen ? "open" : ""}`}
           open={isDropdownOpen}
           onToggle={(e) =>
@@ -135,7 +179,7 @@ const ClaimFilter: React.FC = () => {
           </button>
 
           {/* Sort Button */}
-          <div className="">
+          <div className="relative" ref={sortingRef}>
             <button
               className="px-2 tooltip tooltip-bottom"
               data-tip="Sort"
@@ -150,7 +194,7 @@ const ClaimFilter: React.FC = () => {
               />
             </button>
             {isSortingOpen && (
-              <div className="absolute top-10 right-0 bg-white p-4 rounded-lg shadow-lg z-50 w-72 text-xs">
+              <div className="absolute top-[45px] right-0 bg-white p-4 rounded-lg shadow-lg z-50 w-100 text-xs">
                 <h3 className="text-sm font-bold mb-3">Sort BY:</h3>
                 <div className="flex gap-4 mb-3">
                   <label className="flex items-center">

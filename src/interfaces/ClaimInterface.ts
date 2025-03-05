@@ -5,6 +5,7 @@ export default interface Claim {
   name: string;
   status: string;
   date: string;
+  estimated_date: string;
   srn?: string;
   followUp?: string;
   time?: string;

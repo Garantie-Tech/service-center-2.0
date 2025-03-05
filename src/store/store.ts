@@ -110,6 +110,7 @@ interface StoreType {
     repairPaymentSuccessful?: boolean;
     repairPaymentLink?: string;
     repairRazorpayOrderId?: string;
+    estimateDate?: string;
   };
   setApprovalDetails: (
     updatedDetails: Partial<StoreType["approvalDetails"]>

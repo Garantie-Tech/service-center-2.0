@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import TimelineModal from "@/components/TimelineModal";
 import CancelClaimModal from "@/components/CancelClaimModal";
@@ -36,10 +36,6 @@ const ClaimActionsDropdown: React.FC = () => {
     getServiceCenterId();
   });
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-
   const openTimeline = () => {
     setIsOpen(false);
     setShowTimeline(true);
@@ -71,10 +67,34 @@ const ClaimActionsDropdown: React.FC = () => {
     }
   };
 
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   return (
-    <div className="relative text-xs text-gray-600">
+    <div className="relative text-xs text-gray-600" ref={dropdownRef}>
       {/* Three dots button */}
-      <button title="More Options" onClick={toggleDropdown}>
+      <button
+        className="tooltip tooltip-left"
+        data-tip="More Options"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <Image
           src="/images/three-dots.svg"
           alt="More Options"
