@@ -107,11 +107,11 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
           <div className="leading-[20px]">
             <div>
               <span className="text-xl font-bold">{selectedClaim.id} </span>
-              <span className="text-sm text-darkGray">
+              <span className="text-base text-darkGray">
                 / {selectedClaim.name}
               </span>
             </div>
-            <p className="text-darkGray text-xxs">
+            <p className="text-darkGray text-xs">
               {formatDate(selectedClaim.created_at)}
             </p>
           </div>

@@ -1,4 +1,4 @@
-import Claim from "@/interfaces/ClaimInterface";
+import { ClaimResponse } from "@/interfaces/ClaimInterface";
 import {
   BerDecision,
   CancelClaim,
@@ -10,16 +10,6 @@ import {
   UploadFinalDocuments,
 } from "@/interfaces/GlobalInterface";
 import { getRequest, postRequest } from "@/utils/api";
-
-export interface ClaimResponse {
-  success: boolean;
-  code: number;
-  locale: string;
-  message: string;
-  data: {
-    claims: Claim[];
-  };
-}
 
 interface ClaimCancelReasonResponse {
   success: boolean;
@@ -85,15 +75,12 @@ export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
   return await postRequest<UploadFinalDocuments>(endpoint, body);
 };
 
-export const handleCancelClaim = async (
-  claimID: number,
-  reason: string,
-) => {
+export const handleCancelClaim = async (claimID: number, reason: string) => {
   const endpoint = `claim/update/${claimID}`;
   const body: Record<string, string> = {
     cancellation_reason: reason,
-    cancelled_by: 'Service Centre',
-    update_type: 'cancel_claim',
+    cancelled_by: "Service Centre",
+    update_type: "cancel_claim",
   };
 
   try {
@@ -113,7 +100,7 @@ export const generatePaymentLink = async (
   const endpoint = `payments/link`;
   const body: GenerateLinkPaymentBody = {
     entity_id: claimID,
-    payment_type : paymentType,
+    payment_type: paymentType,
     entity: type,
     is_monthly: false,
     is_recurring: false,
@@ -133,8 +120,5 @@ export const fetchTimeline = async (
   claimId: string | number,
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload
 ) => {
-  return await getRequest<ClaimTimeline>(
-    `timeline/${claimId}`,
-    _params
-  );
+  return await getRequest<ClaimTimeline>(`timeline/${claimId}`, _params);
 };

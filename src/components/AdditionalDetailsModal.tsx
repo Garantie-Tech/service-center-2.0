@@ -27,7 +27,7 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
 
       {/* Sidebar Modal (Full Height, 90% of the screen height) */}
       <div
-        className={`w-[450px] h-[95vh] mt-[230px] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
+        className={`w-[450px] mt-[230px] h-[calc(100vh-230px)] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

@@ -59,7 +59,7 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
       {/* Sidebar Modal (Full Height, 90% of the screen height) */}
       <div
-        className={`w-[450px] mt-[230px] h-[95vh] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
+        className={`w-[450px] mt-[230px] h-[calc(100vh-230px)] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -80,14 +80,14 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         </div>
 
         {/* Timeline List */}
-        <div className="p-4 overflow-auto mb-[30px]">
+        <div className="p-4 h-[80%] overflow-auto mb-[30px]">
           {isLoading ? (
             <p className="text-center text-gray-500">Loading timeline...</p>
           ) : claimTimeline && claimTimeline.length > 0 ? (
             <ul className="timeline timeline-vertical">
               {claimTimeline.map((event, index) => (
                 <li key={index}>
-                  {index !== 0 && <hr className="bg-[#3C63FC]"/>}
+                  {index !== 0 && <hr className="bg-[#3C63FC]" />}
                   <div className="timeline-start">
                     {event?.time || "No time available"}
                   </div>
@@ -97,7 +97,9 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   <div className="timeline-end timeline-box">
                     {event?.label || "No label"}
                   </div>
-                  {index !== claimTimeline.length - 1 && <hr className="bg-[#3C63FC]" />}
+                  {index !== claimTimeline.length - 1 && (
+                    <hr className="bg-[#3C63FC] !h-[30px]" />
+                  )}
                 </li>
               ))}
             </ul>

@@ -59,11 +59,13 @@ export interface ClaimDetailsProps {
   };
 }
 
-// export interface ClaimEstimateViewProps {
-//   estimateAmount:string;
-//   jobSheetNumber: string;
-//   estimateDetails: string;
-//   replacementConfirmed: "yes" | "no" | null;
-//   damagePhotos: (string | File)[];
-//   estimateDocument: File | string | null;
-// }
+export interface ClaimResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    claims: Claim[];
+    totalCount?:number;
+  };
+}

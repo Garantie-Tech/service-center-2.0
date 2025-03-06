@@ -117,6 +117,8 @@ interface StoreType {
   ) => void;
   refreshClaimsTrigger: number;
   triggerClaimRefresh: () => void;
+  claimCount: number;
+  setClaimCount: (claimCount: number) => void;
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -293,5 +295,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   triggerClaimRefresh: () =>
     set((state) => ({ refreshClaimsTrigger: state.refreshClaimsTrigger + 1 })),
   claimRevised: false,
-  setClaimRevised:  (claimRevised) => set({ claimRevised: claimRevised }),
+  setClaimRevised: (claimRevised) => set({ claimRevised: claimRevised }),
+  claimCount: 0,
+  setClaimCount: (claimCount) => set({ claimCount: claimCount }),
 }));

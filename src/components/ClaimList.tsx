@@ -24,6 +24,7 @@ const ClaimList: React.FC = () => {
     globalSearch,
     refreshClaimsTrigger,
     setClaimRevised,
+    setClaimCount,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -46,24 +47,23 @@ const ClaimList: React.FC = () => {
         partner_id: 191,
         source: "service_centre",
       };
-  
+
       if (globalSearch) {
         basePayload.claim_search = globalSearch; // Include globalSearch, exclude other filters
       } else {
         basePayload.claim_status = filterStatus || "ALL CLAIMS"; // Default claim status
-  
+
         if (appliedFilters?.fromDate && appliedFilters?.toDate) {
           basePayload.duration = "custom";
           basePayload.startDate = appliedFilters.fromDate;
           basePayload.endDate = appliedFilters.toDate;
         }
       }
-  
+
       return basePayload;
     },
     [appliedFilters, filterStatus, globalSearch]
   );
-  
 
   // Fetch claims (main function)
   const fetchClaimsData = useCallback(
@@ -80,6 +80,8 @@ const ClaimList: React.FC = () => {
 
         if (response.success && Array.isArray(response.data?.data?.claims)) {
           const newClaims = response.data.data.claims;
+          const claimCount = response.data.data.totalCount;
+          setClaimCount(Number(claimCount));
 
           if (reset) {
             setFilteredClaims(newClaims);

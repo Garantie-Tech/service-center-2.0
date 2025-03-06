@@ -14,6 +14,7 @@ const SearchSection: React.FC = () => {
     handleSearch,
     setIsLoading,
     filterStatus,
+    claimCount,
   } = useGlobalStore();
 
   // const handleClearSearch = () => {
@@ -56,8 +57,8 @@ const SearchSection: React.FC = () => {
         {/* Claims Summary */}
         <div className="flex w-1/4 items-center justify-between gap-2">
           <div>
-            {/* <h2 className="text-sm font-bold">Claims</h2>
-            <p className="text-xxs text-gray-500">50/1000</p> */}
+            <h2 className="text-sm font-bold">Claims</h2>
+            <p className="text-xxs text-gray-500">{claimCount}</p>
           </div>
           <button
             onClick={() => window.location.reload()}
