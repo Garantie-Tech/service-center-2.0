@@ -174,3 +174,16 @@ export interface GenerateLinkPaymentBody {
   is_recurring: boolean;
   payment_method: boolean;
 }
+
+export interface TimelineEvent {
+  label: string;
+  time: string;
+}
+
+export interface ClaimTimeline {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: TimelineEvent[];
+}

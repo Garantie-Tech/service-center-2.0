@@ -1,47 +1,48 @@
 "use client";
 
 import Image from "next/image";
-
-// interface TimelineEvent {
-//   title: string;
-//   date: string;
-//   completed?: boolean;
-// }
-
-// const timelineData: TimelineEvent[] = [
-//   {
-//     title: "Claim Initiated",
-//     date: "08 January 2025, 11:00 AM",
-//     completed: true,
-//   },
-//   {
-//     title: "Claim Submitted",
-//     date: "10 January 2025, 10:00 PM",
-//     completed: true,
-//   },
-//   {
-//     title: "Document Verified",
-//     date: "10 January 2025, 11:00 AM",
-//     completed: true,
-//   },
-//   { title: "BER Decision", date: "10 January 2025, 11:00 AM", completed: true },
-//   {
-//     title: "Payment Link Generated",
-//     date: "11 January 2025, 11:00 AM",
-//     completed: true,
-//   },
-//   { title: "Payment Done", date: "11 January 2025, 11:00 AM", completed: true },
-//   {
-//     title: "Settlement Completed",
-//     date: "13 January 2025, 11:00 AM",
-//     completed: true,
-//   },
-// ];
+import { CheckmarkIcon } from "@/components/icons/Icons";
+import { useEffect, useState } from "react";
+import { fetchTimeline } from "@/services/claimService";
+import { useGlobalStore } from "@/store/store";
+import { TimelineEvent } from "@/interfaces/GlobalInterface";
 
 const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
   onClose,
 }) => {
+  const [claimTimeline, setClaimTimeline] = useState<TimelineEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { selectedClaim } = useGlobalStore();
+
+  useEffect(() => {
+    const getClaimTimeline = async () => {
+      if (!isOpen || !selectedClaim?.id) return;
+
+      try {
+        setIsLoading(true);
+        const response = await fetchTimeline(Number(selectedClaim.id));
+
+        if (
+          response.success &&
+          response.data &&
+          Array.isArray(response.data.data)
+        ) {
+          setClaimTimeline(response.data.data);
+        } else {
+          setClaimTimeline([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch timeline data:", error);
+        setClaimTimeline([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getClaimTimeline();
+  }, [isOpen, selectedClaim?.id]);
+
   return (
     <div
       className={`fixed inset-0 flex justify-end z-50 transition-all duration-300 ${
@@ -58,7 +59,7 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
       {/* Sidebar Modal (Full Height, 90% of the screen height) */}
       <div
-        className={`w-[400px] mt-[20px] h-[90vh] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
+        className={`w-[450px] mt-[230px] h-[95vh] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -79,50 +80,30 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         </div>
 
         {/* Timeline List */}
-        <div className="p-6 relative overflow-y-auto h-[calc(100%-50px)]">
-          <div className="relative">
+        <div className="p-4 overflow-auto mb-[30px]">
+          {isLoading ? (
+            <p className="text-center text-gray-500">Loading timeline...</p>
+          ) : claimTimeline && claimTimeline.length > 0 ? (
             <ul className="timeline timeline-vertical">
-              <li>
-                <div className="timeline-start ">First Macintosh computer</div>
-                <div className="timeline-middle">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="text-primaryBlue h-5 w-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="timeline-end ">testing</div>
-                <hr className="bg-primaryBlue w-[2px]" />
-              </li>
-
-              <li>
-                <hr className="bg-primaryBlue w-[2px]" />
-                <div className="timeline-middle">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="text-primaryBlue h-5 w-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="timeline-end ">iMac</div>
-                <hr className="bg-primaryBlue w-[2px]" />
-              </li>
+              {claimTimeline.map((event, index) => (
+                <li key={index}>
+                  {index !== 0 && <hr className="bg-[#3C63FC]"/>}
+                  <div className="timeline-start">
+                    {event?.time || "No time available"}
+                  </div>
+                  <div className="timeline-middle px-[10px]">
+                    <CheckmarkIcon />
+                  </div>
+                  <div className="timeline-end timeline-box">
+                    {event?.label || "No label"}
+                  </div>
+                  {index !== claimTimeline.length - 1 && <hr className="bg-[#3C63FC]" />}
+                </li>
+              ))}
             </ul>
-          </div>
+          ) : (
+            <p className="text-center text-gray-500">No timeline data found.</p>
+          )}
         </div>
       </div>
     </div>

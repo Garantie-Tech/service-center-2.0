@@ -3,6 +3,7 @@ import {
   BerDecision,
   CancelClaim,
   ClaimFetchPayload,
+  ClaimTimeline,
   GenerateLinkPaymentBody,
   GeneratePaymentLink,
   SubmitEstimate,
@@ -126,4 +127,14 @@ export const generatePaymentLink = async (
     console.error("Error Generating Payment Link:", error);
     throw error;
   }
+};
+
+export const fetchTimeline = async (
+  claimId: string | number,
+  _params?: Record<string, string | number | boolean> | ClaimFetchPayload
+) => {
+  return await getRequest<ClaimTimeline>(
+    `timeline/${claimId}`,
+    _params
+  );
 };
