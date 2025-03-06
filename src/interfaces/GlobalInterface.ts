@@ -70,7 +70,7 @@ export interface EstimateDetailsState {
   documents?: Documents;
 }
 
-export interface ApprovalState {
+export interface ApprovalState { 
   approvalDetails: {
     estimateAmount: number;
     approvedAmount: number;
@@ -82,6 +82,10 @@ export interface ApprovalState {
     repairPaymentSuccessful?: boolean;
     repairPaymentLink?: string;
     repairRazorpayOrderId?: string;
+    estimateDate?: string;
+    replacementPaymentSuccessful?: boolean;
+    replacementPaymentLink?: string;
+    replacementAmount?: number;
   };
   setApprovalDetails: (
     updatedDetails: Partial<ApprovalState["approvalDetails"]>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useGlobalStore } from "@/store/store";
-import CustomSelect from "@/components/ui/CustomSelect"; // Reusable Select Component
-import { useState } from "react";
+import CustomSelect from "@/components/ui/CustomSelect";
+import { useEffect, useState } from "react";
 import BerRepairModal from "@/components/BerRepairModel";
 import { useNotification } from "@/context/NotificationProvider";
 import {
@@ -30,10 +30,35 @@ const ApprovalDetailsTab: React.FC = () => {
 
   const berOptions = ["repair", "replace", "settle"];
 
+  // this will execute in background
+  useEffect(() => {
+    if (selectedClaim) {
+      setApprovalDetails({
+        estimateAmount: Number(selectedClaim?.claimed_amount),
+        approvedAmount: Number(selectedClaim?.approved_amount),
+        approvalType: selectedClaim?.status,
+        approvalDate: selectedClaim?.approval_date,
+        repairAmount: selectedClaim?.repair_amount,
+        repairPaymentSuccessful: selectedClaim?.repair_payment_successful,
+        repairPaymentLink: selectedClaim?.repair_payment_link,
+        repairRazorpayOrderId: selectedClaim?.repair_razorpay_order_id,
+        estimateDate: selectedClaim?.estimated_date,
+        replacementPaymentSuccessful:
+          selectedClaim?.data?.replacement_payment?.replace_payment_successful,
+        replacementPaymentLink:
+          selectedClaim?.data?.replacement_payment?.replace_payment_link,
+        replacementAmount:
+          selectedClaim?.data?.replacement_payment?.replace_amount,
+      });
+    }
+  }, [selectedClaim, setApprovalDetails]);
+
   // Handle BER Decision Selection
   const handleBerSelection = (val: string) => {
     setApprovalDetails({ berDecision: val, deviceAmount: "" });
-    setIsBerModalOpen(true);
+    if (val != "replace") {
+      setIsBerModalOpen(true);
+    }
     setErrorMessage(null);
   };
 
@@ -61,25 +86,55 @@ const ApprovalDetailsTab: React.FC = () => {
 
   // Submit Handler
   const handleSubmit = () => {
-    if (errorMessage || !approvalDetails.berDecision) return;
-    console.log("Submitting Approval Details:", approvalDetails);
+    if (
+      errorMessage ||
+      !approvalDetails.berDecision ||
+      !approvalDetails?.deviceAmount
+    )
+      return;
 
     setIsSubmitting(true);
+    if (approvalDetails.berDecision === "replace") {
+      setIsBerModalOpen(true);
+    }
     setTimeout(() => {
       setIsSubmitting(false);
     }, 1000);
   };
 
   const handleBerSubmit = async () => {
-    setIsLoading(true);
     if (approvalDetails.berDecision != "replace") {
       try {
+        setIsLoading(true);
         const response = await handleBerDecision(
           Number(selectedClaim?.id),
           String(approvalDetails.berDecision)
         );
 
-        if (!response.success) {
+        if (!response?.success) {
+          notifyError("Failed to update Ber Decision !");
+        } else {
+          triggerClaimRefresh();
+          notifySuccess("Ber Decision Successfully updated !");
+        }
+      } catch (error) {
+        notifyError(`Failed to update Ber Decision ! ${error}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    // replace
+    if (approvalDetails.berDecision === "replace") {
+      try {
+        setIsLoading(true);
+        const response = await handleBerDecision(
+          Number(selectedClaim?.id),
+          String(approvalDetails.berDecision),
+          String(approvalDetails?.deviceAmount)
+        );
+
+        if (!response?.success) {
           notifyError("Failed to update Ber Decision !");
         } else {
           triggerClaimRefresh();
@@ -113,8 +168,8 @@ const ApprovalDetailsTab: React.FC = () => {
       if (!response.success) {
         notifyError("Failed to update Ber Decision !");
       } else {
-        notifySuccess("Ber Decision Successfully updated !");
         triggerClaimRefresh();
+        notifySuccess("Ber Decision Successfully updated !");
       }
     } catch (error) {
       notifyError(`Failed to update Ber Decision ! ${error}`);
@@ -184,44 +239,6 @@ const ApprovalDetailsTab: React.FC = () => {
           </div>
         )}
 
-        {/* Conditionally show Device Amount Input only when BER Decision is replace */}
-        {approvalDetails.berDecision == "replace" && (
-          <div className="pb-[10px] w-[45%]">
-            <label className="block text-darkGray text-xs font-medium">
-              Add Device Amount *
-            </label>
-            <input
-              type="text"
-              className={`w-full border px-4 py-2 rounded-md text-sm bg-inputBg text-[#181D27] focus:outline-none hover:bg-gray-100 h-[45px] ${
-                errorMessage ? "border-red-500" : "border-gray-300"
-              }`}
-              value={approvalDetails.deviceAmount}
-              onChange={handleDeviceAmountChange}
-              onBlur={handleDeviceAmountBlur}
-            />
-            {errorMessage && (
-              <p className="text-red-500 text-xs mt-1">{errorMessage}</p>
-            )}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        {approvalDetails.berDecision == "replace" && (
-          <div className="pb-[10px] w-[45%] md:w-1/2">
-            <button
-              className={`w-full px-4 py-2 rounded-md text-white text-sm font-semibold ${
-                isSubmitDisabled
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } h-[45px]`}
-              onClick={handleSubmit}
-              disabled={isSubmitDisabled}
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
-          </div>
-        )}
-
         {approvalDetails.repairAmount &&
           approvalDetails.repairPaymentSuccessful && (
             <div className="pb-[10px] w-[45%]">
@@ -245,7 +262,9 @@ const ApprovalDetailsTab: React.FC = () => {
             !approvalDetails.repairPaymentLink ? (
               <button
                 className={`btn bg-primaryBlue text-white w-1/2 hover:bg-blue-700`}
-                onClick={() => handleGenerateLink("CLAIM_REPAIR")}
+                onClick={() => {
+                  handleGenerateLink("CLAIM_REPAIR");
+                }}
               >
                 Generate Payment Link
               </button>
@@ -279,10 +298,58 @@ const ApprovalDetailsTab: React.FC = () => {
           </div>
         )}
 
+        {/* replacement payments */}
+
+        {claimStatus === "BER Replace" && (
+          <div className="pb-[10px] w-[45%]">
+            <label className="block text-darkGray text-xs font-medium">
+              Partial Payment:
+            </label>
+
+            {!approvalDetails.replacementPaymentSuccessful &&
+            !approvalDetails.replacementPaymentLink ? (
+              <button
+                className={`btn bg-primaryBlue text-white w-1/2 hover:bg-blue-700`}
+                onClick={() => {
+                  handleGenerateLink("CLAIM_REPLACE");
+                }}
+              >
+                Generate Payment Link
+              </button>
+            ) : approvalDetails.replacementAmount &&
+              !approvalDetails.replacementPaymentSuccessful ? (
+              <>
+                <p className="text-sm font-semibold text-[#CC4244]">
+                  ₹ {approvalDetails.replacementAmount} (Pending)
+                </p>
+                {approvalDetails.replacementPaymentLink && (
+                  <p className="flex justify-start gap-1 items-center text-xs text-[#5C5C5C] font-semibold mt-2">
+                    <span>Payment Link: </span>
+                    <Link
+                      className="text-xs text-[#3C63FC]"
+                      href={String(approvalDetails.replacementPaymentLink)}
+                      target="_blank"
+                    >
+                      {approvalDetails.replacementPaymentLink}
+                    </Link>
+                    <CopyToClipboardButton
+                      text={String(approvalDetails.replacementPaymentLink)}
+                    />
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm font-semibold text-[#23A047]">
+                ₹ {approvalDetails.replacementAmount} (Paid)
+              </p>
+            )}
+          </div>
+        )}
+
         {/* BER Decision Dropdown */}
         {approvalDetails.approvalType != "Approved" &&
           claimStatus === "BER Marked" && (
-            <div className="pb-[10px] w-[45%] md:w-1/2">
+            <div className="pb-[10px] w-[45%]">
               <label className="block text-darkGray text-xs font-medium">
                 BER Decision
               </label>
@@ -291,7 +358,48 @@ const ApprovalDetailsTab: React.FC = () => {
                 onChange={handleBerSelection}
                 className="border-[#D5D7DA] text-[#181D27] h-[50px]"
                 fontSize="text-sm"
+                width="w-1/2"
               />
+            </div>
+          )}
+
+        {/* Conditionally show Device Amount Input only when BER Decision is replace */}
+        {approvalDetails.berDecision == "replace" &&
+          claimStatus === "BER Marked" && (
+            <div className="pb-[10px] w-[45%]">
+              <label className="block text-darkGray text-xs font-medium">
+                Add Device Amount *
+              </label>
+              <input
+                type="text"
+                className={`w-full border px-4 py-2 rounded-md text-sm bg-inputBg text-[#181D27] focus:outline-none hover:bg-gray-100 h-[45px] ${
+                  errorMessage ? "border-red-500" : "border-gray-300"
+                }`}
+                value={approvalDetails.deviceAmount}
+                onChange={handleDeviceAmountChange}
+                onBlur={handleDeviceAmountBlur}
+              />
+              {errorMessage && (
+                <p className="text-red-500 text-xs mt-1">{errorMessage}</p>
+              )}
+            </div>
+          )}
+
+        {/* Submit Button */}
+        {approvalDetails.berDecision == "replace" &&
+          claimStatus === "BER Marked" && (
+            <div className="pb-[10px] w-[45%]">
+              <button
+                className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold ${
+                  isSubmitDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } h-[45px]`}
+                onClick={handleSubmit}
+                disabled={isSubmitDisabled}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
             </div>
           )}
       </div>

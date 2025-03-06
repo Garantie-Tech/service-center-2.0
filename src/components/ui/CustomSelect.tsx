@@ -8,6 +8,7 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
   className?: string;
   fontSize?: string;
+  width?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -16,6 +17,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   onChange,
   className = "",
   fontSize = "text-xs",
+  width = "w-full",
 }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +29,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div className={`relative w-full`}>
+    <div className={`relative ${width}`}>
       {/* Select Box */}
       <button
         className={`w-full flex items-center justify-between px-4 py-2 border rounded-lg bg-white shadow-sm focus:outline-none ${className} ${fontSize}`}

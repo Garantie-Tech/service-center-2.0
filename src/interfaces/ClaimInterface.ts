@@ -18,6 +18,13 @@ export default interface Claim {
       damage_details?: string;
       estimate_details?: string;
     };
+    replacement_payment?: {
+      replace_payment_successful: boolean;
+      replace_razorpay_order_id: string;
+      replace_payment_link: string;
+      replace_payment_link_create_date: string;
+      replace_amount: number;
+    }
   };
   claimed_amount?: string;
   job_sheet_number?: string;

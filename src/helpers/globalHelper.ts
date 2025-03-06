@@ -103,6 +103,10 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
     return ["Claim Details", "Rejected"];
   }
 
+  if (claimStatus === "Estimate Revised") {
+    return ["Claim Details", "Estimate"];
+  }
+
   return ["Claim Details", "Estimate", "Approval", "Final Documents"];
 };
 

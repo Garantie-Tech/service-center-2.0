@@ -220,6 +220,9 @@ const ClaimList: React.FC = () => {
           repairPaymentLink: firstClaim?.repair_payment_link,
           repairRazorpayOrderId: firstClaim?.repair_razorpay_order_id,
           estimateDate: firstClaim?.estimated_date,
+          replacementPaymentSuccessful: firstClaim?.data?.replacement_payment?.replace_payment_successful,
+          replacementPaymentLink: firstClaim?.data?.replacement_payment?.replace_payment_link,
+          replacementAmount: firstClaim?.data?.replacement_payment?.replace_amount,
         });
         setActiveTab(
           getActiveTab(firstClaim.status) as
@@ -294,6 +297,9 @@ const ClaimList: React.FC = () => {
                   repairPaymentLink: claim.repair_payment_link,
                   repairRazorpayOrderId: claim.repair_razorpay_order_id,
                   estimateDate: claim?.estimated_date,
+                  replacementPaymentSuccessful: claim?.data?.replacement_payment?.replace_payment_successful,
+                  replacementPaymentLink: claim?.data?.replacement_payment?.replace_payment_link,
+                  replacementAmount: claim?.data?.replacement_payment?.replace_amount,
                 });
               }}
             >

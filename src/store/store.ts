@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import Claim from "@/interfaces/ClaimInterface";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
-import { EstimateDetailsState, Tab } from "@/interfaces/GlobalInterface";
+import { ApprovalState, EstimateDetailsState, Tab } from "@/interfaces/GlobalInterface";
 
 interface FilterProps {
   fromDate: string;
@@ -99,21 +99,9 @@ interface StoreType {
   ) => void;
   resetEstimateDetailsState: () => void;
   // Approval Details State
-  approvalDetails: {
-    estimateAmount: number;
-    approvedAmount: number;
-    approvalType: string;
-    deviceAmount?: string;
-    berDecision?: string;
-    approvalDate?: string;
-    repairAmount?: number;
-    repairPaymentSuccessful?: boolean;
-    repairPaymentLink?: string;
-    repairRazorpayOrderId?: string;
-    estimateDate?: string;
-  };
+  approvalDetails: ApprovalState["approvalDetails"];
   setApprovalDetails: (
-    updatedDetails: Partial<StoreType["approvalDetails"]>
+    updatedDetails: Partial<ApprovalState["approvalDetails"]>
   ) => void;
   refreshClaimsTrigger: number;
   triggerClaimRefresh: () => void;
@@ -283,6 +271,9 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     repairPaymentSuccessful: false,
     repairPaymentLink: "",
     repairRazorpayOrderId: "",
+    replacementPaymentSuccessful: false,
+    replacementPaymentLink: "",
+    replacementAmount: 0,
   },
   setApprovalDetails: (updatedDetails) =>
     set((state) => ({

@@ -360,7 +360,7 @@ const FinalDocumentsTab: React.FC = () => {
         </div>
       </div>
       <div className="flex gap-8">
-        {!reupload ? (
+        {reupload ? (
           <button
             className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
             onClick={() => setReupload(true)}
