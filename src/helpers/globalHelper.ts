@@ -107,6 +107,18 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
     return ["Claim Details", "Estimate"];
   }
 
+  if (
+    ["Approved", "BER Approved", "BER Replacement Approved"].includes(
+      claimStatus
+    )
+  ) {
+    return ["Claim Details", "Estimate", "Approval", "Final Documents"];
+  }
+
+  if (["Partially Approved"].includes(claimStatus)) {
+    return ["Claim Details", "Estimate", "Approval"];
+  }
+
   return ["Claim Details", "Estimate", "Approval", "Final Documents"];
 };
 
@@ -146,4 +158,19 @@ export const getStatusIcon = (status: TabStatus): string | null => {
   };
 
   return iconMap[status] ?? null;
+};
+
+export const getDocumentInfo = (selectedClaim: Claim | null, docKey: "16" | "74" | "75") => {
+  const doc = selectedClaim?.documents?.[docKey];
+
+  const status = doc?.status;
+  const statusValue = status === "1" ? true : status === "0" ? false : null;
+
+  return {
+    isInvalid: !!doc?.status_reason_id,
+    invalidReason: doc?.status_reason || "",
+    statusValue: statusValue,
+    isValid: status === "1",
+    hasInvalidStatus: !!(doc?.url && statusValue === null),
+  };
 };

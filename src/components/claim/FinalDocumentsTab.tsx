@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import FinalDocumentsView from "@/components/claim/view/FinalDocumentsView";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import Image from "next/image";
-import GalleryPopup from "../ui/GalleryPopup";
+import GalleryPopup from "@/components/ui/GalleryPopup";
+import { getDocumentInfo } from "@/helpers/globalHelper";
 
 const FinalDocumentsTab: React.FC = () => {
   const [repairInvoice, setRepairInvoice] = useState<File[]>([]);
@@ -30,8 +31,6 @@ const FinalDocumentsTab: React.FC = () => {
   const handleSubmit = async () => {
     const formData = new FormData();
 
-    // console.log(repairInvoice, repairedMobilePhotos, replacementReceipt);
-
     try {
       if (
         (!repairInvoice || repairInvoice.length === 0) &&
@@ -49,8 +48,8 @@ const FinalDocumentsTab: React.FC = () => {
       }
 
       if (
-        ((selectedClaim?.imei_changed && !replacementReceipt) ||
-          replacementReceipt.length === 0) &&
+        selectedClaim?.imei_changed &&
+        (!replacementReceipt || replacementReceipt.length === 0) &&
         !selectedClaim?.documents?.["75"]?.url
       ) {
         notifyError("Please Upload Replacement Receipt");
@@ -100,71 +99,54 @@ const FinalDocumentsTab: React.FC = () => {
     }
   };
 
-  // is documents invalid
-  const isInvalidRepairInvoice = selectedClaim?.documents?.["16"]
-    ?.status_reason_id
-    ? true
-    : false;
-  const isInvalidRepairMobilePhoto = selectedClaim?.documents?.["74"]
-    ?.status_reason_id
-    ? true
-    : false;
-  const isInvalidReplacementReceipt = selectedClaim?.documents?.["75"]
-    ?.status_reason_id
-    ? true
-    : false;
-
-  // invalid reason
-  const isInvalidRepairInvoiceReason = selectedClaim?.documents?.["16"]
-    ?.status_reason
-    ? selectedClaim?.documents?.["16"]?.status_reason
-    : "";
-  const isInvalidRepairMobilePhotoReason = selectedClaim?.documents?.["74"]
-    ?.status_reason
-    ? selectedClaim?.documents?.["74"]?.status_reason
-    : "";
-  const isInvalidReplacementReceiptReason = selectedClaim?.documents?.["75"]
-    ?.status_reason
-    ? selectedClaim?.documents?.["75"]?.status_reason
-    : "";
-
-  // action taken by garantie
-  const isInvalidRepairInvoiceStatus =
-    selectedClaim?.documents?.["16"]?.status === "1"
-      ? true
-      : selectedClaim?.documents?.["16"]?.status === "0"
-      ? false
-      : null;
-  const isInvalidRepairMobilePhotoStatus =
-    selectedClaim?.documents?.["74"]?.status === "1"
-      ? true
-      : selectedClaim?.documents?.["74"]?.status === "0"
-      ? false
-      : null;
-  const isInvalidReplacementReceiptStatus =
-    selectedClaim?.documents?.["75"]?.status === "1"
-      ? true
-      : selectedClaim?.documents?.["75"]?.status === "0"
-      ? false
-      : null;
-
   const isImeiChanged = selectedClaim?.imei_changed ? true : false;
 
-  // documents url
+  // Get document info for each type
+  const repairInvoiceInfo = getDocumentInfo(selectedClaim, "16");
+  const repairMobilePhotoInfo = getDocumentInfo(selectedClaim, "74");
+  const replacementReceiptInfo = getDocumentInfo(selectedClaim, "75");
+
+  // Assign values
+  const isInvalidRepairInvoice = repairInvoiceInfo.isInvalid;
+  const isInvalidRepairMobilePhoto = repairMobilePhotoInfo.isInvalid;
+  const isInvalidReplacementReceipt = replacementReceiptInfo.isInvalid;
+
+  const isInvalidRepairInvoiceReason = repairInvoiceInfo.invalidReason;
+  const isInvalidRepairMobilePhotoReason = repairMobilePhotoInfo.invalidReason;
+  const isInvalidReplacementReceiptReason =
+    replacementReceiptInfo.invalidReason;
+
+  const isInvalidRepairInvoiceStatus = repairInvoiceInfo.statusValue;
+  const isInvalidRepairMobilePhotoStatus = repairMobilePhotoInfo.statusValue;
+  const isInvalidReplacementReceiptStatus = replacementReceiptInfo.statusValue;
+
+  const isValidRepairInvoice = repairInvoiceInfo.isValid;
+  const isValidRepairMobilePhoto = repairMobilePhotoInfo.isValid;
+  const isValidReplacementReceipt = replacementReceiptInfo.isValid;
+
+  const isEditable =
+    isInvalidRepairInvoice ||
+    isInvalidRepairMobilePhoto ||
+    (isImeiChanged && isInvalidReplacementReceipt) ||
+    repairInvoiceInfo.statusValue === null ||
+    repairMobilePhotoInfo.statusValue === null ||
+    replacementReceiptInfo.statusValue === null;
+
+  const showReuploadButton =
+    isInvalidRepairInvoice ||
+    isInvalidRepairMobilePhoto ||
+    (isImeiChanged && isInvalidReplacementReceipt) ||
+    repairInvoiceInfo.hasInvalidStatus ||
+    repairMobilePhotoInfo.hasInvalidStatus ||
+    replacementReceiptInfo.hasInvalidStatus;
+
+  // document
   const finalDocuments = {
     repairInvoiceImage: selectedClaim?.documents?.["16"]?.url ?? "",
     repairMobilePhoto: selectedClaim?.documents?.["74"]?.url ?? "",
     replacementReceiptImage: selectedClaim?.documents?.["75"]?.url ?? "",
     isImeiChanged: isImeiChanged,
   };
-
-  const isEditable =
-    isInvalidRepairInvoice ||
-    isInvalidRepairMobilePhoto ||
-    (isImeiChanged && isInvalidReplacementReceipt) ||
-    isInvalidRepairInvoiceStatus === null ||
-    isInvalidRepairMobilePhotoStatus === null ||
-    isInvalidReplacementReceiptStatus === null;
 
   return isEditable ? (
     <div>
@@ -196,7 +178,8 @@ const FinalDocumentsTab: React.FC = () => {
       <div className="flex gap-8">
         {/* Repair Invoice PDF */}
         <div className="w-1/2">
-          {!selectedClaim?.documents?.["16"] || isInvalidRepairInvoice ? (
+          {(!isValidRepairInvoice && reupload) ||
+          !finalDocuments?.repairInvoiceImage ? (
             <PdfUpload
               label="Repair Invoice(Please add Invoice document)"
               pdfs={repairInvoice}
@@ -247,7 +230,8 @@ const FinalDocumentsTab: React.FC = () => {
 
         {/* Repaired Mobile Photos */}
         <div className="w-1/2">
-          {!selectedClaim?.documents?.["74"] || isInvalidRepairMobilePhoto ? (
+          {(!isValidRepairMobilePhoto && reupload) ||
+          !finalDocuments?.repairMobilePhoto ? (
             <ImageUpload
               label="Repaired Mobile( Add repaired mobile photo)"
               images={repairedMobilePhotos}
@@ -300,67 +284,69 @@ const FinalDocumentsTab: React.FC = () => {
       <div className="flex gap-8">
         <div className="w-1/2">
           {/* Replacement Receipt PDF */}
-          <div className="">
-            {!selectedClaim?.documents?.["75"] ||
-            isInvalidReplacementReceipt ? (
-              <PdfUpload
-                label="Replacement Receipt( Add replacement receipts)"
-                pdfs={replacementReceipt}
-                setPdfs={setReplacementReceipt}
-              />
-            ) : finalDocuments.replacementReceiptImage.endsWith(".pdf") ? (
-              <>
-                <h3 className="text-sm font-medium mb-2">
-                  Replacement Receipt
-                </h3>
-                <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
-                  <a
-                    href={finalDocuments.replacementReceiptImage}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Image
-                      src="/images/pdf-icon.svg"
-                      alt="Repair Invoice PDF"
-                      width={30}
-                      height={50}
-                    />
-                  </a>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="text-sm font-medium mb-2">
-                  Replacement Receipt
-                </h3>
-                <GalleryPopup
-                  images={[finalDocuments.replacementReceiptImage]}
+          {isImeiChanged && (
+            <div className="">
+              {(!isValidReplacementReceipt && reupload) ||
+              !finalDocuments?.replacementReceiptImage ? (
+                <PdfUpload
+                  label="Replacement Receipt( Add replacement receipts)"
+                  pdfs={replacementReceipt}
+                  setPdfs={setReplacementReceipt}
                 />
-              </>
-            )}
+              ) : finalDocuments.replacementReceiptImage.endsWith(".pdf") ? (
+                <>
+                  <h3 className="text-sm font-medium mb-2">
+                    Replacement Receipt
+                  </h3>
+                  <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
+                    <a
+                      href={finalDocuments.replacementReceiptImage}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Image
+                        src="/images/pdf-icon.svg"
+                        alt="Repair Invoice PDF"
+                        width={30}
+                        height={50}
+                      />
+                    </a>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-sm font-medium mb-2">
+                    Replacement Receipt
+                  </h3>
+                  <GalleryPopup
+                    images={[finalDocuments.replacementReceiptImage]}
+                  />
+                </>
+              )}
 
-            {isInvalidReplacementReceipt ? (
-              <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
-                Invalid Receipt : {isInvalidReplacementReceiptReason}
-              </span>
-            ) : !isInvalidReplacementReceiptStatus &&
-              finalDocuments?.replacementReceiptImage &&
-              finalDocuments?.isImeiChanged ? (
-              <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
-                Uploaded (Under Review)
-              </span>
-            ) : finalDocuments?.replacementReceiptImage ? (
-              <span className="p-2 text-[#19AD61] text-xxs font-semibold">
-                Valid
-              </span>
-            ) : (
-              <></>
-            )}
-          </div>
+              {isInvalidReplacementReceipt ? (
+                <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
+                  Invalid Receipt : {isInvalidReplacementReceiptReason}
+                </span>
+              ) : !isInvalidReplacementReceiptStatus &&
+                finalDocuments?.replacementReceiptImage &&
+                finalDocuments?.isImeiChanged ? (
+                <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
+                  Uploaded (Under Review)
+                </span>
+              ) : finalDocuments?.replacementReceiptImage ? (
+                <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+                  Valid
+                </span>
+              ) : (
+                <></>
+              )}
+            </div>
+          )}
         </div>
       </div>
       <div className="flex gap-8">
-        {reupload ? (
+        {showReuploadButton && !reupload ? (
           <button
             className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
             onClick={() => setReupload(true)}
