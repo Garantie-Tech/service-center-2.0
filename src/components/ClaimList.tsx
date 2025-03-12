@@ -49,9 +49,9 @@ const ClaimList: React.FC = () => {
       };
 
       if (globalSearch) {
-        basePayload.claim_search = globalSearch; // Include globalSearch, exclude other filters
+        basePayload.claim_search = globalSearch;
       } else {
-        basePayload.claim_status = filterStatus || "ALL CLAIMS"; // Default claim status
+        basePayload.claim_status = filterStatus || "ALL CLAIMS";
 
         if (appliedFilters?.fromDate && appliedFilters?.toDate) {
           basePayload.duration = "custom";
@@ -196,6 +196,7 @@ const ClaimList: React.FC = () => {
   }, [page, hasMore, loading]);
 
   useEffect(() => {
+    // const isSearchActive = globalSearch !== undefined;
     if (!selectedClaim) {
       // If there's no selected claim, select the first available claim
       if (filteredClaims.length > 0) {
@@ -246,7 +247,7 @@ const ClaimList: React.FC = () => {
         setSelectedClaim(filteredClaims[0] || null);
       }
     }
-  }, [filteredClaims]);
+  }, [filteredClaims, globalSearch]);
 
   return (
     <div className="w-full max-w-lg mx-auto">
@@ -345,7 +346,7 @@ const ClaimList: React.FC = () => {
           <span className="loading loading-ring loading-lg"></span>
         </p>
       )}
-      {!hasMore && filteredClaims.length > 0 && (
+      {!hasMore && filteredClaims.length < 0 && (
         <p className="text-center text-gray-400 py-4">No more claims</p>
       )}
     </div>

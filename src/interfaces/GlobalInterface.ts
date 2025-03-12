@@ -191,3 +191,14 @@ export interface ClaimTimeline {
   message: string;
   data?: TimelineEvent[];
 }
+
+export interface UploadCustomerDocuments {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    claimID: number;
+    message: number;
+  };
+}

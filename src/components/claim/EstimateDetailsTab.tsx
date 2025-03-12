@@ -75,7 +75,6 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const handleReplacementSelection = (value: string) => {
     setPendingReplacementValue(value);
     setShowReplacementConfirmation(true);
-    console.log(pendingReplacementValue);
   };
 
   const confirmReplacementSelection = () => {

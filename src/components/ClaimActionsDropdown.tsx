@@ -43,8 +43,6 @@ const ClaimActionsDropdown: React.FC = () => {
   const closeTimeline = () => setShowTimeline(false);
 
   const handleCancelClaimFn = async (reason: string) => {
-    console.log("Canceling claim for reason:", reason);
-
     try {
       setIsLoading(true);
 

@@ -24,7 +24,8 @@ export default interface Claim {
       replace_payment_link: string;
       replace_payment_link_create_date: string;
       replace_amount: number;
-    }
+    };
+    accessory_provided?: string | boolean;
   };
   claimed_amount?: string;
   job_sheet_number?: string;
@@ -36,6 +37,9 @@ export default interface Claim {
     "16"?: DocumentItem;
     "74"?: DocumentItem;
     "75"?: DocumentItem;
+    "76"?: DocumentItem;
+    "77"?: DocumentItem;
+    "78"?: DocumentItem;
   };
   approved_amount?: string;
   approval_date?: string;
@@ -51,6 +55,7 @@ export default interface Claim {
   rejection_reason?: string;
   service_centre_id: number;
   service_centre_name: string;
+  aadhar_photos?: string[];
 }
 
 export interface ClaimDetailsProps {
@@ -62,7 +67,7 @@ export interface ClaimDetailsProps {
       amount: string | number;
     };
     claimDetails?: string;
-    service_centre_name:string;
+    service_centre_name: string;
   };
 }
 
@@ -73,6 +78,20 @@ export interface ClaimResponse {
   message: string;
   data: {
     claims: Claim[];
-    totalCount?:number;
+    totalCount?: number;
   };
+}
+
+export interface CustomerDocuments {
+  aadharDocuments: {
+    "76": DocumentItem | undefined;
+    documents: string[] | undefined;
+  };
+  bankDetails: DocumentItem | undefined;
+  panCard: DocumentItem | undefined;
+  accessoriesProvided: string | undefined;
+}
+
+export interface CustomerDocumentsTabProps {
+  documents: CustomerDocuments;
 }

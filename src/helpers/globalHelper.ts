@@ -37,7 +37,6 @@ export const getActiveTab = (status: string): string => {
   if (
     status === "BER Marked" ||
     status === "BER Repair" ||
-    status === "BER SETTLE" ||
     status === "BER Replace" ||
     status === "Partially Approved"
   ) {
@@ -83,6 +82,10 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
 
   if (claimStatus === "BER Marked") {
     return ["Claim Details", "Estimate", "Approval"];
+  }
+
+  if (claimStatus === "Invalid Documents") {
+    return ["Claim Details", "Estimate"];
   }
 
   if (claimStatus === "Documents Verified") {
@@ -160,7 +163,10 @@ export const getStatusIcon = (status: TabStatus): string | null => {
   return iconMap[status] ?? null;
 };
 
-export const getDocumentInfo = (selectedClaim: Claim | null, docKey: "16" | "74" | "75") => {
+export const getDocumentInfo = (
+  selectedClaim: Claim | null,
+  docKey: "16" | "74" | "75"
+) => {
   const doc = selectedClaim?.documents?.[docKey];
 
   const status = doc?.status;

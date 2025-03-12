@@ -7,6 +7,7 @@ import {
   GenerateLinkPaymentBody,
   GeneratePaymentLink,
   SubmitEstimate,
+  UploadCustomerDocuments,
   UploadFinalDocuments,
 } from "@/interfaces/GlobalInterface";
 import { getRequest, postRequest } from "@/utils/api";
@@ -121,4 +122,9 @@ export const fetchTimeline = async (
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload
 ) => {
   return await getRequest<ClaimTimeline>(`timeline/${claimId}`, _params);
+};
+
+export const uploadCustomerDocuments = async (claimID: number, body: FormData) => {
+  const endpoint = `submit/customer/documents/${claimID}`;
+  return await postRequest<UploadCustomerDocuments>(endpoint, body);
 };

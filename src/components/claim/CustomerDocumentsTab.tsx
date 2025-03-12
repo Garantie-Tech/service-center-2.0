@@ -1,159 +1,496 @@
 "use client";
 
-import Image from "next/image";
-import GalleryPopup from "@/components/ui/GalleryPopup";
-import CustomerDocumentsUpload from "../ui/CustomerDocumentsUpload";
+import { CustomerDocumentsTabProps } from "@/interfaces/ClaimInterface";
 
-interface CustomerDocumentsTabProps {
-  documents: {
-    aadharFront: string;
-    aadharBack: string;
-    bankDetails: string;
-    panCard?: string; // Optional field
-  };
-}
+import { useEffect, useState } from "react";
+import ImageUpload from "@/components/ui/ImageUpload";
+import { useNotification } from "@/context/NotificationProvider";
+import { useGlobalStore } from "@/store/store";
+import { uploadCustomerDocuments } from "@/services/claimService";
+import GalleryPopup from "@/components/ui/GalleryPopup";
 
 const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   documents,
 }) => {
-  // Function to check if a file is a PDF
-  const isPdf = (url: string) => url.endsWith(".pdf");
+  const { notifySuccess, notifyError } = useNotification();
+  const {
+    isLoading,
+    setIsLoading,
+    selectedClaim,
+    triggerClaimRefresh,
+    claimStatus,
+  } = useGlobalStore();
+
+  // State for document selection
+  const [aadharFrontSideImage, setAadharFrontSideImage] = useState<File[]>([]);
+  const [aadharBackSideImage, setAadharBackSideImage] = useState<File[]>([]);
+  const [bankDetailImage, setBankDetailImage] = useState<File[]>([]);
+  const [panCardImage, setPanCardImage] = useState<File[]>([]);
+  const [accessoriesProvided, setAccessoriesProvided] = useState<string | null>(
+    documents?.accessoriesProvided ?? null
+  );
+  const [reupload, setReupload] = useState(false);
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+
+  useEffect(() => {
+    setReupload(false);
+  }, [selectedClaim]);
+
+  // Utility function to get document status
+  const getDocumentStatus = (
+    status?: number | string | null,
+    url?: string | null
+  ) => {
+    return status == 1 && url
+      ? "valid"
+      : status == 0 && url
+      ? "invalid"
+      : "pending";
+  };
+
+  // Utility function to check if a document is valid
+  const isValidDocument = (
+    status?: number | string | null,
+    url?: string | null
+  ) => status == 1 && !!url;
+
+  // Utility function to get invalid reason
+  const getInvalidReason = (reason?: string | null) => reason || "";
+
+  // Extract document URLs
+  const { aadharDocuments, bankDetails, panCard } = documents || {};
+  const aadharFrontImageUrl = aadharDocuments?.documents?.[0];
+  const aadharBackImageUrl = aadharDocuments?.documents?.[1];
+  const bankDetailImageUrl = bankDetails?.url;
+  const pancardImageUrl = panCard?.url;
+
+  // Validate Documents
+  const isValidAadharFrontImage = isValidDocument(
+    aadharDocuments?.[76]?.status,
+    aadharFrontImageUrl
+  );
+  const isValidAadharBackImage = isValidDocument(
+    aadharDocuments?.[76]?.status,
+    aadharBackImageUrl
+  );
+  const isValidBankDetail = isValidDocument(
+    bankDetails?.status,
+    bankDetailImageUrl
+  );
+
+  // Get Invalid Reasons
+  const invalidAadharFrontImageReason = getInvalidReason(
+    aadharDocuments?.[76]?.status_reason
+  );
+  const invalidAadharBackImageReason = getInvalidReason(
+    aadharDocuments?.[76]?.status_reason
+  );
+  const invalidBankDetailReason = getInvalidReason(bankDetails?.status_reason);
+  const invalidPancardReason = getInvalidReason(panCard?.status_reason);
+
+  // Get Document Status
+  const aadharFrontImageStatus = getDocumentStatus(
+    aadharDocuments?.[76]?.status,
+    aadharFrontImageUrl
+  );
+  const aadharBackImageStatus = getDocumentStatus(
+    aadharDocuments?.[76]?.status,
+    aadharBackImageUrl
+  );
+  const bankDetailsStatus = getDocumentStatus(
+    bankDetails?.status,
+    bankDetailImageUrl
+  );
+  const panCardStatus = getDocumentStatus(panCard?.status, pancardImageUrl);
+
+  // Show Reupload Button Condition
+  const showReuploadButton =
+    aadharDocuments?.[76]?.status_reason ||
+    bankDetails?.status_reason ||
+    (panCard?.status_reason && pancardImageUrl) ||
+    aadharFrontImageStatus == "invalid" ||
+    aadharBackImageStatus == "invalid" ||
+    bankDetailsStatus == "invalid";
+
+  const appendFiles = (
+    files: File[],
+    documentTypeId: number | string,
+    formData: FormData,
+    subTypes?: string[]
+  ) => {
+    files.forEach((file, index) => {
+      if (subTypes) {
+        // ✅ Properly index front & back with `index`
+        formData.append(
+          `documents[${documentTypeId}][${index}][document_type_id]`,
+          `${documentTypeId}_${subTypes[index]}`
+        );
+        formData.append(`documents[${documentTypeId}][${index}][file]`, file);
+      } else {
+        // ✅ Single document case
+        formData.append(
+          `documents[${documentTypeId}][document_type_id]`,
+          documentTypeId.toString()
+        );
+        formData.append(`documents[${documentTypeId}][file]`, file);
+      }
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+
+      // ✅ Ensure claim_id is valid
+      if (selectedClaim?.id) {
+        formData.append("claim_id", String(selectedClaim.id));
+      }
+
+      // ✅ Append Aadhar Front & Back with correct indices
+      const aadharImages: File[] = [];
+      const aadharSubTypes: string[] = [];
+
+      if (aadharFrontSideImage.length > 0) {
+        aadharImages.push(aadharFrontSideImage[0]);
+        aadharSubTypes.push("front");
+      }
+
+      if (aadharBackSideImage.length > 0) {
+        aadharImages.push(aadharBackSideImage[0]);
+        aadharSubTypes.push("back");
+      }
+
+      if (aadharImages.length > 0) {
+        appendFiles(aadharImages, 76, formData, aadharSubTypes);
+      }
+
+      // ✅ Append Bank Details
+      if (bankDetailImage) {
+        appendFiles(bankDetailImage, 77, formData);
+      }
+
+      // ✅ Append PAN Card if available
+      if (panCardImage.length > 0) {
+        appendFiles(panCardImage, 78, formData);
+      }
+
+      // ✅ Append Accessories Provided
+      formData.append("accessory_provided", accessoriesProvided || "no");
+
+      const response = await uploadCustomerDocuments(
+        Number(selectedClaim?.id),
+        formData
+      );
+
+      if (response.success) {
+        notifySuccess("Documents uploaded successfully!");
+        triggerClaimRefresh();
+      } else {
+        notifyError("Failed to upload documents.");
+      }
+    } catch (error) {
+      console.error("Error uploading documents:", error);
+      notifyError("An error occurred while uploading documents.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (documents?.accessoriesProvided !== undefined) {
+      setAccessoriesProvided(documents.accessoriesProvided);
+    }
+  }, [documents?.accessoriesProvided]);
+
+  useEffect(() => {
+    setAccessoriesProvided(documents?.accessoriesProvided ?? null);
+  }, [documents?.accessoriesProvided]);
+
+  const handleAccessoriesClick = (value: string) => {
+    setAccessoriesProvided(value);
+  };
+
+  const isFormEditable = true;
+
+  useEffect(() => {
+    const allMandatoryValid =
+      aadharFrontImageStatus === "valid" &&
+      aadharBackImageStatus === "valid" &&
+      bankDetailsStatus === "valid";
+
+    const allMandatoryUploaded =
+      (aadharFrontSideImage?.length > 0 ||
+        aadharFrontImageStatus === "valid") &&
+      (aadharBackSideImage?.length > 0 || aadharBackImageStatus === "valid") &&
+      (bankDetailImage?.length > 0 || bankDetailsStatus === "valid");
+
+    setIsSubmitDisabled(
+      allMandatoryUploaded && !allMandatoryValid && accessoriesProvided !== null
+    );
+  }, [
+    aadharFrontSideImage,
+    aadharBackSideImage,
+    bankDetailImage,
+    accessoriesProvided,
+    aadharFrontImageStatus,
+    aadharBackImageStatus,
+    bankDetailsStatus,
+    reupload,
+  ]);
+
+  const showButtonSection =
+    aadharFrontImageStatus != "valid" ||
+    aadharBackImageStatus != "valid" ||
+    bankDetailsStatus != "valid";
 
   return (
     <div>
-      {false ? (
-        <CustomerDocumentsUpload />
-      ) : (
-        <div className="documents-view">
-          <h2 className="text-lg font-semibold mb-4">Customer Documents</h2>
-          <div className="grid grid-cols-2 gap-8">
-            {/* Aadhar Front & Back */}
-            <div className="col-span-2">
-              <h3 className="text-sm font-medium mb-2 text-primaryDark">
-                Aadhar (Front and Back) <span className="text-red-500">*</span>
-              </h3>
+      <h2 className="text-lg font-semibold mb-4">Upload Customer Documents</h2>
 
-              <div className="flex gap-4">
-                {/* Aadhar Front */}
-                <div className="w-1/2">
-                  <span className="text-xs text-gray-500">(Front side)</span>
-                  {documents.aadharFront &&
-                    (isPdf(documents.aadharFront) ? (
-                      <a
-                        href={documents.aadharFront}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-[60px] h-[60px] border border-[#EEEEEE] flex items-center justify-center bg-inputBg"
-                      >
-                        <Image
-                          src="/images/pdf-icon.svg"
-                          alt="Aadhar Front PDF"
-                          width={30}
-                          height={50}
-                        />
-                      </a>
-                    ) : (
-                      <GalleryPopup images={[documents.aadharFront]} />
-                    ))}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Aadhar Front & Back */}
+        <div className="col-span-2">
+          <h3 className="text-sm font-medium mb-2 text-primaryDark">
+            Aadhar (Front and Back) <span className="text-red-500">*</span>
+          </h3>
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              {isFormEditable &&
+              reupload &&
+              aadharFrontImageStatus != "valid" &&
+              aadharFrontImageStatus != "pending" ? (
+                <ImageUpload
+                  label="(Front side)"
+                  images={aadharFrontSideImage}
+                  setImages={setAadharFrontSideImage}
+                />
+              ) : aadharFrontImageUrl ? (
+                <div>
+                  <label className="text-xs">(Front side)</label>
+                  {aadharFrontImageUrl && (
+                    <GalleryPopup images={[String(aadharFrontImageUrl)]} />
+                  )}
+
+                  {invalidAadharFrontImageReason ? (
+                    <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
+                      Invalid Receipt : {invalidAadharFrontImageReason}
+                    </span>
+                  ) : aadharFrontImageStatus === "pending" ? (
+                    <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
+                      Uploaded (Under Review)
+                    </span>
+                  ) : isValidAadharFrontImage ? (
+                    <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+                      Valid
+                    </span>
+                  ) : (
+                    <></>
+                  )}
                 </div>
+              ) : (
+                <ImageUpload
+                  label="(Front side)"
+                  images={aadharFrontSideImage}
+                  setImages={setAadharFrontSideImage}
+                />
+              )}
+            </div>
 
-                {/* Aadhar Back */}
-                <div className="w-1/2">
-                  <span className="text-xs text-gray-500">(Back side)</span>
-                  {documents.aadharBack &&
-                    (isPdf(documents.aadharBack) ? (
-                      <a
-                        href={documents.aadharBack}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-[60px] h-[60px] border border-[#EEEEEE] flex items-center justify-center bg-inputBg"
-                      >
-                        <Image
-                          src="/images/pdf-icon.svg"
-                          alt="Aadhar Back PDF"
-                          width={30}
-                          height={50}
-                        />
-                      </a>
-                    ) : (
-                      <GalleryPopup images={[documents.aadharBack]} />
-                    ))}
+            <div className="w-1/2">
+              {isFormEditable &&
+              reupload &&
+              aadharBackImageStatus != "valid" &&
+              aadharBackImageStatus != "pending" ? (
+                <ImageUpload
+                  label="(Back side)"
+                  images={aadharBackSideImage}
+                  setImages={setAadharBackSideImage}
+                />
+              ) : aadharBackImageUrl ? (
+                <div>
+                  <label className="text-xs">(Back side)</label>
+                  {aadharBackImageUrl && (
+                    <GalleryPopup images={[String(aadharBackImageUrl)]} />
+                  )}
+
+                  {invalidAadharBackImageReason ? (
+                    <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
+                      Invalid Receipt : {invalidAadharBackImageReason}
+                    </span>
+                  ) : aadharBackImageStatus === "pending" ? (
+                    <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
+                      Uploaded (Under Review)
+                    </span>
+                  ) : isValidAadharBackImage ? (
+                    <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+                      Valid
+                    </span>
+                  ) : (
+                    <></>
+                  )}
                 </div>
-              </div>
-            </div>
-
-            {/* Bank Details */}
-            <div className="col-span-1">
-              <h3 className="text-sm font-medium mb-2 text-primaryDark">
-                Bank Details <span className="text-red-500">*</span>
-              </h3>
-              <span className="text-xs text-gray-500">
-                (Cancelled Cheque/Passbook)
-              </span>
-              {documents.bankDetails &&
-                (isPdf(documents.bankDetails) ? (
-                  <a
-                    href={documents.bankDetails}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-[60px] h-[60px] border border-[#EEEEEE] flex items-center justify-center bg-inputBg"
-                  >
-                    <Image
-                      src="/images/pdf-icon.svg"
-                      alt="Bank Details PDF"
-                      width={30}
-                      height={50}
-                    />
-                  </a>
-                ) : (
-                  <GalleryPopup images={[documents.bankDetails]} />
-                ))}
-            </div>
-
-            {/* PAN Card (Optional) */}
-            <div className="col-span-1">
-              <h3 className="text-sm font-medium mb-2 text-primaryDark">
-                Pan Card <span className="text-gray-500">(Optional)</span>
-              </h3>
-              {documents.panCard &&
-                (isPdf(documents.panCard) ? (
-                  <a
-                    href={documents.panCard}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-[60px] h-[60px] border border-[#EEEEEE] flex items-center justify-center bg-inputBg"
-                  >
-                    <Image
-                      src="/images/pdf-icon.svg"
-                      alt="PAN Card PDF"
-                      width={30}
-                      height={50}
-                    />
-                  </a>
-                ) : (
-                  <GalleryPopup images={[documents.panCard]} />
-                ))}
-            </div>
-          </div>
-
-          {/* Accessories Provided */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium mb-2 text-primaryDark">
-              Accessories Provided:
-            </h3>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="checkbox" />
-                <span>Yes</span>
-              </label>
-
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="checkbox" />
-                <span>No</span>
-              </label>
+              ) : (
+                <ImageUpload
+                  label="(Back side)"
+                  images={aadharBackSideImage}
+                  setImages={setAadharBackSideImage}
+                />
+              )}
             </div>
           </div>
         </div>
+
+        {/* Bank Details */}
+        <div className="col-span-1">
+          <h3 className="text-sm font-medium mb-2 text-primaryDark">
+            Bank Details <span className="text-red-500">*</span>
+          </h3>
+
+          {isFormEditable &&
+          reupload &&
+          bankDetailsStatus != "valid" &&
+          bankDetailsStatus != "pending" ? (
+            <ImageUpload
+              label="(Cancelled Cheque/Passbook)"
+              images={bankDetailImage}
+              setImages={setBankDetailImage}
+            />
+          ) : bankDetailImageUrl ? (
+            <div>
+              <label className="text-xs">(Cancelled Cheque/Passbook)</label>
+              {bankDetailImageUrl && (
+                <GalleryPopup images={[String(bankDetailImageUrl)]} />
+              )}
+
+              {invalidBankDetailReason ? (
+                <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
+                  Invalid Receipt : {invalidBankDetailReason}
+                </span>
+              ) : bankDetailsStatus === "pending" ? (
+                <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
+                  Uploaded (Under Review)
+                </span>
+              ) : isValidBankDetail ? (
+                <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+                  Valid
+                </span>
+              ) : (
+                <></>
+              )}
+            </div>
+          ) : (
+            <ImageUpload
+              label="(Cancelled Cheque/Passbook)"
+              images={bankDetailImage}
+              setImages={setBankDetailImage}
+            />
+          )}
+        </div>
+
+        {/* PAN Card (Optional) */}
+        <div className="col-span-1">
+          {isFormEditable &&
+          reupload &&
+          panCardStatus != "valid" &&
+          panCardStatus != "pending" ? (
+            <ImageUpload
+              label="Pan Card (Optional)"
+              images={panCardImage}
+              setImages={setPanCardImage}
+            />
+          ) : pancardImageUrl ? (
+            <div>
+              <label className="text-xs">Pan Card (Optional)</label>
+              {pancardImageUrl && (
+                <GalleryPopup images={[String(pancardImageUrl)]} />
+              )}
+
+              {invalidPancardReason ? (
+                <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
+                  Invalid Receipt : {invalidPancardReason}
+                </span>
+              ) : panCardStatus === "pending" ? (
+                <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
+                  Uploaded (Under Review)
+                </span>
+              ) : panCardStatus === "valid" ? (
+                <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+                  Valid
+                </span>
+              ) : (
+                <></>
+              )}
+            </div>
+          ) : (
+            <ImageUpload
+              label="Pan Card (Optional)"
+              images={panCardImage}
+              setImages={setPanCardImage}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Accessories Provided */}
+      <div className="mt-6">
+        <h3 className="text-sm font-medium mb-2 text-primaryDark">
+          Accessories Provided:
+        </h3>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="accessoriesProvided"
+              value="yes"
+              className="radio"
+              checked={accessoriesProvided === "yes"}
+              onChange={() => handleAccessoriesClick("yes")}
+            />
+            <span>Yes</span>
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="accessoriesProvided"
+              value="no"
+              className="radio"
+              checked={accessoriesProvided === "no"}
+              onChange={() => handleAccessoriesClick("no")}
+            />
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      {showButtonSection && (
+        <>
+          {claimStatus === "BER SETTLE" && showReuploadButton && !reupload ? (
+            <button
+              className={`btn mt-6 px-6 py-2 rounded-md bg-primaryBlue text-white hover:bg-blue-700`}
+              onClick={() => {
+                setReupload(true);
+              }}
+            >
+              Reupload
+            </button>
+          ) : (
+            <button
+              className={`btn mt-6 px-6 py-2 rounded-md ${
+                !isSubmitDisabled
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "bg-primaryBlue text-white hover:bg-blue-700"
+              }`}
+              disabled={!isSubmitDisabled || isLoading}
+              onClick={handleSubmit}
+            >
+              {isLoading ? "Uploading..." : "Submit Documents"}
+            </button>
+          )}
+        </>
       )}
     </div>
   );

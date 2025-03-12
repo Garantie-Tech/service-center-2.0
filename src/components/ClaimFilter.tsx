@@ -128,7 +128,7 @@ const ClaimFilter: React.FC = () => {
             className="custom-button btn-default w-full flex items-center justify-between cursor-pointer tooltip tooltip-bottom"
             data-tip="Claim Status"
           >
-            <span className="flex items-center text-xs">
+            <span className="flex items-center text-sm">
               {claimStatuses[selectedDropdown] || "All Claims"}
             </span>
             <Image
@@ -139,7 +139,7 @@ const ClaimFilter: React.FC = () => {
               className="ml-2"
             />
           </summary>
-          <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg text-xs">
+          <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg text-sm">
             {Object.entries(claimStatuses).map(([key, value]) => (
               <li key={key}>
                 <button

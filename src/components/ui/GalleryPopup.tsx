@@ -67,13 +67,15 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
             onClick={() => openGallery(index)}
           >
             {/* Image Preview */}
-            <Image
-              src={src}
-              alt={`Gallery image ${index + 1}`}
-              width={60}
-              height={60}
-              className="rounded h-[100%]"
-            />
+            {src && (
+              <Image
+                src={src}
+                alt={`Gallery image ${index + 1}`}
+                width={60}
+                height={60}
+                className="rounded h-[100%]"
+              />
+            )}
 
             {/* 🆕 Remove Button - Only Show If `allowRemoval` is True */}
             {allowRemoval && onRemoveImage && (
@@ -122,42 +124,46 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
             </button>
 
             {/* Image Display */}
-            <Image
-              src={imageUrls[currentIndex ?? 0]}
-              alt={`Selected Image ${
-                currentIndex !== null ? currentIndex + 1 : "1"
-              }`}
-              width={400}
-              height={300}
-              className="rounded-lg"
-            />
+            {imageUrls[currentIndex ?? 0] && (
+              <Image
+                src={imageUrls[currentIndex ?? 0]}
+                alt={`Selected Image ${
+                  currentIndex !== null ? currentIndex + 1 : "1"
+                }`}
+                width={400}
+                height={300}
+                className="rounded-lg"
+              />
+            )}
 
             {/* Navigation Buttons */}
-            <div className="flex justify-center gap-4 mt-4 text-xs">
-              <button
-                className={`px-4 py-2 bg-gray-300 rounded-md ${
-                  currentIndex === 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-400"
-                }`}
-                onClick={prevImage}
-                disabled={currentIndex === 0}
-              >
-                ◀
-              </button>
+            {images.length > 1 && (
+              <div className="flex justify-center gap-4 mt-4 text-xs">
+                <button
+                  className={`px-4 py-2 bg-gray-300 rounded-md ${
+                    currentIndex === 0
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-400"
+                  }`}
+                  onClick={prevImage}
+                  disabled={currentIndex === 0}
+                >
+                  ◀
+                </button>
 
-              <button
-                className={`px-4 py-2 bg-gray-300 rounded-md ${
-                  currentIndex === images.length - 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-400"
-                }`}
-                onClick={nextImage}
-                disabled={currentIndex === images.length - 1}
-              >
-                ▶
-              </button>
-            </div>
+                <button
+                  className={`px-4 py-2 bg-gray-300 rounded-md ${
+                    currentIndex === images.length - 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-400"
+                  }`}
+                  onClick={nextImage}
+                  disabled={currentIndex === images.length - 1}
+                >
+                  ▶
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

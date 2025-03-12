@@ -34,7 +34,6 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
         if (response.success && response.data.data) {
           // Extract only the values (reason texts) from API response
           const formattedReasons = Object.values(response.data.data);
-          console.log(formattedReasons);
           setReasons(formattedReasons);
         } else {
           setReasons([]);

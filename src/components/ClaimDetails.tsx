@@ -8,7 +8,7 @@ import FinalDocumentsTab from "@/components/claim/FinalDocumentsTab";
 import { Tab } from "@/interfaces/GlobalInterface";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
-import Claim from "@/interfaces/ClaimInterface";
+import Claim, { CustomerDocuments } from "@/interfaces/ClaimInterface";
 import { submitEstimate } from "@/services/claimService";
 import ClaimActionsDropdown from "./ClaimActionsDropdown";
 import { useNotification } from "@/context/NotificationProvider";
@@ -86,11 +86,14 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     rejectedReason: selectedClaim?.rejection_reason,
   };
 
-  const customerDocuments = {
-    aadharFront: "/uploads/aadhar-front.jpg",
-    aadharBack: "/uploads/aadhar-back.jpg",
-    bankDetails: "/uploads/bank-passbook.pdf",
-    panCard: "/uploads/pan-card.jpg",
+  const customerDocuments: CustomerDocuments = {
+    aadharDocuments: {
+      "76": selectedClaim?.documents?.["76"],
+      documents: selectedClaim?.aadhar_photos,
+    },
+    bankDetails: selectedClaim?.documents?.["77"],
+    panCard: selectedClaim?.documents?.["78"],
+    accessoriesProvided: String(selectedClaim?.data?.accessory_provided),
   };
 
   return (
