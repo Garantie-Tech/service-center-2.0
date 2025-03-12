@@ -54,33 +54,6 @@ const CancelClaimModal: React.FC<CancelClaimModalProps> = ({
     }
   }, [isOpen]);
 
-  // const handleSubmit = async () => {
-  //   if (!selectedReason) return;
-
-  //   try {
-  //     setIsLoading(true);
-
-  //     // API Call to submit cancellation reason
-  //     const response = await handleCancelClaim(
-  //       Number(selectedClaim?.id),
-  //       String(selectedReason)
-  //     );
-
-  //     if (!response.data) {
-  //       notifyError("Failed to cancel the claim. Please try again.");
-  //     } else {
-  //       notifySuccess("Claim cancelled successfully!");
-  //       onSubmit(selectedReason);
-  //       onClose();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error cancelling claim:", error);
-  //     notifyError("An error occurred while cancelling the claim.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handleSubmit = () => {
     if (!selectedReason) return;
     onSubmit(selectedReason);

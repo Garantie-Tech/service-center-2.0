@@ -180,8 +180,8 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   sortBy: "SRN",
   setSortBy: (sortKey: SortByOptions) => set({ sortBy: sortKey }),
 
-  sortOrder: "Ascending",
-  setSortOrder: (order: "Ascending" | "Descending") =>
+  sortOrder: "Desc",
+  setSortOrder: (order: "Asc" | "Desc") =>
     set({ sortOrder: order }),
 
   globalSearch: "",
@@ -212,7 +212,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
       const valueA = a[sortBy as keyof Claim] ?? "";
       const valueB = b[sortBy as keyof Claim] ?? "";
 
-      return order === "Ascending"
+      return order === "Asc"
         ? String(valueA).localeCompare(String(valueB))
         : String(valueB).localeCompare(String(valueA));
     });

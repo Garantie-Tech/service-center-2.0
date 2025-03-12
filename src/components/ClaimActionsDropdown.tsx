@@ -14,7 +14,7 @@ const ClaimActionsDropdown: React.FC = () => {
   const [showTimeline, setShowTimeline] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false);
-  const { selectedClaim, setActiveTab, setIsLoading, setClaimRevised } =
+  const { selectedClaim, setActiveTab, setIsLoading, setClaimRevised, triggerClaimRefresh} =
     useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
   const [serviceCenterId, setServiceCenterId] = useState<number | null>(null);
@@ -55,6 +55,7 @@ const ClaimActionsDropdown: React.FC = () => {
       if (!response.data) {
         notifyError("Failed to cancel the claim. Please try again.");
       } else {
+        triggerClaimRefresh();
         notifySuccess("Claim cancelled successfully!");
       }
     } catch (error) {

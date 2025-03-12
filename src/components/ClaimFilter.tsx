@@ -27,6 +27,7 @@ const ClaimFilter: React.FC = () => {
     handleSortingChange,
     handleFilterChange,
     claimStatuses,
+    setClaimTypes,
   } = useGlobalStore();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -85,20 +86,24 @@ const ClaimFilter: React.FC = () => {
 
   const handleSortChange = (sortKey: SortByOptions) => {
     setSortBy(sortKey);
-    handleSortingChange(sortKey, sortOrder as "Ascending" | "Descending");
+    handleSortingChange(sortKey, sortOrder as "Asc" | "Desc");
     setIsSortingOpen(false);
   };
 
   const toggleSortOrder = (order: SortOrder) => {
     setSortOrder(order);
-    handleSortingChange(sortBy, order as "Ascending" | "Descending");
+    handleSortingChange(sortBy, order as "Asc" | "Desc");
+    setIsSortingOpen(false);
   };
 
   const sortingRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (sortingRef.current && !sortingRef.current.contains(event.target as Node)) {
+      if (
+        sortingRef.current &&
+        !sortingRef.current.contains(event.target as Node)
+      ) {
         setIsSortingOpen(false);
       }
     }
@@ -111,6 +116,45 @@ const ClaimFilter: React.FC = () => {
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSortingOpen]);
+
+  const handleClaimTypeChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const selectedType = event.target.value;
+
+    // Reset all claim types and set the selected one to true
+    setClaimTypes({
+      myClaims: selectedType === "mySC",
+      otherClaims: selectedType === "otherSC",
+      pendingClaims: selectedType === "pendingClaims",
+    });
+  };
+
+  const handleCancel = () => {
+    const isAnyClaimTypeSelected =
+    claimTypes.myClaims || claimTypes.otherClaims || claimTypes.pendingClaims;
+
+    if (fromDate || toDate || isAnyClaimTypeSelected) {
+      setToDate("");
+      setFromDate("");
+      setClaimTypes({
+        myClaims: false,
+        otherClaims: false,
+        pendingClaims: false,
+      });
+      setAppliedFilters({ fromDate: "", toDate: "", claimTypes });
+    }
+    toggleFilter();
+  };
+
+  const mappedClaimType: Record<
+    "mySC" | "otherSC" | "pendingClaims",
+    keyof typeof claimTypes
+  > = {
+    mySC: "myClaims",
+    otherSC: "otherClaims",
+    pendingClaims: "pendingClaims",
+  };
 
   return (
     <div className="sticky top-0 bg-white h-[50px] mt-2">
@@ -202,8 +246,8 @@ const ClaimFilter: React.FC = () => {
                       type="radio"
                       className="radio rounded-[20px] mr-2 checked:bg-primaryBlue"
                       name="sortOrder"
-                      checked={sortOrder === "Ascending"}
-                      onChange={() => toggleSortOrder("Ascending")}
+                      checked={sortOrder === "Asc"}
+                      onChange={() => toggleSortOrder("Asc")}
                     />
                     Ascending
                   </label>
@@ -212,8 +256,8 @@ const ClaimFilter: React.FC = () => {
                       type="radio"
                       className="radio rounded-[20px] mr-2 checked:bg-primaryBlue"
                       name="sortOrder"
-                      checked={sortOrder === "Descending"}
-                      onChange={() => toggleSortOrder("Descending")}
+                      checked={sortOrder === "Desc"}
+                      onChange={() => toggleSortOrder("Desc")}
                     />
                     Descending
                   </label>
@@ -287,15 +331,26 @@ const ClaimFilter: React.FC = () => {
           {/* Claim Types */}
           <h3 className="text-sm font-bold mb-3">Claim Type</h3>
           <div className="flex gap-2 mb-4">
-            {["myClaims", "otherClaims", "pendingClaims"].map((type, index) => (
-              <label key={index} className="flex items-center">
+            {(
+              ["mySC", "otherSC", "pendingClaims"] as Array<
+                keyof typeof claimTypes
+              >
+            ).map((type) => (
+              <label key={type} className="flex items-center">
                 <input
                   type="radio"
                   name="claimType"
                   className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
+                  value={type}
+                  checked={
+                    claimTypes[
+                      mappedClaimType[type as keyof typeof mappedClaimType]
+                    ]
+                  }
+                  onChange={handleClaimTypeChange}
                 />
                 <span className="ml-2 text-xs capitalize">
-                  {type.replace("Claims", " Claims")}
+                  {type.replace("SC", " SC").replace("Claims", " Claims")}
                 </span>
               </label>
             ))}
@@ -303,11 +358,16 @@ const ClaimFilter: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex justify-center gap-2 mt-4">
-            <button className="btn w-1/2" onClick={toggleFilter}>
+            <button
+              className="btn w-1/2"
+              onClick={() => {
+                handleCancel();
+              }}
+            >
               Cancel
             </button>
             <button
-              className="btn bg-primaryBlue text-white w-1/2"
+              className="btn bg-primaryBlue hover:bg-lightPrimaryBlue text-white w-1/2"
               onClick={handleApply}
             >
               Apply

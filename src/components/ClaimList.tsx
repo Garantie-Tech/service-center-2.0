@@ -25,6 +25,8 @@ const ClaimList: React.FC = () => {
     refreshClaimsTrigger,
     setClaimRevised,
     setClaimCount,
+    claimTypes,
+    sortOrder
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -60,9 +62,21 @@ const ClaimList: React.FC = () => {
         }
       }
 
+      const selectedClaimType = Object.entries(claimTypes).find(
+        ([, value]) => value === true
+      )?.[0];
+
+      if (selectedClaimType) {
+        basePayload.claim_type = selectedClaimType
+      }
+      
+      if(sortOrder) {
+        basePayload.sort_by = sortOrder;
+      }
+
       return basePayload;
     },
-    [appliedFilters, filterStatus, globalSearch]
+    [appliedFilters, filterStatus, globalSearch, claimTypes, sortOrder]
   );
 
   // Fetch claims (main function)
@@ -170,7 +184,7 @@ const ClaimList: React.FC = () => {
     setPage(0);
     setHasMore(true);
     fetchClaimsData(0, true);
-  }, [appliedFilters, filterStatus, globalSearch]);
+  }, [appliedFilters, filterStatus, globalSearch, sortOrder]);
 
   // Background refresh effect
   useEffect(() => {
@@ -247,7 +261,7 @@ const ClaimList: React.FC = () => {
         setSelectedClaim(filteredClaims[0] || null);
       }
     }
-  }, [filteredClaims, globalSearch]);
+  }, [filteredClaims, globalSearch, sortOrder]);
 
   return (
     <div className="w-full max-w-lg mx-auto">

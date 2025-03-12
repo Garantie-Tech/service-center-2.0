@@ -530,27 +530,29 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
       {showReplacementConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-medium">Are you sure?</p>
+          <div className="bg-white p-4 rounded-lg shadow-lg text-center p-[40px]">
+            <h2 className="text-center text-xl font-semibold text-[#181D27]">
+              Are you sure?
+            </h2>
             {pendingReplacementValue == "yes" ? (
-              <p className="text-sm text-gray-600">
+              <p className="text-center text-base text-[#414651] font-medium my-4">
                 Motherboard/Phone is getting replaced.
               </p>
             ) : (
-              <p className="text-sm text-gray-600">
+              <p className="text-center text-base text-[#414651] font-medium my-4">
                 Motherboard/Phone is not getting replace.
               </p>
             )}
             <div className="flex justify-center gap-4 mt-4">
               <button
-                className="bg-darkGray text-white px-4 py-2 rounded-md"
+                className="w-1/2 border border-gray-300 px-4 py-2 rounded-md text-[#414651] hover:bg-gray-100 transition-all duration-200 h-[50px]"
                 onClick={cancelReplacementSelection}
               >
                 Cancel
               </button>
 
               <button
-                className="bg-primaryBlue text-white px-4 py-2 rounded-md"
+                className="w-1/2 h-[50px] px-4 py-2 rounded-md bg-primaryBlue text-white hover:bg-lightPrimaryBlue"
                 onClick={confirmReplacementSelection}
               >
                 Yes
@@ -810,27 +812,29 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
       {showReplacementConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-medium">Are you sure?</p>
+          <div className="bg-white p-4 rounded-lg shadow-lg text-center p-[40px]">
+            <h2 className="text-center text-xl font-semibold text-[#181D27]">
+              Are you sure?
+            </h2>
             {pendingReplacementValue == "yes" ? (
-              <p className="text-sm text-gray-600">
+              <p className="text-center text-base text-[#414651] font-medium my-4">
                 Motherboard/Phone is getting replaced.
               </p>
             ) : (
-              <p className="text-sm text-gray-600">
+              <p className="text-center text-base text-[#414651] font-medium my-4">
                 Motherboard/Phone is not getting replace.
               </p>
             )}
             <div className="flex justify-center gap-4 mt-4">
               <button
-                className="bg-darkGray text-white px-4 py-2 rounded-md"
+                className="w-1/2 border border-gray-300 px-4 py-2 rounded-md text-[#414651] hover:bg-gray-100 transition-all duration-200 h-[50px]"
                 onClick={cancelReplacementSelection}
               >
                 Cancel
               </button>
 
               <button
-                className="bg-primaryBlue text-white px-4 py-2 rounded-md"
+                className="w-1/2 h-[50px] px-4 py-2 rounded-md bg-primaryBlue text-white hover:bg-lightPrimaryBlue"
                 onClick={confirmReplacementSelection}
               >
                 Yes

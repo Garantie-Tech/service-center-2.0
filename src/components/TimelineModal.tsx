@@ -87,15 +87,15 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             <ul className="timeline timeline-vertical">
               {claimTimeline.map((event, index) => (
                 <li key={index}>
-                  {index !== 0 && <hr className="bg-[#3C63FC]" />}
+                  {index !== 0 && <hr className="bg-[#3C63FC] !h-[30px]" />}
                   <div className="timeline-start">
-                    {event?.time || "No time available"}
+                    {event?.label || "No label"}
                   </div>
                   <div className="timeline-middle px-[10px]">
                     <CheckmarkIcon />
                   </div>
                   <div className="timeline-end timeline-box">
-                    {event?.label || "No label"}
+                  {event?.time || "No time available"}
                   </div>
                   {index !== claimTimeline.length - 1 && (
                     <hr className="bg-[#3C63FC] !h-[30px]" />

@@ -140,6 +140,8 @@ export interface ClaimFetchPayload {
   startDate?: string;
   endDate?: string;
   claim_search?: string;
+  claim_type?: string;
+  sort_by?: string;
 }
 
 export interface UploadFinalDocuments {
