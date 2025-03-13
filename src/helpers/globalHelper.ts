@@ -53,14 +53,14 @@ export const getActiveTab = (status: string): string => {
     status === "BER Repair Approved" ||
     status === "BER Replacement Approved" ||
     status === "BER Replace" ||
-    status === "Approved"
+    status === "Approved" ||
+    status === "BER Settlement Initiated" ||
+    status === "BER Settlement Completed"
   ) {
     return "Final Documents";
   }
   if (
-    status === "BER SETTLE" ||
-    status === "BER Settlement Initiated" ||
-    status === "BER Settlement Completed"
+    status === "BER SETTLE"
   ) {
     return "Customer Documents";
   }
@@ -94,9 +94,7 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
 
   if (
     [
-      "BER SETTLE",
-      "BER Settlement Initiated",
-      "BER Settlement Completed",
+      "BER SETTLE"
     ].includes(claimStatus)
   ) {
     return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
@@ -111,7 +109,7 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
   }
 
   if (
-    ["Approved", "BER Approved", "BER Replacement Approved"].includes(
+    ["Approved", "BER Approved", "BER Replacement Approved","BER Settlement Initiated", "BER Settlement Completed",].includes(
       claimStatus
     )
   ) {
