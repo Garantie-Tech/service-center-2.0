@@ -71,7 +71,7 @@ export const getActiveTab = (status: string): string => {
   return "Claim Details";
 };
 
-export const getFilteredTabs = (claimStatus: string): Tab[] => {
+export const getFilteredTabs = (claimStatus: string, selectedClaim : Claim): Tab[] => {
   if (["Claim Initiated", "Claim Submitted"].includes(claimStatus)) {
     return ["Claim Details", "Estimate"];
   }
@@ -117,6 +117,10 @@ export const getFilteredTabs = (claimStatus: string): Tab[] => {
   }
 
   if (["Partially Approved"].includes(claimStatus)) {
+    return ["Claim Details", "Estimate", "Approval"];
+  }
+
+  if(["BER Repair", "BER Replace"].includes(claimStatus) && !selectedClaim?.repair_payment_successful) {
     return ["Claim Details", "Estimate", "Approval"];
   }
 

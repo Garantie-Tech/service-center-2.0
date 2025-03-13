@@ -75,7 +75,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     }
   };
 
-  const filteredTabs: Tab[] = getFilteredTabs(claimStatus);
+  const filteredTabs: Tab[] = getFilteredTabs(claimStatus, selectedClaim);
 
   const cancelledData = {
     cancelledBy: selectedClaim?.cancelled_by,
