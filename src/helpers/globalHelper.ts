@@ -172,7 +172,7 @@ export const getDocumentInfo = (
   const doc = selectedClaim?.documents?.[docKey];
 
   const status = doc?.status;
-  const statusValue = status === "1" ? true : status === "0" ? false : null;
+  const statusValue = status == "1" ? true : status == "0" ? false : null;
 
   return {
     isInvalid: !!doc?.status_reason_id,
