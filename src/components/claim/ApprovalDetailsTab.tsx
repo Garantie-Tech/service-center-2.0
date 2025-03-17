@@ -166,13 +166,13 @@ const ApprovalDetailsTab: React.FC = () => {
       );
 
       if (!response.success) {
-        notifyError("Failed to update Ber Decision !");
+        notifyError("Failed to Generate Payment Link !");
       } else {
         triggerClaimRefresh();
-        notifySuccess("Ber Decision Successfully updated !");
+        notifySuccess("Payment Link Successfully Generated! ");
       }
     } catch (error) {
-      notifyError(`Failed to update Ber Decision ! ${error}`);
+      notifyError(`Failed to generate Payment link ! ${error}`);
     } finally {
       setIsLoading(false);
     }

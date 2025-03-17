@@ -49,7 +49,6 @@ export const getActiveTab = (status: string): string => {
     return "Rejected";
   }
   if (
-    status === "Closed" ||
     status === "BER Repair Approved" ||
     status === "BER Replacement Approved" ||
     status === "BER Replace" ||
@@ -58,6 +57,11 @@ export const getActiveTab = (status: string): string => {
     status === "BER Settlement Completed"
   ) {
     return "Final Documents";
+  }
+  if (
+    status === "Closed"
+  ) {
+    return "Settlement";
   }
   if (
     status === "BER SETTLE"

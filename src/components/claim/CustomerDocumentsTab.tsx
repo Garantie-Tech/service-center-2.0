@@ -475,7 +475,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
                 setReupload(true);
               }}
             >
-              Reupload
+              Upload Again
             </button>
           ) : (
             <button

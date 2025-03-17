@@ -157,7 +157,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setToDate: (date) => set({ toDate: date }),
 
   claimTypes: {
-    myClaims: false,
+    myClaims: true,
     otherClaims: false,
     pendingClaims: false,
   },

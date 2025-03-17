@@ -132,13 +132,13 @@ const ClaimFilter: React.FC = () => {
 
   const handleCancel = () => {
     const isAnyClaimTypeSelected =
-    claimTypes.myClaims || claimTypes.otherClaims || claimTypes.pendingClaims;
+      claimTypes.myClaims || claimTypes.otherClaims || claimTypes.pendingClaims;
 
     if (fromDate || toDate || isAnyClaimTypeSelected) {
       setToDate("");
       setFromDate("");
       setClaimTypes({
-        myClaims: false,
+        myClaims: true,
         otherClaims: false,
         pendingClaims: false,
       });

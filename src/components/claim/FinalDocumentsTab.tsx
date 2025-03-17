@@ -148,6 +148,8 @@ const FinalDocumentsTab: React.FC = () => {
     isImeiChanged: isImeiChanged,
   };
 
+  const showSubmitButton = repairInvoiceInfo.statusValue != true && repairMobilePhotoInfo.statusValue != true || (replacementReceiptInfo.statusValue != true && isImeiChanged) ;
+
   return isEditable ? (
     <div>
       <h2 className="text-lg font-semibold mb-4">Final Invoice Documents</h2>
@@ -351,16 +353,16 @@ const FinalDocumentsTab: React.FC = () => {
             className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
             onClick={() => setReupload(true)}
           >
-            Reupload
+            Upload Again
           </button>
-        ) : (
+        ) : showSubmitButton ? (
           <button
             className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
             onClick={handleSubmit}
           >
             Submit
           </button>
-        )}
+        ): (<></>)}
       </div>
     </div>
   ) : (

@@ -43,6 +43,7 @@ export const CLAIM_TABS = [
   "Customer Documents",
   "Cancelled",
   "Rejected",
+  "Settlement",
 ] as const;
 
 export type Tab = (typeof CLAIM_TABS)[number];
@@ -64,13 +65,13 @@ export interface EstimateDetailsState {
   estimateAmount: string;
   jobSheetNumber: string;
   estimateDetails: string;
-  replacementConfirmed: string | "yes" | "no" | null | '';
+  replacementConfirmed: string | "yes" | "no" | null | "";
   damagePhotos: (string | File)[];
   estimateDocument: File | string | null;
   documents?: Documents;
 }
 
-export interface ApprovalState { 
+export interface ApprovalState {
   approvalDetails: {
     estimateAmount: number;
     approvedAmount: number;
@@ -163,12 +164,12 @@ export interface GeneratePaymentLink {
   locale: string;
   message: string;
   data?: {
-    entity_id: number,
-    payment_type: string,
-    entity: string,
-    is_monthly: boolean,
-    is_recurring: string,
-    payment_method: string,
+    entity_id: number;
+    payment_type: string;
+    entity: string;
+    is_monthly: boolean;
+    is_recurring: string;
+    payment_method: string;
   };
 }
 
