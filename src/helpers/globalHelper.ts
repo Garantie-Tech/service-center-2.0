@@ -58,14 +58,10 @@ export const getActiveTab = (status: string): string => {
   ) {
     return "Final Documents";
   }
-  if (
-    status === "Closed"
-  ) {
-    return "Settlement";
+  if (status === "Closed") {
+    return "Settlement Details";
   }
-  if (
-    status === "BER SETTLE"
-  ) {
+  if (status === "BER SETTLE") {
     return "Customer Documents";
   }
 
@@ -75,7 +71,10 @@ export const getActiveTab = (status: string): string => {
   return "Claim Details";
 };
 
-export const getFilteredTabs = (claimStatus: string, selectedClaim : Claim): Tab[] => {
+export const getFilteredTabs = (
+  claimStatus: string,
+  selectedClaim: Claim
+): Tab[] => {
   if (["Claim Initiated", "Claim Submitted"].includes(claimStatus)) {
     return ["Claim Details", "Estimate"];
   }
@@ -96,11 +95,7 @@ export const getFilteredTabs = (claimStatus: string, selectedClaim : Claim): Tab
     return ["Claim Details", "Estimate"];
   }
 
-  if (
-    [
-      "BER SETTLE"
-    ].includes(claimStatus)
-  ) {
+  if (["BER SETTLE"].includes(claimStatus)) {
     return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
   }
 
@@ -113,9 +108,13 @@ export const getFilteredTabs = (claimStatus: string, selectedClaim : Claim): Tab
   }
 
   if (
-    ["Approved", "BER Approved", "BER Replacement Approved","BER Settlement Initiated", "BER Settlement Completed",].includes(
-      claimStatus
-    )
+    [
+      "Approved",
+      "BER Approved",
+      "BER Replacement Approved",
+      "BER Settlement Initiated",
+      "BER Settlement Completed",
+    ].includes(claimStatus)
   ) {
     return ["Claim Details", "Estimate", "Approval", "Final Documents"];
   }
@@ -124,8 +123,31 @@ export const getFilteredTabs = (claimStatus: string, selectedClaim : Claim): Tab
     return ["Claim Details", "Estimate", "Approval"];
   }
 
-  if(["BER Repair", "BER Replace"].includes(claimStatus) && !selectedClaim?.repair_payment_successful) {
+  if (
+    ["BER Repair", "BER Replace"].includes(claimStatus) &&
+    !selectedClaim?.repair_payment_successful
+  ) {
     return ["Claim Details", "Estimate", "Approval"];
+  }
+
+  if (["Closed"].includes(claimStatus) && selectedClaim?.documents?.["16"]) {
+    return [
+      "Claim Details",
+      "Estimate",
+      "Approval",
+      "Final Documents",
+      "Settlement Details",
+    ];
+  }
+
+  if (["Closed"].includes(claimStatus) && selectedClaim?.documents?.["76"]) {
+    return [
+      "Claim Details",
+      "Estimate",
+      "Approval",
+      "Customer Documents",
+      "Settlement Details",
+    ];
   }
 
   return ["Claim Details", "Estimate", "Approval", "Final Documents"];
@@ -154,6 +176,8 @@ export const getTabStatus = (
       return selectedClaim?.cancellation_reason ? "error" : "success";
     case "Rejected":
       return selectedClaim?.is_rejected ? "error" : "success";
+    case "Settlement Details":
+      return false ? "error" : "success";
     default:
       return "empty";
   }

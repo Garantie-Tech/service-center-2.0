@@ -56,6 +56,9 @@ export default interface Claim {
   service_centre_id: number;
   service_centre_name: string;
   aadhar_photos?: string[];
+  utr_number?: string;
+  payment_date?: string;
+  payment_amount?: string;
 }
 
 export interface ClaimDetailsProps {
@@ -94,4 +97,10 @@ export interface CustomerDocuments {
 
 export interface CustomerDocumentsTabProps {
   documents: CustomerDocuments;
+}
+
+export interface SettlementDetailsProps {
+  utr_number: string;
+  payment_date: string;
+  payment_amount: string;
 }

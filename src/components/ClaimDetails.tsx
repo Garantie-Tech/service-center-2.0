@@ -8,7 +8,10 @@ import FinalDocumentsTab from "@/components/claim/FinalDocumentsTab";
 import { Tab } from "@/interfaces/GlobalInterface";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
-import Claim, { CustomerDocuments } from "@/interfaces/ClaimInterface";
+import Claim, {
+  CustomerDocuments,
+  SettlementDetailsProps,
+} from "@/interfaces/ClaimInterface";
 import { submitEstimate } from "@/services/claimService";
 import ClaimActionsDropdown from "./ClaimActionsDropdown";
 import { useNotification } from "@/context/NotificationProvider";
@@ -20,6 +23,7 @@ import {
   getStatusIcon,
   getTabStatus,
 } from "@/helpers/globalHelper";
+import SettlementDetailsTab from "./claim/SettlementDetailsTab";
 
 const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
   selectedClaim,
@@ -94,6 +98,16 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     bankDetails: selectedClaim?.documents?.["77"],
     panCard: selectedClaim?.documents?.["78"],
     accessoriesProvided: String(selectedClaim?.data?.accessory_provided),
+  };
+
+  const settlementDetailsData: SettlementDetailsProps = {
+    utr_number: selectedClaim?.utr_number ? selectedClaim?.utr_number : "N/A",
+    payment_date: selectedClaim?.payment_date
+      ? selectedClaim?.payment_date
+      : "N/A",
+    payment_amount: selectedClaim?.payment_amount
+      ? selectedClaim?.payment_amount
+      : "N/A",
   };
 
   return (
@@ -177,6 +191,9 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
         )}
         {activeTab === "Cancelled" && <CancelledClaim data={cancelledData} />}
         {activeTab === "Rejected" && <RejectedClaim data={rejectedData} />}
+        {activeTab === "Settlement Details" && (
+          <SettlementDetailsTab data={settlementDetailsData} />
+        )}
       </div>
     </div>
   );

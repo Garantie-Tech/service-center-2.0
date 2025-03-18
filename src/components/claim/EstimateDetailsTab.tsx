@@ -10,6 +10,7 @@ import EstimateTabViewComponent from "@/components/claim/view/EstimateTabView";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import { useEffect, useState } from "react";
 import GalleryPopup from "@/components/ui/GalleryPopup";
+import { MAX_DAMAGE_IMAGES, MAX_FILE_SIZE } from "@/globalConstant";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -18,10 +19,13 @@ interface EstimateDetailsTabProps {
 const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   onSubmit,
 }) => {
-  const MAX_DAMAGE_IMAGES = 11;
   const [damagePhotosError, setDamagePhotosError] = useState<string | null>(
     null
   );
+
+  const [estimateDocumentError, setEstimateDocumentError] = useState<
+    string | null
+  >("");
 
   const {
     selectedClaim,
@@ -131,7 +135,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
       if (damagePhotos.length + newFiles.length > MAX_DAMAGE_IMAGES) {
         setDamagePhotosError(
-          `You can upload up to ${MAX_DAMAGE_IMAGES} images.`
+          `You can upload a maximum of ${MAX_DAMAGE_IMAGES} images.`
         );
         return;
       }
@@ -140,6 +144,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         damagePhotos: [...damagePhotos, ...newFiles],
       });
       setDamagePhotosError(null);
+      event.target.value = "";
     }
   };
 
@@ -147,7 +152,19 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
-      setEstimateDetailsState({ estimateDocument: event.target.files[0] });
+      const file = event.target.files[0];
+
+      // Check if file size exceeds 2MB
+      if (file.size > MAX_FILE_SIZE) {
+        setEstimateDetailsState({ estimateDocument: null });
+        setEstimateDocumentError("File size must be less than 2MB.");
+        event.target.value = "";
+        return;
+      }
+
+      // Update state with valid file
+      setEstimateDetailsState({ estimateDocument: file });
+      event.target.value = "";
     }
   };
 
@@ -444,6 +461,13 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   </button>
                 )}
               </div>
+            )}
+
+            {estimateDocumentError && (
+              <ErrorAlert
+                message={estimateDocumentError}
+                onClose={() => setEstimateDocumentError(null)}
+              />
             )}
 
             {isInvalidDocument ? (

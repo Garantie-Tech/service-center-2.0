@@ -43,7 +43,7 @@ export const CLAIM_TABS = [
   "Customer Documents",
   "Cancelled",
   "Rejected",
-  "Settlement",
+  "Settlement Details",
 ] as const;
 
 export type Tab = (typeof CLAIM_TABS)[number];

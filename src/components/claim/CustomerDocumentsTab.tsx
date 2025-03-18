@@ -444,7 +444,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
               type="radio"
               name="accessoriesProvided"
               value="yes"
-              className="radio"
+              className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
               checked={accessoriesProvided === "yes"}
               onChange={() => handleAccessoriesClick("yes")}
             />
@@ -456,7 +456,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
               type="radio"
               name="accessoriesProvided"
               value="no"
-              className="radio"
+              className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
               checked={accessoriesProvided === "no"}
               onChange={() => handleAccessoriesClick("no")}
             />

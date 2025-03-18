@@ -89,7 +89,7 @@ const SearchSection: React.FC = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search Claim number, customer mobile, or IMEI number"
+              placeholder="Search by Claim Number, Customer Name, Email, or IMEI Number"
               className="input input-bordered w-full text-xs pr-10"
             />
             {searchTerm && (

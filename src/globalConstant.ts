@@ -3,3 +3,6 @@ export const SORT_OPTIONS = [
   // { key: "FOLLOW_UP", label: "Follow UP" },
   // { key: "TIME", label: "Time" },
 ] as const;
+
+export const MAX_DAMAGE_IMAGES = 11;
+export const MAX_FILE_SIZE = 2 * 1024 * 1024;

@@ -37,7 +37,7 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
         <div>
           <h4 className="text-xs text-gray-500">Is Motherboard Replaced ?</h4>
           <p className="text-sm text-gray-700">
-            {estimateDetailsState.replacementConfirmed ? "Yes" : "No"}
+            {estimateDetailsState.replacementConfirmed == 'yes' ? "yes" : "no"}
           </p>
         </div>
       </div>

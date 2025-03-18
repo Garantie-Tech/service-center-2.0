@@ -167,6 +167,7 @@ const ClaimList: React.FC = () => {
                 | "Customer Documents"
                 | "Cancelled"
                 | "Rejected"
+                | "Settlement Details"
             );
             setClaimRevised(false);
           }
@@ -210,7 +211,6 @@ const ClaimList: React.FC = () => {
   }, [page, hasMore, loading]);
 
   useEffect(() => {
-    // const isSearchActive = globalSearch !== undefined;
     if (!selectedClaim) {
       // If there's no selected claim, select the first available claim
       if (filteredClaims.length > 0) {
@@ -248,6 +248,7 @@ const ClaimList: React.FC = () => {
             | "Customer Documents"
             | "Cancelled"
             | "Rejected"
+            | "Settlement Details"
         );
       } else {
         setSelectedClaim(null);
@@ -293,6 +294,7 @@ const ClaimList: React.FC = () => {
                     | "Customer Documents"
                     | "Cancelled"
                     | "Rejected"
+                    | "Settlement Details"
                 );
                 setEstimateDetailsState({
                   estimateAmount: claim.claimed_amount || "",
