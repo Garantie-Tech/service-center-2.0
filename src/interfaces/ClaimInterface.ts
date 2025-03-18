@@ -59,6 +59,15 @@ export default interface Claim {
   utr_number?: string;
   payment_date?: string;
   payment_amount?: string;
+  plan_number?: string;
+  plan_start_date?: string;
+  plan_end_date?: string;
+  model_name?: string;
+  model_price?: string | number;
+  copay_refunded?: boolean,
+  copay_refunded_date?: string,
+  copay_refunded_id?: string,
+  copay_refunded_amount?: string | number,
 }
 
 export interface ClaimDetailsProps {

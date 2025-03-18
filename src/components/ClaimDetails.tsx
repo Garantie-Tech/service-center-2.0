@@ -84,10 +84,18 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
   const cancelledData = {
     cancelledBy: selectedClaim?.cancelled_by,
     cancelledReason: selectedClaim?.cancellation_reason,
+    copayRefunded: selectedClaim?.copay_refunded,
+    copayRefundedDate: selectedClaim?.copay_refunded_date,
+    copayRefundedId: selectedClaim?.copay_refunded_id,
+    copayRefundedAmount: selectedClaim?.copay_refunded_amount,
   };
 
   const rejectedData = {
     rejectedReason: selectedClaim?.rejection_reason,
+    copayRefunded: selectedClaim?.copay_refunded,
+    copayRefundedDate: selectedClaim?.copay_refunded_date,
+    copayRefundedId: selectedClaim?.copay_refunded_id,
+    copayRefundedAmount: selectedClaim?.copay_refunded_amount,
   };
 
   const customerDocuments: CustomerDocuments = {

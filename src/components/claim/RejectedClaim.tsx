@@ -5,27 +5,45 @@ import React from "react";
 interface RejectedClaimProps {
   data: {
     rejectedReason: string | undefined;
+    copayRefunded?: boolean;
+    copayRefundedDate?: string;
+    copayRefundedId?: string;
+    copayRefundedAmount?: string | number;
   };
 }
 
 const RejectedClaim: React.FC<RejectedClaimProps> = ({ data }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Left Column */}
-      <div className="space-y-8">
-        <div>
-          <h4 className="text-xs text-gray-500">Reason</h4>
-          <p className="text-sm font-semibold">{data?.rejectedReason}</p>
-        </div>
+    <div className="grid grid-cols-2 gap-y-8 pb-[100px]">
+      {/*Reason */}
+      <div>
+        <p className="text-gray-500 text-xs">Reason</p>
+        <p className="font-bold text-sm">{data?.rejectedReason}</p>
       </div>
 
-      {/* Right Column */}
-      {/* <div className="space-y-8">
+      {/* Copay Refunded date */}
+      {data?.copayRefundedDate && (
         <div>
-          <h4 className="text-xs text-gray-500">Cancelled Reason</h4>
-          <p className="text-sm font-semibold">{data?.cancelledReason}</p>
+          <p className="text-gray-500 text-xs">Copay Refund Date</p>
+          <p className="font-bold text-sm">{data?.copayRefundedDate}</p>
         </div>
-      </div> */}
+      )}
+
+      {/* Copay Refunded id */}
+      {data?.copayRefundedId && (
+        <div>
+          <p className="text-gray-500 text-xs">Copay Refund Id</p>
+          <p className="font-bold text-sm">{data?.copayRefundedId}</p>
+        </div>
+      )}
+
+      {/* Copay Refunded amount */}
+      {data?.copayRefundedAmount && (
+        <div>
+          <p className="text-gray-500 text-xs">Copay Refund Amount</p>
+          <p className="font-bold text-sm">{data?.copayRefundedAmount}</p>
+        </div>
+      )}
     </div>
   );
 };

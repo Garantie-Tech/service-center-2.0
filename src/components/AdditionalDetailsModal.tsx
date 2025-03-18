@@ -1,5 +1,6 @@
 "use client";
 
+import { useGlobalStore } from "@/store/store";
 import Image from "next/image";
 
 interface AdditionalDetailsModalProps {
@@ -11,6 +12,8 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { selectedClaim } = useGlobalStore();
+
   return (
     <div
       className={`fixed inset-0 flex justify-end z-50 transition-all duration-300 ${
@@ -51,52 +54,39 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
 
         {/* Details Section */}
         <div className="p-6 overflow-y-auto h-[calc(100%-100px)]">
-          <div className="grid grid-cols-2 gap-y-4 text-sm pb-[100px]">
-            {/* Claim Date */}
+          <div className="grid grid-cols-2 gap-y-8 pb-[100px]">
+            {/* Plan Number */}
             <div>
-              <p className="text-gray-500">Claim Date</p>
-              <p className="font-bold">02-01-2025</p>
+              <p className="text-gray-500 text-xs">Plan Number</p>
+              <p className="font-bold text-sm">{selectedClaim?.plan_number}</p>
             </div>
 
-            {/* Plan Type */}
+            {/* Start Date */}
             <div>
-              <p className="text-gray-500">Plan Type</p>
-              <p className="font-bold">CDP</p>
-            </div>
-
-            {/* SRN Number */}
-            <div>
-              <p className="text-gray-500">SRN No</p>
-              <p className="font-bold">18956</p>
-            </div>
-
-            {/* Name */}
-            <div>
-              <p className="text-gray-500">Name</p>
-              <p className="font-bold">Ram Kumar</p>
-            </div>
-
-            {/* IMEI Number */}
-            <div>
-              <p className="text-gray-500">IMEI</p>
-              <p className="font-bold">816395305305395903</p>
-            </div>
-
-            {/* Co-Pay Amount */}
-            <div>
-              <p className="text-gray-500">Co-pay</p>
-              <p className="font-bold">
-                200 <span className="text-green-500">(Paid)</span>
+              <p className="text-gray-500 text-xs">Start Date</p>
+              <p className="font-bold text-sm">
+                {selectedClaim?.plan_start_date}
               </p>
             </div>
 
-            {/* Claim Details Section */}
-            <div className="col-span-2 pb-[100px]">
-              <p className="text-gray-500">Claim Details</p>
-              <p className="mt-1">
-                I was leaving for office in the morning when the bike from
-                behind hit me, and I fell, and my phone got damaged.
+            {/* Model Name */}
+            <div>
+              <p className="text-gray-500 text-xs">Model Name</p>
+              <p className="font-bold text-sm">{selectedClaim?.model_name}</p>
+            </div>
+
+            {/* End Date */}
+            <div>
+              <p className="text-gray-500 text-xs">End Date</p>
+              <p className="font-bold text-sm">
+                {selectedClaim?.plan_end_date}
               </p>
+            </div>
+
+            {/* Model Price */}
+            <div>
+              <p className="text-gray-500 text-xs">Model Price</p>
+              <p className="font-bold text-sm">{selectedClaim?.model_price}</p>
             </div>
           </div>
         </div>
