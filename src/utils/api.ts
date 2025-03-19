@@ -1,4 +1,9 @@
-import { ClaimFetchPayload, GenerateLinkPaymentBody } from "@/interfaces/GlobalInterface";
+import {
+  ClaimFetchPayload,
+  GenerateLinkPaymentBody,
+  RemarkPayload,
+  RemarksApiResponse,
+} from "@/interfaces/GlobalInterface";
 import { getCookie } from "@/utils/cookieManager";
 
 export interface ApiResponse<T> {
@@ -7,10 +12,16 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
 
 // Function to format query parameters into a URL string
-function formatQueryParams(params: Record<string, string | number | boolean> | ClaimFetchPayload): string {
+function formatQueryParams(
+  params:
+    | Record<string, string | number | boolean>
+    | ClaimFetchPayload
+    | RemarksApiResponse
+): string {
   const queryString = new URLSearchParams(
     Object.entries(params).reduce((acc, [key, value]) => {
       acc[key] = String(value);
@@ -24,8 +35,15 @@ function formatQueryParams(params: Record<string, string | number | boolean> | C
 export async function apiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  body?: Record<string, unknown> | FormData | GenerateLinkPaymentBody,
-  params?: Record<string, string | number | boolean> | ClaimFetchPayload,
+  body?:
+    | Record<string, unknown>
+    | FormData
+    | GenerateLinkPaymentBody
+    | RemarkPayload,
+  params?:
+    | Record<string, string | number | boolean>
+    | ClaimFetchPayload
+    | RemarksApiResponse,
   extraHeaders: HeadersInit = {}
 ): Promise<ApiResponse<T>> {
   try {
@@ -33,24 +51,36 @@ export async function apiRequest<T>(
 
     const headers: HeadersInit = {
       ...(token && { Authorization: `Bearer ${token}` }),
-      ...(body && !(body instanceof FormData) && { "Content-Type": "application/json" }),
+      ...(body &&
+        !(body instanceof FormData) && { "Content-Type": "application/json" }),
       ...extraHeaders,
     };
 
-    const url = `${API_BASE_URL}/${endpoint}${method === "GET" && params ? formatQueryParams(params) : ""}`;
+    const url = `${API_BASE_URL}/${endpoint}${
+      method === "GET" && params ? formatQueryParams(params) : ""
+    }`;
 
     const response = await fetch(url, {
       next: { revalidate: 60 }, // Caching strategy
       method,
       headers,
-      body: method !== "GET" && body ? (body instanceof FormData ? body : JSON.stringify(body)) : undefined,
+      body:
+        method !== "GET" && body
+          ? body instanceof FormData
+            ? body
+            : JSON.stringify(body)
+          : undefined,
     });
 
     // Ensure the response is valid JSON
     const rawData = await response.json();
 
     if (!response.ok) {
-      return { success: false, error: (rawData as { message?: string })?.message || "Something went wrong" };
+      return {
+        success: false,
+        error:
+          (rawData as { message?: string })?.message || "Something went wrong",
+      };
     }
 
     // Explicitly cast rawData to type T after successful response
@@ -61,17 +91,36 @@ export async function apiRequest<T>(
 }
 
 // Generic GET request
-export function getRequest<T>(endpoint: string, params?: Record<string, string | number | boolean> | ClaimFetchPayload, extraHeaders?: HeadersInit) {
+export function getRequest<T>(
+  endpoint: string,
+  params?:
+    | Record<string, string | number | boolean>
+    | ClaimFetchPayload
+    | RemarksApiResponse,
+  extraHeaders?: HeadersInit
+) {
   return apiRequest<T>(endpoint, "GET", undefined, params, extraHeaders);
 }
 
 // Generic POST request
-export function postRequest<T>(endpoint: string, body: Record<string, unknown> | FormData | GenerateLinkPaymentBody, extraHeaders?: HeadersInit) {
+export function postRequest<T>(
+  endpoint: string,
+  body:
+    | Record<string, unknown>
+    | FormData
+    | GenerateLinkPaymentBody
+    | RemarkPayload,
+  extraHeaders?: HeadersInit
+) {
   return apiRequest<T>(endpoint, "POST", body, undefined, extraHeaders);
 }
 
 // Generic PUT request
-export function putRequest<T>(endpoint: string, body: Record<string, unknown>, extraHeaders?: HeadersInit) {
+export function putRequest<T>(
+  endpoint: string,
+  body: Record<string, unknown>,
+  extraHeaders?: HeadersInit
+) {
   return apiRequest<T>(endpoint, "PUT", body, undefined, extraHeaders);
 }
 

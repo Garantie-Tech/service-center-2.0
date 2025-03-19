@@ -205,3 +205,40 @@ export interface UploadCustomerDocuments {
     message: number;
   };
 }
+
+export interface Remark {
+  id: number;
+  remark: string;
+  entity: string;
+  created_by: number;
+  updated_by: number | null;
+  created_at: string;
+  updated_at: string;
+  data?: null;
+  type: string;
+  added_by_platform: string;
+  added_at: string;
+  added_by_user: string;
+  remark_type: number;
+  pivot: {
+    claim_id: number;
+    remark_id: number;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+}
+
+export interface RemarksApiResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    items: Remark[];
+  };
+}
+
+export interface RemarkPayload {
+  added_by_platform: string;
+  remark: string;
+}

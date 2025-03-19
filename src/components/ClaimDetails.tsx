@@ -12,8 +12,8 @@ import Claim, {
   CustomerDocuments,
   SettlementDetailsProps,
 } from "@/interfaces/ClaimInterface";
-import { submitEstimate } from "@/services/claimService";
-import ClaimActionsDropdown from "./ClaimActionsDropdown";
+import { addRemark, submitEstimate } from "@/services/claimService";
+import ClaimActionsDropdown from "@/components/ClaimActionsDropdown";
 import { useNotification } from "@/context/NotificationProvider";
 import CustomerDocumentsTab from "@/components/claim/CustomerDocumentsTab";
 import CancelledClaim from "@/components/claim/CancelledClaimTab";
@@ -23,7 +23,9 @@ import {
   getStatusIcon,
   getTabStatus,
 } from "@/helpers/globalHelper";
-import SettlementDetailsTab from "./claim/SettlementDetailsTab";
+import SettlementDetailsTab from "@/components/claim/SettlementDetailsTab";
+import RemarksComponent from "@/components/RemarksComponent";
+import { useState } from "react";
 
 const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
   selectedClaim,
@@ -39,6 +41,28 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
+  };
+
+  const [isRemarksOpen, setIsRemarksOpen] = useState(false);
+
+  const handleRemarksSubmit = async (remark: string) => {
+    try {
+      const response = await addRemark(
+        Number(selectedClaim?.id),
+        "Service Centre",
+        remark
+      );
+
+      if (!response) {
+        notifyError("Failed to add remark. Please try again.");
+      } else {
+        triggerClaimRefresh();
+        notifySuccess("Remark Added successfully!");
+      }
+    } catch (error) {
+      console.error("Error Adding remark:", error);
+      notifyError("An error occurred while adding the remark.");
+    }
   };
 
   if (!selectedClaim) {
@@ -142,9 +166,13 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <button className="tooltip tooltip-bottom" data-tip="Remarks">
+          <button
+            className="tooltip tooltip-bottom"
+            data-tip="Remarks"
+            onClick={() => setIsRemarksOpen(true)}
+          >
             <Image
-              src="/images/edit-icon.svg"
+              src="/images/remarks-icon.svg"
               alt="Edit"
               width={24}
               height={24}
@@ -203,6 +231,14 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
           <SettlementDetailsTab data={settlementDetailsData} />
         )}
       </div>
+
+      {/* remarks popup */}
+
+      <RemarksComponent
+        isOpen={isRemarksOpen}
+        onClose={() => setIsRemarksOpen(false)}
+        onSubmit={handleRemarksSubmit}
+      />
     </div>
   );
 };

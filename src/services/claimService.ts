@@ -6,6 +6,8 @@ import {
   ClaimTimeline,
   GenerateLinkPaymentBody,
   GeneratePaymentLink,
+  RemarkPayload,
+  RemarksApiResponse,
   SubmitEstimate,
   UploadCustomerDocuments,
   UploadFinalDocuments,
@@ -124,7 +126,43 @@ export const fetchTimeline = async (
   return await getRequest<ClaimTimeline>(`timeline/${claimId}`, _params);
 };
 
-export const uploadCustomerDocuments = async (claimID: number, body: FormData) => {
+export const uploadCustomerDocuments = async (
+  claimID: number,
+  body: FormData
+) => {
   const endpoint = `submit/customer/documents/${claimID}`;
   return await postRequest<UploadCustomerDocuments>(endpoint, body);
+};
+
+export const fetchRemarks = async (
+  claimId: string | number,
+  _params?:
+    | Record<string, string | number | boolean>
+    | ClaimFetchPayload
+    | RemarksApiResponse
+) => {
+  return await getRequest<RemarksApiResponse>(
+    `claims/${claimId}/remarks`,
+    _params
+  );
+};
+
+export const addRemark = async (
+  claimId: number,
+  addedBy: string,
+  remark: string
+) => {
+  const endpoint = `claims/${claimId}/remarks`;
+  const body: RemarkPayload = {
+    added_by_platform: addedBy,
+    remark: remark,
+  };
+
+  try {
+    const response = await postRequest<{ success: boolean }>(endpoint, body);
+    return response;
+  } catch (error) {
+    console.error("Error Adding Remark:", error);
+    throw error;
+  }
 };
