@@ -83,7 +83,7 @@ const RemarksComponent: React.FC<RemarksComponentProps> = ({
       <div
         className={`w-[450px] mt-[230px] h-[calc(100vh-230px)] bg-white rounded-lg shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        } absolute mr-[0px] md:mr-[80px]`}
       >
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b">
