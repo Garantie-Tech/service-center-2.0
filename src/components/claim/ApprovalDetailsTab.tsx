@@ -13,6 +13,7 @@ import Link from "next/link";
 import CopyToClipboardButton from "@/components/ui/CopyToClipboardButton";
 import BerReplaceModal from "../BerReplaceModel";
 import BerSettleModal from "../BerSettleModel";
+import { convertDateTime } from "@/helpers/dateHelper";
 
 const ApprovalDetailsTab: React.FC = () => {
   const {
@@ -188,7 +189,7 @@ const ApprovalDetailsTab: React.FC = () => {
             <label className="block text-darkGray text-xs font-medium">
               Estimate Date
             </label>
-            <p className="text-sm font-bold">{approvalDetails?.estimateDate}</p>
+            <p className="text-sm font-bold">{convertDateTime(approvalDetails?.estimateDate)}</p>
           </div>
         )}
 

@@ -38,3 +38,28 @@ export function formatDate(dateString: string): string {
     year: "numeric",
   }); // e.g., "07 Dec 2024"
 }
+
+
+export function convertDateTime(dateTimeString: string): string {
+  // Parse the input date string manually
+  const [datePart, timePart] = dateTimeString.split(' ');
+  const [year, month, day] = datePart.split('-');
+  let [hour, minute, second] = timePart.split(':').map(Number);
+
+  // Convert to 12-hour format
+  let period = 'AM';
+  if (hour >= 12) {
+    period = 'PM';
+    if (hour > 12) {
+      hour -= 12;
+    }
+  } else if (hour === 0) {
+    hour = 12;
+  }
+
+  // Ensure two-digit formatting for day, month, hour, and minute
+  const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const formattedTime = `${String(hour).padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
+
+  return `${formattedDate} ${formattedTime}`;
+}
