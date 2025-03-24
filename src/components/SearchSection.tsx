@@ -17,10 +17,6 @@ const SearchSection: React.FC = () => {
     claimCount,
   } = useGlobalStore();
 
-  // const handleClearSearch = () => {
-  //   setSearchTerm("");
-  // };
-
   const { notifySuccess, notifyError } = useNotification();
 
   const handleExport = async () => {

@@ -144,7 +144,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
 
   return (
     <div className="w-full">
-      <div className="py-3 px-8 flex items-center justify-between border-b">
+      <div className="py-3 px-8 flex items-center justify-between border-b bg-claimListBackground">
         <div className="flex items-start gap-3">
           <Image
             src="/images/chevron-down.svg"

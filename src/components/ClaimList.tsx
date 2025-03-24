@@ -7,6 +7,7 @@ import { getActiveTab } from "@/helpers/globalHelper";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fetchClaims } from "@/services/claimService";
 import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
+import Claim from "@/interfaces/ClaimInterface";
 
 const ClaimList: React.FC = () => {
   const {
@@ -26,7 +27,7 @@ const ClaimList: React.FC = () => {
     setClaimRevised,
     setClaimCount,
     claimTypes,
-    sortOrder
+    sortOrder,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -60,18 +61,18 @@ const ClaimList: React.FC = () => {
           basePayload.startDate = appliedFilters.fromDate;
           basePayload.endDate = appliedFilters.toDate;
         }
-      }
 
-      const selectedClaimType = Object.entries(claimTypes).find(
-        ([, value]) => value === true
-      )?.[0];
+        const selectedClaimType = Object.entries(claimTypes).find(
+          ([, value]) => value === true
+        )?.[0];
 
-      if (selectedClaimType) {
-        basePayload.claim_type = selectedClaimType
-      }
-      
-      if(sortOrder) {
-        basePayload.sort_by = sortOrder;
+        if (selectedClaimType) {
+          basePayload.claim_type = selectedClaimType;
+        }
+
+        if (sortOrder) {
+          basePayload.sort_by = sortOrder;
+        }
       }
 
       return basePayload;
@@ -100,6 +101,7 @@ const ClaimList: React.FC = () => {
           if (reset) {
             setFilteredClaims(newClaims);
             setPage(1); // Reset pagination
+            setClaimStates(newClaims[0]);
           } else {
             setFilteredClaims((prevClaims) => [
               ...prevClaims,
@@ -215,41 +217,7 @@ const ClaimList: React.FC = () => {
       // If there's no selected claim, select the first available claim
       if (filteredClaims.length > 0) {
         const firstClaim = filteredClaims[0];
-        setSelectedClaim(firstClaim);
-        setClaimStatus(firstClaim.status);
-        setEstimateDetailsState({
-          estimateAmount: firstClaim?.claimed_amount || "",
-          jobSheetNumber: firstClaim?.job_sheet_number || "",
-          estimateDetails: firstClaim?.data?.inputs?.estimate_details || "",
-          replacementConfirmed: "",
-          damagePhotos: firstClaim?.mobile_damage_photos || [],
-          estimateDocument: firstClaim?.documents?.["15"]?.url || null,
-        });
-        setApprovalDetails({
-          estimateAmount: Number(firstClaim?.claimed_amount),
-          approvedAmount: Number(firstClaim?.approved_amount),
-          approvalType: firstClaim?.status,
-          approvalDate: firstClaim?.approval_date,
-          repairAmount: firstClaim?.repair_amount,
-          repairPaymentSuccessful: firstClaim?.repair_payment_successful,
-          repairPaymentLink: firstClaim?.repair_payment_link,
-          repairRazorpayOrderId: firstClaim?.repair_razorpay_order_id,
-          estimateDate: firstClaim?.estimated_date,
-          replacementPaymentSuccessful: firstClaim?.data?.replacement_payment?.replace_payment_successful,
-          replacementPaymentLink: firstClaim?.data?.replacement_payment?.replace_payment_link,
-          replacementAmount: firstClaim?.data?.replacement_payment?.replace_amount,
-        });
-        setActiveTab(
-          getActiveTab(firstClaim.status) as
-            | "Claim Details"
-            | "Estimate"
-            | "Approval"
-            | "Final Documents"
-            | "Customer Documents"
-            | "Cancelled"
-            | "Rejected"
-            | "Settlement Details"
-        );
+        setClaimStates(firstClaim);
       } else {
         setSelectedClaim(null);
       }
@@ -263,6 +231,49 @@ const ClaimList: React.FC = () => {
       }
     }
   }, [filteredClaims, globalSearch, sortOrder]);
+
+  const setClaimStates = (currentClaim: Claim) => {
+    if (currentClaim) {
+      setSelectedClaim(currentClaim);
+      setClaimStatus(currentClaim.status);
+      setEstimateDetailsState({
+        estimateAmount: currentClaim?.claimed_amount || "",
+        jobSheetNumber: currentClaim?.job_sheet_number || "",
+        estimateDetails: currentClaim?.data?.inputs?.estimate_details || "",
+        replacementConfirmed: "",
+        damagePhotos: currentClaim?.mobile_damage_photos || [],
+        estimateDocument: currentClaim?.documents?.["15"]?.url || null,
+      });
+      setApprovalDetails({
+        estimateAmount: Number(currentClaim?.claimed_amount),
+        approvedAmount: Number(currentClaim?.approved_amount),
+        approvalType: currentClaim?.status,
+        approvalDate: currentClaim?.approval_date,
+        repairAmount: currentClaim?.repair_amount,
+        repairPaymentSuccessful: currentClaim?.repair_payment_successful,
+        repairPaymentLink: currentClaim?.repair_payment_link,
+        repairRazorpayOrderId: currentClaim?.repair_razorpay_order_id,
+        estimateDate: currentClaim?.estimated_date,
+        replacementPaymentSuccessful:
+          currentClaim?.data?.replacement_payment?.replace_payment_successful,
+        replacementPaymentLink:
+          currentClaim?.data?.replacement_payment?.replace_payment_link,
+        replacementAmount:
+          currentClaim?.data?.replacement_payment?.replace_amount,
+      });
+      setActiveTab(
+        getActiveTab(currentClaim.status) as
+          | "Claim Details"
+          | "Estimate"
+          | "Approval"
+          | "Final Documents"
+          | "Customer Documents"
+          | "Cancelled"
+          | "Rejected"
+          | "Settlement Details"
+      );
+    }
+  };
 
   return (
     <div className="w-full max-w-lg mx-auto">
@@ -278,46 +289,12 @@ const ClaimList: React.FC = () => {
                   : "hover:bg-gray-50"
               } cursor-pointer ${
                 actionRequiredStatus.includes(claim.status)
-                  ? "border-l-4 border-primaryBlue bg-claimListBackground"
+                  ? "border-l-4 border-primaryBlue"
                   : ""
               }`}
               onClick={() => {
                 setClaimRevised(false);
-                setSelectedClaim(claim);
-                setClaimStatus(claim.status);
-                setActiveTab(
-                  getActiveTab(claim.status) as
-                    | "Claim Details"
-                    | "Estimate"
-                    | "Approval"
-                    | "Final Documents"
-                    | "Customer Documents"
-                    | "Cancelled"
-                    | "Rejected"
-                    | "Settlement Details"
-                );
-                setEstimateDetailsState({
-                  estimateAmount: claim.claimed_amount || "",
-                  jobSheetNumber: claim.job_sheet_number || "",
-                  estimateDetails: claim.data?.inputs?.estimate_details || "",
-                  replacementConfirmed: "",
-                  damagePhotos: claim.mobile_damage_photos || [],
-                  estimateDocument: claim.documents?.["15"]?.url || null,
-                });
-                setApprovalDetails({
-                  estimateAmount: Number(claim.claimed_amount),
-                  approvedAmount: Number(claim.approved_amount),
-                  approvalType: claim.status,
-                  approvalDate: claim.approval_date,
-                  repairAmount: claim.repair_amount,
-                  repairPaymentSuccessful: claim.repair_payment_successful,
-                  repairPaymentLink: claim.repair_payment_link,
-                  repairRazorpayOrderId: claim.repair_razorpay_order_id,
-                  estimateDate: claim?.estimated_date,
-                  replacementPaymentSuccessful: claim?.data?.replacement_payment?.replace_payment_successful,
-                  replacementPaymentLink: claim?.data?.replacement_payment?.replace_payment_link,
-                  replacementAmount: claim?.data?.replacement_payment?.replace_amount,
-                });
+                setClaimStates(claim);
               }}
             >
               <div>
