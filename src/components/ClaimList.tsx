@@ -240,7 +240,7 @@ const ClaimList: React.FC = () => {
         estimateAmount: currentClaim?.claimed_amount || "",
         jobSheetNumber: currentClaim?.job_sheet_number || "",
         estimateDetails: currentClaim?.data?.inputs?.estimate_details || "",
-        replacementConfirmed: "",
+        replacementConfirmed: currentClaim?.imei_changed,
         damagePhotos: currentClaim?.mobile_damage_photos || [],
         estimateDocument: currentClaim?.documents?.["15"]?.url || null,
       });

@@ -42,7 +42,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const [showReplacementConfirmation, setShowReplacementConfirmation] =
     useState(false);
   const [pendingReplacementValue, setPendingReplacementValue] = useState<
-    string | null
+    boolean | string | null
   >(null);
   const [isReplacementConfirmed, setIsReplacementConfirmed] = useState(false);
 
@@ -61,7 +61,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         estimateAmount: selectedClaim?.claimed_amount || "",
         jobSheetNumber: selectedClaim?.job_sheet_number || "",
         estimateDetails: selectedClaim?.data?.inputs?.estimate_details || "",
-        replacementConfirmed: "",
+        replacementConfirmed: selectedClaim?.imei_changed,
         damagePhotos:
           selectedClaim?.mobile_damage_photos && !claimRevised
             ? selectedClaim?.mobile_damage_photos
@@ -76,13 +76,13 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   }, [selectedClaim, setEstimateDetailsState]);
 
   // ✅ Handle Replacement Confirmation
-  const handleReplacementSelection = (value: string) => {
+  const handleReplacementSelection = (value: boolean) => {
     setPendingReplacementValue(value);
     setShowReplacementConfirmation(true);
   };
 
   const confirmReplacementSelection = () => {
-    if (pendingReplacementValue) {
+    if (pendingReplacementValue != null) {
       setEstimateDetailsState({
         replacementConfirmed: pendingReplacementValue,
       });
@@ -192,7 +192,10 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     formData.append("claimed_amount", estimateAmount);
     formData.append("estimate_details", estimateDetails);
     formData.append("job_sheet_number", jobSheetNumber);
-    formData.append("replacement_confirmed", replacementConfirmed || "No");
+    formData.append(
+      "replacement_confirmed",
+      replacementConfirmed === true ? "yes" : "no"
+    );
 
     if (estimateDocument) {
       formData.append("estimate_document", estimateDocument);
@@ -295,14 +298,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed === "yes"
+                  replacementConfirmed == true
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
-                onClick={() => handleReplacementSelection("yes")}
+                onClick={() => handleReplacementSelection(true)}
                 disabled={isFormDisabled}
               >
-                {replacementConfirmed === "yes" && (
+                {replacementConfirmed == true && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -325,14 +328,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed === "no"
+                  replacementConfirmed == false
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
-                onClick={() => handleReplacementSelection("no")}
+                onClick={() => handleReplacementSelection(false)}
                 disabled={isFormDisabled}
               >
-                {replacementConfirmed === "no" && (
+                {replacementConfirmed == false && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -638,14 +641,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed === "yes"
+                  replacementConfirmed == true
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
-                onClick={() => handleReplacementSelection("yes")}
+                onClick={() => handleReplacementSelection(true)}
                 disabled={isFormDisabled}
               >
-                {replacementConfirmed === "yes" && (
+                {replacementConfirmed == true && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -668,14 +671,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed === "no"
+                  replacementConfirmed == false
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
-                onClick={() => handleReplacementSelection("no")}
+                onClick={() => handleReplacementSelection(false)}
                 disabled={isFormDisabled}
               >
-                {replacementConfirmed === "no" && (
+                {replacementConfirmed == false && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"

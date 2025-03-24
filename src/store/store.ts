@@ -254,7 +254,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
         estimateAmount: "",
         jobSheetNumber: "",
         estimateDetails: "",
-        replacementConfirmed: "no",
+        replacementConfirmed: null,
         damagePhotos: [],
         estimateDocument: null,
       },

@@ -65,7 +65,7 @@ export interface EstimateDetailsState {
   estimateAmount: string;
   jobSheetNumber: string;
   estimateDetails: string;
-  replacementConfirmed: string | "yes" | "no" | null | "";
+  replacementConfirmed: boolean| string | "yes" | "no" | null | "";
   damagePhotos: (string | File)[];
   estimateDocument: File | string | null;
   documents?: Documents;
