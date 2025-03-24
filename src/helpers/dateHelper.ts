@@ -44,7 +44,8 @@ export function convertDateTime(dateTimeString: string): string {
   // Parse the input date string manually
   const [datePart, timePart] = dateTimeString.split(' ');
   const [year, month, day] = datePart.split('-');
-  let [hour, minute, second] = timePart.split(':').map(Number);
+  let [hour] = timePart.split(':').map(Number);
+  const [minute] = timePart.split(':').map(Number);
 
   // Convert to 12-hour format
   let period = 'AM';
