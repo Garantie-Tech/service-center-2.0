@@ -45,6 +45,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     boolean | string | null
   >(null);
   const [isReplacementConfirmed, setIsReplacementConfirmed] = useState(false);
+  const [showEstimateDocValidationError, setShowEstimateDocValidationError] =
+    useState(true);
+  const [showDamageMobImageError, setShowDamageMobImageError] = useState(true);
 
   useEffect(() => {
     setIsFormDisabled(
@@ -61,7 +64,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         estimateAmount: selectedClaim?.claimed_amount || "",
         jobSheetNumber: selectedClaim?.job_sheet_number || "",
         estimateDetails: selectedClaim?.data?.inputs?.estimate_details || "",
-        replacementConfirmed: selectedClaim?.imei_changed,
+        replacementConfirmed: null,
         damagePhotos:
           selectedClaim?.mobile_damage_photos && !claimRevised
             ? selectedClaim?.mobile_damage_photos
@@ -132,6 +135,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   ) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files);
+      setShowDamageMobImageError(false);
 
       if (damagePhotos.length + newFiles.length > MAX_DAMAGE_IMAGES) {
         setDamagePhotosError(
@@ -153,6 +157,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
+      setShowEstimateDocValidationError(false);
 
       // Check if file size exceeds 2MB
       if (file.size > MAX_FILE_SIZE) {
@@ -171,10 +176,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const handleRemoveDamagePhoto = (index: number) => {
     const updatedPhotos = damagePhotos.filter((_, i) => i !== index);
     setEstimateDetailsState({ damagePhotos: updatedPhotos });
+    if (!updatedPhotos) {
+      setShowDamageMobImageError(true);
+    }
   };
 
   const handleRemoveEstimateDocument = () => {
     setEstimateDetailsState({ estimateDocument: null });
+    setShowEstimateDocValidationError(true);
   };
 
   const isSubmitDisabled =
@@ -473,7 +482,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               />
             )}
 
-            {isInvalidDocument ? (
+            {isInvalidDocument && showEstimateDocValidationError ? (
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Document : {invalidDocumentReason}
               </span>
@@ -534,7 +543,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               />
             )}
 
-            {isInvalidImages ? (
+            {isInvalidImages && showDamageMobImageError ? (
               <span className="text-[#EB5757] text-xxs font-semibold">
                 Invalid Images : {invalidImagesReason}
               </span>
