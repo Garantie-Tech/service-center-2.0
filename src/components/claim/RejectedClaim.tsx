@@ -29,6 +29,14 @@ const RejectedClaim: React.FC<RejectedClaimProps> = ({ data }) => {
         </div>
       )}
 
+      {/* is Copay refunded */}
+      {!data?.copayRefunded && (
+        <div>
+          <p className="text-gray-500 text-xs">Copay Refund Status</p>
+          <p className="font-bold text-sm">Pending</p>
+        </div>
+      )}
+
       {/* Copay Refunded id */}
       {data?.copayRefundedId && (
         <div>

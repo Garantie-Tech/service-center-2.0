@@ -28,6 +28,14 @@ const CancelledClaim: React.FC<CancelledClaimProps> = ({ data }) => {
         <p className="font-bold text-sm">{data?.cancelledReason}</p>
       </div>
 
+      {/* is Copay refunded */}
+      {!data?.copayRefunded && (
+        <div>
+          <p className="text-gray-500 text-xs">Copay Refund Status</p>
+          <p className="font-bold text-sm">Pending</p>
+        </div>
+      )}
+
       {/* Copay Refunded date */}
       {data?.copayRefundedDate && (
         <div>
