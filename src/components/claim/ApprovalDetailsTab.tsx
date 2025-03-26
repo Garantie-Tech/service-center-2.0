@@ -115,13 +115,16 @@ const ApprovalDetailsTab: React.FC = () => {
         if (!response?.success) {
           notifyError("Failed to update Ber Decision !");
         } else {
-          triggerClaimRefresh();
+          if (approvalDetails.berDecision === "repair") {
+            handleGenerateLink("CLAIM_REPAIR");
+          }
+          // triggerClaimRefresh();
           notifySuccess("Ber Decision Successfully updated !");
         }
       } catch (error) {
         notifyError(`Failed to update Ber Decision ! ${error}`);
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
 
@@ -138,13 +141,14 @@ const ApprovalDetailsTab: React.FC = () => {
         if (!response?.success) {
           notifyError("Failed to update Ber Decision !");
         } else {
-          triggerClaimRefresh();
+          handleGenerateLink("CLAIM_REPLACE");
+          // triggerClaimRefresh();
           notifySuccess("Ber Decision Successfully updated !");
         }
       } catch (error) {
         notifyError(`Failed to update Ber Decision ! ${error}`);
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
     setIsBerModalOpen(false);
@@ -158,7 +162,7 @@ const ApprovalDetailsTab: React.FC = () => {
     approvalDetails.deviceAmount === "";
 
   const handleGenerateLink = async (type: string) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
       const response = await generatePaymentLink(
         Number(selectedClaim?.id),
@@ -189,7 +193,9 @@ const ApprovalDetailsTab: React.FC = () => {
             <label className="block text-darkGray text-xs font-medium">
               Estimate Date
             </label>
-            <p className="text-sm font-bold">{convertDateTime(approvalDetails?.estimateDate)}</p>
+            <p className="text-sm font-bold">
+              {convertDateTime(approvalDetails?.estimateDate)}
+            </p>
           </div>
         )}
 
@@ -399,7 +405,7 @@ const ApprovalDetailsTab: React.FC = () => {
                 onClick={handleSubmit}
                 disabled={isSubmitDisabled}
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                Submit
               </button>
             </div>
           )}

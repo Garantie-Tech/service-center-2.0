@@ -288,7 +288,8 @@ const ClaimList: React.FC = () => {
                   ? "bg-claimListBackground"
                   : "hover:bg-gray-50"
               } cursor-pointer ${
-                actionRequiredStatus.includes(claim.status)
+                actionRequiredStatus.includes(claim.status) ||
+                claim?.isActionRequired
                   ? "border-l-4 border-primaryBlue"
                   : ""
               }`}
@@ -302,21 +303,23 @@ const ClaimList: React.FC = () => {
                   <p className="text-base font-semibold text-gray-800 mr-2">
                     {claim.id}
                   </p>
-                  {actionRequiredStatus.includes(claim.status) && (
-                    <Image
-                      src="/images/action-required-icon.svg"
-                      alt="Action required"
-                      width={14}
-                      height={14}
-                    />
-                  )}
+                  {actionRequiredStatus.includes(claim.status) ||
+                    (claim?.isActionRequired && (
+                      <Image
+                        src="/images/action-required-icon.svg"
+                        alt="Action required"
+                        width={14}
+                        height={14}
+                      />
+                    ))}
                 </div>
                 <p className="text-xs text-gray-600">{claim.name}</p>
               </div>
               <div className="text-xs text-right">
                 <span
                   className={`badge font-semibold ${
-                    actionRequiredStatus.includes(claim.status)
+                    actionRequiredStatus.includes(claim.status) ||
+                    claim?.isActionRequired
                       ? "bg-primaryBlue text-white"
                       : "bg-gray-200 text-gray-800"
                   } mb-1 text-xs px-4 py-[10px]`}
