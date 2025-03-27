@@ -60,11 +60,12 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   useEffect(() => {
     if (selectedClaim) {
       // Reset estimateDetailsState whenever selectedClaim changes
+      const isImeiChangedCheckbox = claimStatus === "Claim Initiated" ? null : selectedClaim?.imei_changed;
       setEstimateDetailsState({
         estimateAmount: selectedClaim?.claimed_amount || "",
         jobSheetNumber: selectedClaim?.job_sheet_number || "",
         estimateDetails: selectedClaim?.data?.inputs?.estimate_details || "",
-        replacementConfirmed: null,
+        replacementConfirmed: isImeiChangedCheckbox,
         damagePhotos:
           selectedClaim?.mobile_damage_photos && !claimRevised
             ? selectedClaim?.mobile_damage_photos

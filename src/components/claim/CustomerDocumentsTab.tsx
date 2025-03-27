@@ -238,6 +238,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     aadharBackImageStatus,
     bankDetailsStatus,
     reupload,
+    triggerClaimRefresh
   ]);
 
   const showButtonSection =
