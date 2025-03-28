@@ -6,6 +6,7 @@ import { fetchExportData } from "@/services/exportService";
 import { exportToCSV } from "@/utils/exportCsv";
 import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
+import Link from "next/link";
 
 const SearchSection: React.FC = () => {
   const {
@@ -132,9 +133,10 @@ const SearchSection: React.FC = () => {
           {/* Buttons */}
           <div className="flex items-center justify-end gap-4">
             <div className="flex gap-4">
-              <button
+              <Link
                 className="w-[30px] ml-20px tooltip"
                 data-tip="Plan Finder"
+                href="/plan-finder"
               >
                 <Image
                   src="/images/plan-finder.svg"
@@ -142,7 +144,7 @@ const SearchSection: React.FC = () => {
                   width={24}
                   height={24}
                 />
-              </button>
+              </Link>
               <button
                 onClick={handleExport}
                 className="w-[30px] tooltip"

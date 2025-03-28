@@ -68,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                 </Link>
               </li>
             )}
-            {pathname === "/profile" && (
+            {pathname != "/dashboard" && (
               <li>
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <div className="w-[20px] h-[20px]">

@@ -65,7 +65,7 @@ export interface EstimateDetailsState {
   estimateAmount: string;
   jobSheetNumber: string;
   estimateDetails: string;
-  replacementConfirmed: boolean| string | "yes" | "no" | null | "";
+  replacementConfirmed: boolean | string | "yes" | "no" | null | "";
   damagePhotos: (string | File)[];
   estimateDocument: File | string | null;
   documents?: Documents;
@@ -243,7 +243,6 @@ export interface RemarkPayload {
   remark: string;
 }
 
-
 export interface ServiceCenterProfileResponse {
   success: boolean;
   code: number;
@@ -283,7 +282,7 @@ export interface ServiceCenterProfile {
   updated_at: string;
   landline: string;
   landmark: string;
-  user?: User[]
+  user?: User[];
 }
 
 export interface User {
@@ -293,4 +292,71 @@ export interface User {
   is_active: boolean;
   created_at: string;
   type: string;
+}
+
+export interface PolicyItem {
+  id: number;
+  product_id: number;
+  product_code: string;
+  sum_insured: string;
+  start_date: string;
+  end_date: string;
+  premium: string;
+  is_monthly: boolean;
+  policy_number: string;
+  policy_creation_ts: string;
+  email: string;
+  mobile: string;
+  name: string;
+  product_name: string;
+  price_range: string;
+  product_display_name: string;
+  provider_name: string;
+  status: string;
+  invoicing_modal: string;
+  commission: string;
+  oem_commission: string;
+  oem_commission_part: string;
+  state_commission_part: string;
+  is_embedded: boolean;
+  code: string;
+  store_code: string;
+  state_code: string;
+  retail_location: string;
+  invoice_amount: string;
+  invoice_number: string;
+  imei_number: string;
+  phone_model: string;
+  cancelled_date: string | null;
+  is_cancelled: string;
+  contract_start_date: string | null;
+  status_id: number;
+  transaction_number: string;
+  payment_mode: string;
+  promoter_id: number | null;
+  garantie_commission: number;
+  model_price: number;
+  discount_percent: number | null;
+  discounted_premium: number;
+  actual_premium: number;
+  invoice_id: number | null;
+  is_invoice_generated: string;
+  ownership_type: string;
+  owning_group: string;
+  device_invoice_date: string;
+  zone_name: string | null;
+  zone_manager_name: string | null;
+}
+
+export interface PolicyResponseData {
+  policies: PolicyItem[];
+  total_count: number;
+}
+
+export interface PolicyApiResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data: PolicyResponseData;
 }

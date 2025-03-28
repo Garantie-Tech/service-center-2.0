@@ -210,3 +210,7 @@ export const getDocumentInfo = (
     hasInvalidStatus: !!(doc?.url && statusValue === null),
   };
 };
+
+export const isIMEIFormat = (imei: string): boolean => {
+  return /^\d{15}$/.test(imei);
+};

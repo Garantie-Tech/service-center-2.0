@@ -6,6 +6,7 @@ import {
   ClaimTimeline,
   GenerateLinkPaymentBody,
   GeneratePaymentLink,
+  PolicyApiResponse,
   RemarkPayload,
   RemarksApiResponse,
   ServiceCenterProfileResponse,
@@ -172,4 +173,10 @@ export const getServiceCenterProfileData = async () => {
   return await getRequest<ServiceCenterProfileResponse>(
     "service_centres/detail"
   );
+};
+
+export const fetchPlans = async (
+  _params?: Record<string, string | number | boolean> | ClaimFetchPayload | {string: 'search_plan'}
+) => {
+  return await getRequest<PolicyApiResponse>(`v2/orders/`, _params);
 };
