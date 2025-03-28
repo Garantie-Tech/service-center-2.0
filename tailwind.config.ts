@@ -16,6 +16,7 @@ export default {
         lightPrimaryBlue: "#5A7CFF",
         claimListBackground:"#EBEFFF",
         black:"#181D27",
+        blackContent: "#515151",
         gray: {
           50: "#F9FAFB",   // Lightest gray
           100: "#F3F4F6",  // Soft gray

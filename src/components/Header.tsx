@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { HomeIcon } from "@/components/icons/Icons";
 
 interface HeaderProps {
   onLogout: () => void;
@@ -9,6 +11,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const user = localStorage.getItem("user");
   const serviceCenterName = user ? JSON.parse(user) : null;
+  const pathname = usePathname();
 
   return (
     <header className="bg-primaryBlue px-4 py-2 text-white shadow-sm">
@@ -52,18 +55,31 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
             tabIndex={0}
             className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-xs"
           >
-            <li>
-              <Link href="/profile" className="flex items-center gap-2">
-                <Image
-                  src="/images/user-profile-icon.svg"
-                  alt="Profile"
-                  width={20}
-                  height={20}
-                />
-                Profile
-              </Link>
-            </li>
-            <li>
+            {pathname === "/dashboard" && (
+              <li>
+                <Link href="/profile" className="flex items-center gap-2">
+                  <Image
+                    src="/images/user-profile-icon.svg"
+                    alt="Profile"
+                    width={20}
+                    height={20}
+                  />
+                  Profile
+                </Link>
+              </li>
+            )}
+            {pathname === "/profile" && (
+              <li>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="w-[20px] h-[20px]">
+                    <HomeIcon />
+                  </div>
+                  Home
+                </Link>
+              </li>
+            )}
+
+            {/* <li>
               <Link href="/settings" className="flex items-center gap-2">
                 <Image
                   src="/images/settings-icon.svg"
@@ -73,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                 />
                 Settings
               </Link>
-            </li>
+            </li> */}
             <li>
               <button onClick={onLogout} className="flex items-center gap-2">
                 <Image

@@ -8,6 +8,7 @@ import {
   GeneratePaymentLink,
   RemarkPayload,
   RemarksApiResponse,
+  ServiceCenterProfileResponse,
   SubmitEstimate,
   UploadCustomerDocuments,
   UploadFinalDocuments,
@@ -165,4 +166,10 @@ export const addRemark = async (
     console.error("Error Adding Remark:", error);
     throw error;
   }
+};
+
+export const getServiceCenterProfileData = async () => {
+  return await getRequest<ServiceCenterProfileResponse>(
+    "service_centres/detail"
+  );
 };

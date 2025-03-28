@@ -242,3 +242,55 @@ export interface RemarkPayload {
   added_by_platform: string;
   remark: string;
 }
+
+
+export interface ServiceCenterProfileResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: ServiceCenterProfile;
+}
+
+export interface ServiceCenterProfile {
+  id: number;
+  partner_id: number;
+  name: string;
+  service_centre_type: string | null;
+  mobile: string;
+  mobile_verified: boolean;
+  email: string;
+  otp: string | null;
+  address: {
+    address_line_1: string;
+    address_line_2: string | null;
+  };
+  city_id: number;
+  city: string;
+  state_id: number;
+  state: string;
+  pincode: string;
+  data?: null;
+  pan: string | null;
+  gst: string | null;
+  neft: string | null;
+  is_active?: boolean;
+  credit_limit: number | null;
+  is_registered: boolean;
+  invoicing_modal: string | null;
+  invoice_limit: number | null;
+  created_at: string;
+  updated_at: string;
+  landline: string;
+  landmark: string;
+  user?: User[]
+}
+
+export interface User {
+  id: number;
+  email: string;
+  mobile: string;
+  is_active: boolean;
+  created_at: string;
+  type: string;
+}
