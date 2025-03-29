@@ -132,7 +132,7 @@ const PlanFinder = () => {
                   <th>Plan Name</th>
                   <th>Plan Duration</th>
                   <th>Name</th>
-                  <th>IEMI 1</th>
+                  <th>IMEI 1</th>
                   <th>Model</th>
                   <th>Device MOP</th>
                 </tr>
