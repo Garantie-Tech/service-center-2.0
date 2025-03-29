@@ -96,6 +96,7 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
                 )}
               </div>
             )}
+            <span className="text-[#19AD61] text-xxs font-semibold">Valid</span>
           </div>
         </div>
 
@@ -103,6 +104,9 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
         <div>
           <h4 className="text-xs text-gray-500">Damage Mobile Photo</h4>
           <GalleryPopup images={estimateDetailsState?.damagePhotos} />
+          <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
+            Valid
+          </span>
         </div>
       </div>
     </div>

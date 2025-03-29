@@ -52,13 +52,17 @@ export const getActiveTab = (status: string): string => {
     status === "BER Repair Approved" ||
     status === "BER Replacement Approved" ||
     status === "BER Replace" ||
-    status === "Approved" ||
-    status === "BER Settlement Initiated" ||
-    status === "BER Settlement Completed"
+    status === "Approved"
   ) {
     return "Final Documents";
   }
-  if (status === "Closed") {
+  if (
+    status === "Closed" ||
+    status === "Settlement Completed" ||
+    status === "Settlement Initiated" ||
+    status === "BER Settlement Initiated" ||
+    status === "BER Settlement Completed"
+  ) {
     return "Settlement Details";
   }
   if (status === "BER SETTLE") {
@@ -112,8 +116,7 @@ export const getFilteredTabs = (
       "Approved",
       "BER Approved",
       "BER Replacement Approved",
-      "BER Settlement Initiated",
-      "BER Settlement Completed",
+      "BER Repair Approved",
     ].includes(claimStatus)
   ) {
     return ["Claim Details", "Estimate", "Approval", "Final Documents"];
@@ -130,7 +133,16 @@ export const getFilteredTabs = (
     return ["Claim Details", "Estimate", "Approval"];
   }
 
-  if (["Closed"].includes(claimStatus) && selectedClaim?.documents?.["16"]) {
+  if (
+    [
+      "Closed",
+      "Settlement Completed",
+      "Settlement Initiated",
+      "BER Settlement Initiated",
+      "BER Settlement Completed",
+    ].includes(claimStatus) &&
+    selectedClaim?.documents?.["16"]?.status == 1
+  ) {
     return [
       "Claim Details",
       "Estimate",
@@ -140,7 +152,16 @@ export const getFilteredTabs = (
     ];
   }
 
-  if (["Closed"].includes(claimStatus) && selectedClaim?.documents?.["76"]) {
+  if (
+    [
+      "Closed",
+      "Settlement Completed",
+      "Settlement Initiated",
+      "BER Settlement Initiated",
+      "BER Settlement Completed",
+    ].includes(claimStatus) &&
+    selectedClaim?.documents?.["76"]?.status == 1
+  ) {
     return [
       "Claim Details",
       "Estimate",
@@ -150,7 +171,8 @@ export const getFilteredTabs = (
     ];
   }
 
-  return ["Claim Details", "Estimate", "Approval", "Final Documents"];
+  // return ["Claim Details", "Estimate", "Approval", "Final Documents"];
+  return ["Claim Details", "Estimate", "Approval"];
 };
 
 export const getTabStatus = (

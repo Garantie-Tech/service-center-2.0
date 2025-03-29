@@ -29,7 +29,7 @@ const ApprovalDetailsTab: React.FC = () => {
   const [isBerModalOpen, setIsBerModalOpen] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
 
-  const berOptions = ["repair", "replace", "settle"];
+  const berOptions = ["repair", "settle"];
 
   // this will execute in background
   useEffect(() => {

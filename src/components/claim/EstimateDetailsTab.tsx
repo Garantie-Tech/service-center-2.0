@@ -60,7 +60,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   useEffect(() => {
     if (selectedClaim) {
       // Reset estimateDetailsState whenever selectedClaim changes
-      const isImeiChangedCheckbox = claimStatus === "Claim Initiated" ? null : selectedClaim?.imei_changed;
+      const isImeiChangedCheckbox =
+        claimStatus === "Claim Initiated" ? null : selectedClaim?.imei_changed;
       setEstimateDetailsState({
         estimateAmount: selectedClaim?.claimed_amount || "",
         jobSheetNumber: selectedClaim?.job_sheet_number || "",
@@ -232,8 +233,12 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const handleEditButtonClick = () => {
     setIsFormDisabled(false);
-    setEstimateDetailsState({ ...estimateDetailsState, damagePhotos: [] });
-    setEstimateDetailsState({ estimateDocument: null });
+    setEstimateDetailsState({
+      ...estimateDetailsState,
+      damagePhotos: [],
+      estimateDocument: null,
+      replacementConfirmed: null,
+    });
   };
 
   return isFormEditable ? (
