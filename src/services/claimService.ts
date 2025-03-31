@@ -31,7 +31,7 @@ export const fetchClaims = async (
 };
 
 export const submitEstimate = async (claimID: number, body: FormData) => {
-  const endpoint = `submit/estimate/${claimID}`;
+  const endpoint = `service-center/submit/estimate/${claimID}`;
   return await postRequest<SubmitEstimate>(endpoint, body);
 };
 

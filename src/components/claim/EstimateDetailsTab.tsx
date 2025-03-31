@@ -61,11 +61,22 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     if (selectedClaim) {
       // Reset estimateDetailsState whenever selectedClaim changes
       const isImeiChangedCheckbox =
-        claimStatus === "Claim Initiated" ? null : selectedClaim?.imei_changed;
+        claimStatus === "Claim Initiated" || claimRevised
+          ? null
+          : selectedClaim?.imei_changed;
       setEstimateDetailsState({
-        estimateAmount: selectedClaim?.claimed_amount || "",
-        jobSheetNumber: selectedClaim?.job_sheet_number || "",
-        estimateDetails: selectedClaim?.data?.inputs?.estimate_details || "",
+        estimateAmount:
+          selectedClaim?.claimed_amount && !claimRevised
+            ? selectedClaim?.claimed_amount
+            : "",
+        jobSheetNumber:
+          selectedClaim?.job_sheet_number && !claimRevised
+            ? selectedClaim?.job_sheet_number
+            : "",
+        estimateDetails:
+          selectedClaim?.data?.inputs?.estimate_details && !claimRevised
+            ? selectedClaim?.data?.inputs?.estimate_details
+            : "",
         replacementConfirmed: isImeiChangedCheckbox,
         damagePhotos:
           selectedClaim?.mobile_damage_photos && !claimRevised
@@ -78,7 +89,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       });
       setIsReplacementConfirmed(false);
     }
-  }, [selectedClaim, setEstimateDetailsState]);
+  }, [selectedClaim, setEstimateDetailsState, claimRevised]);
 
   // ✅ Handle Replacement Confirmation
   const handleReplacementSelection = (value: boolean) => {
@@ -115,6 +126,11 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const invalidImagesReason = selectedClaim?.documents?.["73"]?.status_reason
     ? selectedClaim?.documents?.["73"]?.status_reason
     : "";
+
+  const estimateDocStatus =
+    selectedClaim?.documents?.["15"]?.status == 1 ? true : false;
+  const damageImageStatus =
+    selectedClaim?.documents?.["73"]?.status == 1 ? true : false;
 
   const {
     estimateAmount,
@@ -213,9 +229,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
 
     damagePhotos.forEach((photo, index) => {
-      if (typeof photo === "string") {
-        formData.append(`mobile_damage_photos_urls[${index}]`, photo);
-      } else {
+      if (typeof photo !== "string") {
         formData.append(`mobile_damage_photos[${index}]`, photo);
       }
     });
@@ -233,11 +247,20 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const handleEditButtonClick = () => {
     setIsFormDisabled(false);
+    const updates: Partial<typeof estimateDetailsState> = {};
+    updates.replacementConfirmed = null;
+
+    if (damageImageStatus == false) {
+      updates.damagePhotos = [];
+    }
+
+    if (estimateDocStatus == false) {
+      updates.estimateDocument = null;
+    }
+
     setEstimateDetailsState({
       ...estimateDetailsState,
-      damagePhotos: [],
-      estimateDocument: null,
-      replacementConfirmed: null,
+      ...updates,
     });
   };
 
@@ -399,7 +422,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             Estimate Document (pdf)
           </label>
           <div className="mb-4">
-            {!isFormDisabled && (
+            {!isFormDisabled && estimateDocStatus == false && (
               <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
                 <input
                   type="file"
@@ -494,11 +517,12 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               </span>
             ) : (claimStatus === "Claim Submitted" ||
                 claimStatus === "Estimate Revised") &&
-              isFormDisabled ? (
+              estimateDocStatus == false ? (
               <span className="text-[#FF9548] text-xxs font-semibold">
                 Under Review
               </span>
-            ) : claimStatus === "Documents Verified" ? (
+            ) : claimStatus === "Documents Verified" ||
+              estimateDocStatus == true ? (
               <span className="text-[#19AD61] text-xxs font-semibold">
                 Valid
               </span>
@@ -512,7 +536,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             Damage Mobile Photo (Upload at least 5 images)
           </label>
           <div className="mb-4">
-            {!isFormDisabled && (
+            {!isFormDisabled && damageImageStatus == false && (
               <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
                 <input
                   type="file"
@@ -537,7 +561,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 <GalleryPopup
                   images={estimateDetailsState?.damagePhotos}
                   onRemoveImage={handleRemoveDamagePhoto}
-                  allowRemoval={!isFormDisabled}
+                  allowRemoval={!isFormDisabled && damageImageStatus == false}
                 />
               </div>
             )}
@@ -555,11 +579,12 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               </span>
             ) : (claimStatus === "Claim Submitted" ||
                 claimStatus === "Estimate Revised") &&
-              isFormDisabled ? (
+              damageImageStatus == false ? (
               <span className="text-[#FF9548] text-xxs font-semibold">
                 Under Review
               </span>
-            ) : claimStatus === "Documents Verified" ? (
+            ) : claimStatus === "Documents Verified" ||
+              damageImageStatus == true ? (
               <span className="text-[#19AD61] text-xxs font-semibold">
                 Valid
               </span>

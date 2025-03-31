@@ -226,8 +226,10 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
       (aadharBackSideImage?.length > 0 || aadharBackImageStatus === "valid") &&
       (bankDetailImage?.length > 0 || bankDetailsStatus === "valid");
 
+      const validatePanCard = panCardImage?.length > 0 && panCardStatus === "invalid";
+
     setIsSubmitDisabled(
-      allMandatoryUploaded && !allMandatoryValid && accessoriesProvided !== null
+      allMandatoryUploaded && !allMandatoryValid && accessoriesProvided !== null || validatePanCard
     );
   }, [
     aadharFrontSideImage,
@@ -238,6 +240,8 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     aadharBackImageStatus,
     bankDetailsStatus,
     reupload,
+    panCardStatus,
+    panCardImage,
     triggerClaimRefresh
   ]);
 

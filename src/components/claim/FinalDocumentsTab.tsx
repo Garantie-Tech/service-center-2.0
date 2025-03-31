@@ -148,7 +148,10 @@ const FinalDocumentsTab: React.FC = () => {
     isImeiChanged: isImeiChanged,
   };
 
-  const showSubmitButton = repairInvoiceInfo.statusValue != true && repairMobilePhotoInfo.statusValue != true || (replacementReceiptInfo.statusValue != true && isImeiChanged) ;
+  const showSubmitButton =
+    (repairInvoiceInfo.statusValue != true ||
+      repairMobilePhotoInfo.statusValue != true) ||
+    (replacementReceiptInfo.statusValue != true && isImeiChanged);
 
   return isEditable ? (
     <div>
@@ -362,7 +365,9 @@ const FinalDocumentsTab: React.FC = () => {
           >
             Submit
           </button>
-        ): (<></>)}
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   ) : (

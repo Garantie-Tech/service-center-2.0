@@ -303,15 +303,15 @@ const ClaimList: React.FC = () => {
                   <p className="text-base font-semibold text-gray-800 mr-2">
                     {claim.id}
                   </p>
-                  {actionRequiredStatus.includes(claim.status) ||
-                    (claim?.isActionRequired && (
-                      <Image
-                        src="/images/action-required-icon.svg"
-                        alt="Action required"
-                        width={14}
-                        height={14}
-                      />
-                    ))}
+                  {(actionRequiredStatus.includes(claim.status) ||
+                    claim?.isActionRequired) && (
+                    <Image
+                      src="/images/action-required-icon.svg"
+                      alt="Action required"
+                      width={14}
+                      height={14}
+                    />
+                  )}
                 </div>
                 <p className="text-xs text-gray-600">{claim.name}</p>
               </div>
