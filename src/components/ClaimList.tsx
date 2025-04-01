@@ -28,7 +28,6 @@ const ClaimList: React.FC = () => {
     setClaimCount,
     claimTypes,
     sortOrder,
-    setClaimTypes,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
