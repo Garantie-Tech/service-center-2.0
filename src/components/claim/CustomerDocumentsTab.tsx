@@ -226,10 +226,14 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
       (aadharBackSideImage?.length > 0 || aadharBackImageStatus === "valid") &&
       (bankDetailImage?.length > 0 || bankDetailsStatus === "valid");
 
-      const validatePanCard = panCardImage?.length > 0 && panCardStatus === "invalid";
+    const validatePanCard =
+      panCardImage?.length > 0 && panCardStatus === "invalid";
 
     setIsSubmitDisabled(
-      allMandatoryUploaded && !allMandatoryValid && accessoriesProvided !== null || validatePanCard
+      (allMandatoryUploaded &&
+        !allMandatoryValid &&
+        accessoriesProvided !== null) ||
+        validatePanCard
     );
   }, [
     aadharFrontSideImage,
@@ -242,13 +246,45 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     reupload,
     panCardStatus,
     panCardImage,
-    triggerClaimRefresh
+    triggerClaimRefresh,
   ]);
 
   const showButtonSection =
     aadharFrontImageStatus != "valid" ||
     aadharBackImageStatus != "valid" ||
     bankDetailsStatus != "valid";
+
+  const handleAadharFrontImageUpload = (files: File[]) => {
+    if (files.length > 0) {
+      setAadharFrontSideImage([files[files.length - 1]]);
+    } else {
+      setAadharFrontSideImage([]);
+    }
+  };
+
+  const handleAadharBackImageUpload = (files: File[]) => {
+    if (files.length > 0) {
+      setAadharBackSideImage([files[files.length - 1]]);
+    } else {
+      setAadharBackSideImage([]);
+    }
+  };
+
+  const handleBankDetailImageUpload = (files: File[]) => {
+    if (files.length > 0) {
+      setBankDetailImage([files[files.length - 1]]);
+    } else {
+      setBankDetailImage([]);
+    }
+  };
+
+  const handlePanCardUpload = (files: File[]) => {
+    if (files.length > 0) {
+      setPanCardImage([files[files.length - 1]]);
+    } else {
+      setPanCardImage([]);
+    }
+  };
 
   return (
     <div>
@@ -269,7 +305,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
                 <ImageUpload
                   label="(Front side)"
                   images={aadharFrontSideImage}
-                  setImages={setAadharFrontSideImage}
+                  setImages={handleAadharFrontImageUpload}
                 />
               ) : aadharFrontImageUrl ? (
                 <div>
@@ -298,7 +334,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
                 <ImageUpload
                   label="(Front side)"
                   images={aadharFrontSideImage}
-                  setImages={setAadharFrontSideImage}
+                  setImages={handleAadharFrontImageUpload}
                 />
               )}
             </div>
@@ -311,7 +347,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
                 <ImageUpload
                   label="(Back side)"
                   images={aadharBackSideImage}
-                  setImages={setAadharBackSideImage}
+                  setImages={handleAadharBackImageUpload}
                 />
               ) : aadharBackImageUrl ? (
                 <div>
@@ -340,7 +376,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
                 <ImageUpload
                   label="(Back side)"
                   images={aadharBackSideImage}
-                  setImages={setAadharBackSideImage}
+                  setImages={handleAadharBackImageUpload}
                 />
               )}
             </div>
@@ -360,7 +396,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
             <ImageUpload
               label="(Cancelled Cheque/Passbook)"
               images={bankDetailImage}
-              setImages={setBankDetailImage}
+              setImages={handleBankDetailImageUpload}
             />
           ) : bankDetailImageUrl ? (
             <div>
@@ -389,7 +425,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
             <ImageUpload
               label="(Cancelled Cheque/Passbook)"
               images={bankDetailImage}
-              setImages={setBankDetailImage}
+              setImages={handleBankDetailImageUpload}
             />
           )}
         </div>
@@ -403,7 +439,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
             <ImageUpload
               label="Pan Card (Optional)"
               images={panCardImage}
-              setImages={setPanCardImage}
+              setImages={handlePanCardUpload}
             />
           ) : pancardImageUrl ? (
             <div>
@@ -432,7 +468,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
             <ImageUpload
               label="Pan Card (Optional)"
               images={panCardImage}
-              setImages={setPanCardImage}
+              setImages={handlePanCardUpload}
             />
           )}
         </div>
