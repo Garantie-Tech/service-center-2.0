@@ -6,15 +6,27 @@ interface PdfUploadProps {
   label: string;
   pdfs: File[];
   setPdfs: (files: File[]) => void;
+  multiple?: boolean; // 🆕 Optional multiple select
 }
 
-const PdfUpload: React.FC<PdfUploadProps> = ({ label, pdfs, setPdfs }) => {
+const PdfUpload: React.FC<PdfUploadProps> = ({
+  label,
+  pdfs,
+  setPdfs,
+  multiple = false, // default to single select
+}) => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files).filter(
         (file) => file.type === "application/pdf"
       );
-      setPdfs([...pdfs, ...newFiles]);
+
+      // 🆕 Check if single or multiple select
+      if (multiple) {
+        setPdfs([...pdfs, ...newFiles]);
+      } else {
+        setPdfs(newFiles.slice(0, 1)); // only keep the first one
+      }
     }
   };
 
@@ -34,6 +46,7 @@ const PdfUpload: React.FC<PdfUploadProps> = ({ label, pdfs, setPdfs }) => {
             type="file"
             accept=".pdf"
             onChange={handleFileUpload}
+            multiple={multiple} // 🆕 Enable file picker to accept multiple if needed
             className="hidden"
           />
           <span className="text-grayFont text-sm">Add File</span>

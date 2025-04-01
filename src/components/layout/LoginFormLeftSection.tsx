@@ -5,68 +5,67 @@ import React from "react";
 
 const LoginFormLeftSection: React.FC = () => {
   return (
-    <div
-      className="hidden md:flex flex-col justify-center items-start w-1/2 bg-cover bg-center p-[80px] text-white"
-      style={{
-        backgroundImage: "url(/images/service-center-login-bg.svg)",
-      }}
-    >
-      <h2 className="text-3xl font-bold mb-4">Safety Verification</h2>
-      <p className="text-lg mb-6">
+    <div className="hidden md:flex flex-col justify-center items-center w-1/2 bg-cover bg-center p-[80px] text-white bg-[#3C63FC]">
+      <h2 className="text-xxl font-bold">Safety Verification</h2>
+      <p className="text-[20px] mb-6 text-center">
         For safety concerns, we need to validate your login credentials
       </p>
 
       {/* Image */}
       <Image
-        src="/images/form-left-image.svg"
+        src="/images/login-left-image.svg"
         alt="Dashboard preview"
-        width={800}
-        height={200}
-        className="w-full"
+        width={170}
+        height={250}
+        className="text-center my-[40px]"
       />
 
       {/* Contact Details */}
-      <div className="flex justify-center items-start py-8 w-full">
-        <div className="w-1/2">
-          <p className="text-sm font-medium">For claim-related queries</p>
-          <p className="mt-2 text-sm flex">
+      <div className="py-8 text-center">
+        <div className="w-full">
+          <p className="text-base">For claim-related queries</p>
+          <p className="mt-2 text-[20px] font-semibold flex justify-center">
             <Image
               src="/images/mail-icon.svg"
               alt="Dashboard preview"
-              width={25}
-              height={25}
+              width={40}
+              height={40}
               className="pr-2"
             />
-            <a href="mailto:claims.mobile@garantie.in" className="underline">
+            <a href="mailto:claims.mobile@garantie.in">
               Claims.mobile@garantie.in
             </a>
           </p>
-          <p className="text-sm flex">
+          <p className="text-[20px] flex justify-center font-semibold">
             <Image
               src="/images/phone-icon.svg"
               alt="Dashboard preview"
-              width={25}
-              height={25}
+              width={40}
+              height={40}
               className="pr-2"
             />
-            <a href="tel:+918800502077" className="underline">
-              +91 8800502077
-            </a> / 
-            <a href="tel:+919650604181" className="underline">
-              9650604181
-            </a>
+            <a href="tel:+918800502077">+91 8800502077</a> /
+            <a href="tel:+919650604181">9650604181</a>
           </p>
         </div>
 
+        <Image
+          src="/images/line.svg"
+          alt="Dashboard preview"
+          width={40}
+          height={2}
+          className="w-full py-4"
+        />
+
         {/* Footer */}
-        <div className="w-1/2">
-          <p className="text-sm">For any other query</p>
-          <p className="text-sm font-semibold flex">
+        <div className="w-full text-center">
+          <p className="text-base">For any other query</p>
+          <p className="text-[20px] font-semibold flex justify-center">
             <Image
               src="/images/phone-icon.svg"
               alt="Dashboard preview"
-              width={25}
-              height={25}
+              width={40}
+              height={40}
               className="pr-2"
             />
             +91 9871115834

@@ -104,6 +104,7 @@ const ApprovalDetailsTab: React.FC = () => {
   };
 
   const handleBerSubmit = async () => {
+    setIsBerModalOpen(false);
     if (approvalDetails.berDecision != "replace") {
       try {
         setIsLoading(true);
@@ -117,14 +118,17 @@ const ApprovalDetailsTab: React.FC = () => {
         } else {
           if (approvalDetails.berDecision === "repair") {
             handleGenerateLink("CLAIM_REPAIR");
+          } else {
+            triggerClaimRefresh();
           }
-          // triggerClaimRefresh();
           notifySuccess("Ber Decision Successfully updated !");
         }
       } catch (error) {
         notifyError(`Failed to update Ber Decision ! ${error}`);
       } finally {
-        // setIsLoading(false);
+        if (approvalDetails.berDecision == "settle") {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -151,7 +155,6 @@ const ApprovalDetailsTab: React.FC = () => {
         // setIsLoading(false);
       }
     }
-    setIsBerModalOpen(false);
   };
 
   // Disable Submit Button Conditions

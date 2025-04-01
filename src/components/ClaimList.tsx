@@ -28,6 +28,7 @@ const ClaimList: React.FC = () => {
     setClaimCount,
     claimTypes,
     sortOrder,
+    setClaimTypes,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -135,6 +136,9 @@ const ClaimList: React.FC = () => {
 
     try {
       const payload = generatePayload(0);
+      if (payload.claim_type == "otherClaims") {
+        payload.claim_type = "myClaims";
+      }
       const response = await fetchClaims(payload);
 
       if (response.success && Array.isArray(response.data?.data?.claims)) {

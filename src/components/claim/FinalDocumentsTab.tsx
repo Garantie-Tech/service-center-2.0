@@ -23,6 +23,9 @@ const FinalDocumentsTab: React.FC = () => {
     useState(true);
 
   const [reupload, setReupload] = useState(false);
+  const [repairInvoiceError, setRepairInvoiceError] = useState(true);
+  const [repairMobilePhotoError, setRepairMobilePhotoError] = useState(true);
+  const [replacementReceiptError, setReplacementReceiptError] = useState(true);
 
   useEffect(() => {
     setReupload(false);
@@ -149,31 +152,58 @@ const FinalDocumentsTab: React.FC = () => {
   };
 
   const showSubmitButton =
-    (repairInvoiceInfo.statusValue != true ||
-      repairMobilePhotoInfo.statusValue != true) ||
+    repairInvoiceInfo.statusValue != true ||
+    repairMobilePhotoInfo.statusValue != true ||
     (replacementReceiptInfo.statusValue != true && isImeiChanged);
+
+  const handleSingleImageSelect = (
+    files: File[],
+    setter: (fileArray: File[]) => void
+  ) => {
+    if (files.length > 0) {
+      setRepairMobilePhotoError(false);
+      setter([files[files.length - 1]]);
+    } else {
+      setter([]);
+    }
+  };
+
+  const handleRepairInvoiceUpload = (files: File[]) => {
+    setRepairInvoice(files);
+    setRepairInvoiceError(false);
+  };
+
+  const handleReplacementReceiptUpload = (files: File[]) => {
+    setReplacementReceipt(files);
+    setReplacementReceiptError(false);
+  };
 
   return isEditable ? (
     <div>
       <h2 className="text-lg font-semibold mb-4">Final Invoice Documents</h2>
 
-      {isInvalidRepairInvoice && showRepairInvoiceError && (
-        <ErrorAlert
-          message={isInvalidRepairInvoiceReason}
-          onClose={() => setShowRepairInvoiceError(false)}
-        />
-      )}
+      {isInvalidRepairInvoice &&
+        showRepairInvoiceError &&
+        repairInvoiceError && (
+          <ErrorAlert
+            message={isInvalidRepairInvoiceReason}
+            onClose={() => setShowRepairInvoiceError(false)}
+          />
+        )}
 
-      {isInvalidRepairMobilePhoto && showRepairMobilePhotoError && (
-        <ErrorAlert
-          message={isInvalidRepairMobilePhotoReason}
-          onClose={() => setShowRepairMobilePhotoError(false)}
-        />
-      )}
+      {isInvalidRepairMobilePhoto &&
+        showRepairMobilePhotoError &&
+        repairMobilePhotoError && (
+          <ErrorAlert
+            message={isInvalidRepairMobilePhotoReason}
+            onClose={() => setShowRepairMobilePhotoError(false)}
+          />
+        )}
 
       {isInvalidReplacementReceipt &&
         isImeiChanged &&
-        showReplacementReceiptError && (
+        showReplacementReceiptError &&
+        replacementReceiptError && (
           <ErrorAlert
             message={isInvalidReplacementReceiptReason}
             onClose={() => setShowReplacementReceiptError(false)}
@@ -188,7 +218,7 @@ const FinalDocumentsTab: React.FC = () => {
             <PdfUpload
               label="Repair Invoice(Please add Invoice document)"
               pdfs={repairInvoice}
-              setPdfs={setRepairInvoice}
+              setPdfs={handleRepairInvoiceUpload}
             />
           ) : finalDocuments.repairInvoiceImage.endsWith(".pdf") ? (
             <>
@@ -215,16 +245,16 @@ const FinalDocumentsTab: React.FC = () => {
             </>
           )}
 
-          {isInvalidRepairInvoice ? (
+          {isInvalidRepairInvoice && repairInvoiceError ? (
             <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
               Invalid Invoice : {isInvalidRepairInvoiceReason}
             </span>
-          ) : !isInvalidRepairInvoiceStatus &&
+          ) : isInvalidRepairInvoiceStatus == null &&
             finalDocuments?.repairInvoiceImage ? (
             <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
               Uploaded (Under Review)
             </span>
-          ) : finalDocuments?.repairInvoiceImage ? (
+          ) : isInvalidRepairInvoiceStatus == true ? (
             <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
               Valid
             </span>
@@ -240,8 +270,9 @@ const FinalDocumentsTab: React.FC = () => {
             <ImageUpload
               label="Repaired Mobile( Add repaired mobile photo)"
               images={repairedMobilePhotos}
-              setImages={setRepairedMobilePhotos}
-              multiple
+              setImages={(files: File[]) =>
+                handleSingleImageSelect(files, setRepairedMobilePhotos)
+              }
             />
           ) : finalDocuments.repairMobilePhoto.endsWith(".pdf") ? (
             <>
@@ -268,16 +299,16 @@ const FinalDocumentsTab: React.FC = () => {
             </>
           )}
 
-          {isInvalidRepairMobilePhoto ? (
+          {isInvalidRepairMobilePhoto && repairMobilePhotoError ? (
             <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
               Invalid Photo : {isInvalidRepairMobilePhotoReason}
             </span>
-          ) : !isInvalidRepairMobilePhotoStatus &&
+          ) : isInvalidRepairMobilePhotoStatus == null &&
             finalDocuments?.repairMobilePhoto ? (
             <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
               Uploaded (Under Review)
             </span>
-          ) : finalDocuments?.repairMobilePhoto ? (
+          ) : isInvalidRepairMobilePhotoStatus == true ? (
             <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
               Valid
             </span>
@@ -296,7 +327,7 @@ const FinalDocumentsTab: React.FC = () => {
                 <PdfUpload
                   label="Replacement Receipt( Add replacement receipts)"
                   pdfs={replacementReceipt}
-                  setPdfs={setReplacementReceipt}
+                  setPdfs={handleReplacementReceiptUpload}
                 />
               ) : finalDocuments.replacementReceiptImage.endsWith(".pdf") ? (
                 <>
@@ -329,17 +360,17 @@ const FinalDocumentsTab: React.FC = () => {
                 </>
               )}
 
-              {isInvalidReplacementReceipt ? (
+              {isInvalidReplacementReceipt && replacementReceiptError ? (
                 <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
                   Invalid Receipt : {isInvalidReplacementReceiptReason}
                 </span>
-              ) : !isInvalidReplacementReceiptStatus &&
+              ) : isInvalidReplacementReceiptStatus == null &&
                 finalDocuments?.replacementReceiptImage &&
                 finalDocuments?.isImeiChanged ? (
                 <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
                   Uploaded (Under Review)
                 </span>
-              ) : finalDocuments?.replacementReceiptImage ? (
+              ) : isInvalidReplacementReceiptStatus == true ? (
                 <span className="p-2 text-[#19AD61] text-xxs font-semibold">
                   Valid
                 </span>

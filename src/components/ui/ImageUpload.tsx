@@ -21,6 +21,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         file.type.startsWith("image/")
       );
       setImages([...images, ...newFiles]);
+      event.target.value = "";
     }
   };
 
