@@ -197,7 +197,8 @@ const ApprovalDetailsTab: React.FC = () => {
               Estimate Date
             </label>
             <p className="text-sm font-bold">
-              {convertDateTime(approvalDetails?.estimateDate)}
+              {/* {convertDateTime(approvalDetails?.estimateDate)} */}
+              {approvalDetails?.estimateDate}
             </p>
           </div>
         )}
