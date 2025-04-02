@@ -601,7 +601,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             <h2 className="text-center text-xl font-semibold text-[#181D27]">
               Are you sure?
             </h2>
-            {pendingReplacementValue == "yes" ? (
+            {pendingReplacementValue == true ? (
               <p className="text-center text-base text-[#414651] font-medium my-4">
                 Motherboard/Phone is getting replaced.
               </p>
@@ -883,7 +883,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             <h2 className="text-center text-xl font-semibold text-[#181D27]">
               Are you sure?
             </h2>
-            {pendingReplacementValue == "yes" ? (
+            {pendingReplacementValue == true ? (
               <p className="text-center text-base text-[#414651] font-medium my-4">
                 Motherboard/Phone is getting replaced.
               </p>
