@@ -216,7 +216,7 @@ const FinalDocumentsTab: React.FC = () => {
           {(!isValidRepairInvoice && reupload) ||
           !finalDocuments?.repairInvoiceImage ? (
             <PdfUpload
-              label="Repair Invoice(Please add Invoice document)"
+              label="Repair Invoice (Please add Invoice document pdf)"
               pdfs={repairInvoice}
               setPdfs={handleRepairInvoiceUpload}
             />
@@ -268,7 +268,7 @@ const FinalDocumentsTab: React.FC = () => {
           {(!isValidRepairMobilePhoto && reupload) ||
           !finalDocuments?.repairMobilePhoto ? (
             <ImageUpload
-              label="Repaired Mobile( Add repaired mobile photo)"
+              label="Repaired Mobile (Add repaired mobile photo)"
               images={repairedMobilePhotos}
               setImages={(files: File[]) =>
                 handleSingleImageSelect(files, setRepairedMobilePhotos)
@@ -325,7 +325,7 @@ const FinalDocumentsTab: React.FC = () => {
               {(!isValidReplacementReceipt && reupload) ||
               !finalDocuments?.replacementReceiptImage ? (
                 <PdfUpload
-                  label="Replacement Receipt( Add replacement receipts)"
+                  label="Replacement Receipt (Add replacement receipt pdf)"
                   pdfs={replacementReceipt}
                   setPdfs={handleReplacementReceiptUpload}
                 />
