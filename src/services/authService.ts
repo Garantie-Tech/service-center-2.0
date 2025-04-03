@@ -13,6 +13,7 @@ export type LoginResponse = {
     name?: string;
     service_centre_id?: string;
     token?: string;
+    user_type?: string;
   };
 };
 
@@ -47,6 +48,7 @@ export async function loginService(
       JSON.stringify({
         name: data?.data?.name,
         id: data?.data?.service_centre_id,
+        user_type: data?.data?.user_type,
       })
     );
   }

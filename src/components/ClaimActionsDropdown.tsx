@@ -14,10 +14,16 @@ const ClaimActionsDropdown: React.FC = () => {
   const [showTimeline, setShowTimeline] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false);
-  const { selectedClaim, setActiveTab, setIsLoading, setClaimRevised, triggerClaimRefresh} =
-    useGlobalStore();
+  const {
+    selectedClaim,
+    setActiveTab,
+    setIsLoading,
+    setClaimRevised,
+    triggerClaimRefresh,
+  } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
   const [serviceCenterId, setServiceCenterId] = useState<number | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
     const getServiceCenterId = async () => {
@@ -27,6 +33,7 @@ const ClaimActionsDropdown: React.FC = () => {
 
         if (serviceCenter) {
           setServiceCenterId(serviceCenter?.id);
+          setUserType(serviceCenter?.user_type);
         }
       } catch (error) {
         console.error("Error fetching service center ID:", error);
@@ -139,7 +146,8 @@ const ClaimActionsDropdown: React.FC = () => {
               </li>
             )}
             {selectedClaim?.cancellable &&
-              serviceCenterId == selectedClaim?.service_centre_id && (
+              (serviceCenterId == selectedClaim?.service_centre_id ||
+                userType == "service_head") && (
                 <li
                   className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
                   onClick={() => setIsCancelModalOpen(true)}

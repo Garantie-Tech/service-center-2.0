@@ -6,6 +6,7 @@ interface User {
   token: string | null;
   name: string | null;
   id: string | null;
+  user_type?: string | null;
 }
 
 interface AuthState {
@@ -22,10 +23,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       const storedUser = localStorage.getItem("user");
       const parsedUser = storedUser
         ? JSON.parse(storedUser)
-        : { name: null, id: null };
-      return { token, name: parsedUser.name, id: parsedUser.id };
+        : { name: null, id: null, user_type: null };
+      return {
+        token,
+        name: parsedUser.name,
+        id: parsedUser.id,
+        user_type: parsedUser.user_type,
+      };
     }
-    return { token: null, name: null, id: null };
+    return { token: null, name: null, id: null, user_type: null };
   })(),
   isAuthenticated:
     typeof window !== "undefined" ? !!localStorage.getItem("token") : false,
@@ -37,6 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         JSON.stringify({
           name: user.name,
           id: user.id,
+          user_type: user.user_type,
         })
       );
     }
@@ -49,7 +56,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       document.cookie = "token=; path=/; max-age=0; secure; samesite=strict";
     }
     set({
-      user: { token: null, name: null, id: null },
+      user: { token: null, name: null, id: null, user_type: null },
       isAuthenticated: false,
     });
   },

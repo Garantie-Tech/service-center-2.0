@@ -51,6 +51,18 @@ const ClaimList: React.FC = () => {
         source: "service_centre",
       };
 
+      // const user = localStorage.getItem("user");
+      // const serviceCenter = user ? JSON.parse(user) : null;
+
+      const user = localStorage.getItem("user");
+      let serviceCenter: { user_type?: string } | null = null;
+
+      try {
+        serviceCenter = user ? JSON.parse(user) : null;
+      } catch (e) {
+        console.error("Invalid user data in localStorage", e);
+      }
+
       if (globalSearch) {
         basePayload.claim_search = globalSearch;
       } else {
@@ -66,7 +78,10 @@ const ClaimList: React.FC = () => {
           ([, value]) => value === true
         )?.[0];
 
-        if (selectedClaimType) {
+        if (
+          selectedClaimType &&
+          serviceCenter?.user_type === "service_centre"
+        ) {
           basePayload.claim_type = selectedClaimType;
         }
 
