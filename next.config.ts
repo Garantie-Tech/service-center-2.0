@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "qa-garantie-cdn.s3.ap-south-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "prod-garantie.s3.ap-south-1.amazonaws.com",
+      },
     ],
   },
 };
