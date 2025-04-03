@@ -1,8 +1,4 @@
 export const redirectToClaimsPortal = () => {
-  const isProduction = process.env.NODE_ENV === "production";
-  const baseUrl = isProduction
-    ? "https://qa-claims.garantie.in/" // Live server
-    : "https://qa-claims.garantie.in/"; // QA server
-
-    window.open(baseUrl, "_blank");
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_INITIATE_CLAIM_URL ?? "";
+  window.open(baseUrl, "_blank");
 };
