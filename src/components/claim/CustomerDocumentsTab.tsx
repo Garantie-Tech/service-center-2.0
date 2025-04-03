@@ -8,6 +8,7 @@ import { useNotification } from "@/context/NotificationProvider";
 import { useGlobalStore } from "@/store/store";
 import { uploadCustomerDocuments } from "@/services/claimService";
 import GalleryPopup from "@/components/ui/GalleryPopup";
+import ErrorAlert from "@/components/ui/ErrorAlert";
 
 const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   documents,
@@ -27,10 +28,14 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const [bankDetailImage, setBankDetailImage] = useState<File[]>([]);
   const [panCardImage, setPanCardImage] = useState<File[]>([]);
   const [accessoriesProvided, setAccessoriesProvided] = useState<string | null>(
-    documents?.accessoriesProvided ?? null
+    ""
   );
   const [reupload, setReupload] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+  const [showAadharCardInvalidReason, setShowAadharCardInvalidReason] =
+    useState(true);
+  const [showBankDetailInvalidReason, setShowBankDetailInvalidReason] =
+    useState(true);
 
   useEffect(() => {
     setReupload(false);
@@ -215,26 +220,18 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const isFormEditable = true;
 
   useEffect(() => {
-    const allMandatoryValid =
-      aadharFrontImageStatus === "valid" &&
-      aadharBackImageStatus === "valid" &&
-      bankDetailsStatus === "valid";
-
     const allMandatoryUploaded =
       (aadharFrontSideImage?.length > 0 ||
         aadharFrontImageStatus === "valid") &&
       (aadharBackSideImage?.length > 0 || aadharBackImageStatus === "valid") &&
       (bankDetailImage?.length > 0 || bankDetailsStatus === "valid");
 
-    const validatePanCard =
-      panCardImage?.length > 0 && panCardStatus === "invalid";
+    const accessoriesSelected =
+      accessoriesProvided === "yes" || accessoriesProvided === "no";
 
-    setIsSubmitDisabled(
-      (allMandatoryUploaded &&
-        !allMandatoryValid &&
-        accessoriesProvided !== null) ||
-        validatePanCard
-    );
+    const shouldDisableSubmit = !allMandatoryUploaded || !accessoriesSelected;
+
+    setIsSubmitDisabled(shouldDisableSubmit);
   }, [
     aadharFrontSideImage,
     aadharBackSideImage,
@@ -289,6 +286,20 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Upload Customer Documents</h2>
+
+      {showAadharCardInvalidReason && invalidAadharFrontImageReason && (
+        <ErrorAlert
+          message={invalidAadharFrontImageReason}
+          onClose={() => setShowAadharCardInvalidReason(false)}
+        />
+      )}
+
+      {showBankDetailInvalidReason && invalidBankDetailReason && (
+        <ErrorAlert
+          message={invalidBankDetailReason}
+          onClose={() => setShowBankDetailInvalidReason(false)}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         {/* Aadhar Front & Back */}
@@ -521,11 +532,11 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
           ) : (
             <button
               className={`btn mt-6 px-6 py-2 rounded-md ${
-                !isSubmitDisabled
+                isSubmitDisabled
                   ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                   : "bg-primaryBlue text-white hover:bg-blue-700"
               }`}
-              disabled={!isSubmitDisabled || isLoading}
+              disabled={isSubmitDisabled || isLoading}
               onClick={handleSubmit}
             >
               {isLoading ? "Uploading..." : "Submit Documents"}
