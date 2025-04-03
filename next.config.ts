@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
         hostname: "prod-garantie.s3.ap-south-1.amazonaws.com",
       },
     ],
+    domains: ['prod-garantie-cdn.s3.ap-south-1.amazonaws.com', 'qa-garantie-cdn.s3.ap-south-1.amazonaws.com'],
   },
 };
 
