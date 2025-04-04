@@ -79,7 +79,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             : "",
         replacementConfirmed: isImeiChangedCheckbox,
         damagePhotos:
-          selectedClaim?.mobile_damage_photos && !claimRevised
+          selectedClaim?.mobile_damage_photos && !claimRevised && claimStatus != "Claim Initiated"
             ? selectedClaim?.mobile_damage_photos
             : [],
         estimateDocument:
