@@ -1,4 +1,4 @@
-import { addCookie } from "@/utils/cookieManager";
+import { addCookie, getCookie } from "@/utils/cookieManager";
 
 export type LoginCredentials = {
   email: string;
@@ -14,6 +14,23 @@ export type LoginResponse = {
     service_centre_id?: string;
     token?: string;
     user_type?: string;
+  };
+};
+
+export type ResetPasswordPayload = {
+  confirmPassword: string;
+  currentPassword: string;
+  newPassword: string;
+};
+
+export type ResetPasswordResponse = {
+  success: boolean;
+  code?: string;
+  locale: string;
+  message: string;
+  data?: {
+    status: string;
+    msg: string;
   };
 };
 
@@ -60,6 +77,30 @@ export async function loginService(
     path: "/",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   });
+
+  return data;
+}
+
+export async function resetPassword(
+  credentials: ResetPasswordPayload
+): Promise<ResetPasswordResponse> {
+  const token = await getCookie("token");
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/service/reset-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: JSON.stringify({
+        ...credentials,
+      }),
+    }
+  );
+
+  const data = await response.json();
 
   return data;
 }
