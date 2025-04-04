@@ -125,7 +125,7 @@ const ClaimActionsDropdown: React.FC = () => {
                 height={20}
                 className="mr-2"
               />
-              Time Line
+              Timeline
             </li>
             {selectedClaim?.revisable && (
               <li
