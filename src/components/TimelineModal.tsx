@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { fetchTimeline } from "@/services/claimService";
 import { useGlobalStore } from "@/store/store";
 import { TimelineEvent } from "@/interfaces/GlobalInterface";
+import { formatToDateTime } from "@/helpers/dateHelper";
 
 const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -94,9 +95,11 @@ const TimelineModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                   <div className="timeline-middle px-[10px]">
                     <CheckmarkIcon />
                   </div>
-                  <div className="timeline-end timeline-box">
-                  {event?.time || "No time available"}
-                  </div>
+                  {event?.time && (
+                    <div className="timeline-end timeline-box">
+                      {formatToDateTime(event?.time) || "No time available"}
+                    </div>
+                  )}
                   {index !== claimTimeline.length - 1 && (
                     <hr className="bg-[#3C63FC] !h-[30px]" />
                   )}

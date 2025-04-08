@@ -36,7 +36,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
 
         {/* Co-pay */}
         <div>
-          <h4 className="text-xs text-gray-500">CoPay</h4>
+          <h4 className="text-xs text-gray-500">Copay Amount</h4>
           <p className="text-sm font-semibold">{data.coPay.amount} </p>
         </div>
 

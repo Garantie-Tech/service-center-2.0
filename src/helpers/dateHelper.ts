@@ -39,18 +39,18 @@ export function formatDate(dateString: string): string {
   }); // e.g., "07 Dec 2024"
 }
 
-
 export function convertDateTime(dateTimeString: string): string {
+  console.log(dateTimeString, "dateTimeString");
   // Parse the input date string manually
-  const [datePart, timePart] = dateTimeString.split(' ');
-  const [year, month, day] = datePart.split('-');
-  let [hour] = timePart.split(':').map(Number);
-  const [minute] = timePart.split(':').map(Number);
+  const [datePart, timePart] = dateTimeString.split(" ");
+  const [year, month, day] = datePart.split("-");
+  let [hour] = timePart.split(":").map(Number);
+  const [minute] = timePart.split(":").map(Number);
 
   // Convert to 12-hour format
-  let period = 'AM';
+  let period = "AM";
   if (hour >= 12) {
-    period = 'PM';
+    period = "PM";
     if (hour > 12) {
       hour -= 12;
     }
@@ -59,8 +59,36 @@ export function convertDateTime(dateTimeString: string): string {
   }
 
   // Ensure two-digit formatting for day, month, hour, and minute
-  const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  const formattedTime = `${String(hour).padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
+  const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+    2,
+    "0"
+  )}`;
+  const formattedTime = `${String(hour).padStart(2, "0")}:${minute
+    .toString()
+    .padStart(2, "0")} ${period}`;
 
   return `${formattedDate} ${formattedTime}`;
 }
+
+export const formatToDateTime = (dateString: string): string => {
+  const parsedDate = new Date(Date.parse(dateString));
+
+  if (isNaN(parsedDate.getTime())) {
+    return "Invalid date";
+  }
+
+  const year = parsedDate.getFullYear();
+  const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+  const day = String(parsedDate.getDate()).padStart(2, "0");
+
+  let hours = parsedDate.getHours();
+  const minutes = String(parsedDate.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // 0 => 12
+
+  const formattedTime = `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+
+  return `${year}-${month}-${day} ${formattedTime}`;
+};
