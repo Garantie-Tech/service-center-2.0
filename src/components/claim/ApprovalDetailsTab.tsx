@@ -13,6 +13,7 @@ import Link from "next/link";
 import CopyToClipboardButton from "@/components/ui/CopyToClipboardButton";
 import BerReplaceModal from "../BerReplaceModel";
 import BerSettleModal from "../BerSettleModel";
+import { formatToDateTime } from "@/helpers/dateHelper";
 // import { convertDateTime } from "@/helpers/dateHelper";
 
 const ApprovalDetailsTab: React.FC = () => {
@@ -223,7 +224,7 @@ const ApprovalDetailsTab: React.FC = () => {
             </label>
             <p className="text-sm font-semibold">
               {/* {formatDate(approvalDetails?.approvalDate)} */}
-              {approvalDetails?.approvalDate}
+              {formatToDateTime(approvalDetails?.approvalDate)}
             </p>
           </div>
         )}

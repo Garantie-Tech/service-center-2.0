@@ -81,14 +81,21 @@ export const formatToDateTime = (dateString: string): string => {
   const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
   const day = String(parsedDate.getDate()).padStart(2, "0");
 
-  let hours = parsedDate.getHours();
-  const minutes = String(parsedDate.getMinutes()).padStart(2, "0");
+  const hours = parsedDate.getHours();
+  const minutes = parsedDate.getMinutes();
+
+  // Check if time was included in input string
+  const hasTime = !(hours === 0 && minutes === 0);
+
+  if (!hasTime) {
+    return `${year}-${month}-${day}`;
+  }
+
   const ampm = hours >= 12 ? "PM" : "AM";
+  let displayHours = hours % 12;
+  displayHours = displayHours ? displayHours : 12;
 
-  hours = hours % 12;
-  hours = hours ? hours : 12; // 0 => 12
-
-  const formattedTime = `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+  const formattedTime = `${String(displayHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
 
   return `${year}-${month}-${day} ${formattedTime}`;
 };

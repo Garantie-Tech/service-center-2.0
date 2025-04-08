@@ -5,7 +5,7 @@ import Image from "next/image";
 import { fetchRemarks } from "@/services/claimService";
 import { useGlobalStore } from "@/store/store";
 import { Remark } from "@/interfaces/GlobalInterface";
-import { convertDateTime } from "@/helpers/dateHelper";
+import {formatToDateTime } from "@/helpers/dateHelper";
 
 interface RemarksComponentProps {
   isOpen: boolean;
@@ -111,7 +111,7 @@ const RemarksComponent: React.FC<RemarksComponentProps> = ({
               <div key={remark.id} className="p-2">
                 <p className="text-xs text-darkGray">{remark?.remark}</p>
                 <p className="text-xs text-[#515151] font-semibold">
-                  Added By: {remark?.added_by_platform} on {convertDateTime(remark?.added_at)}
+                  Added By: {remark?.added_by_platform} on {formatToDateTime(remark?.added_at)}
                 </p>
               </div>
             ))
