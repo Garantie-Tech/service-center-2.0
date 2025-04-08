@@ -26,6 +26,7 @@ export default function LoginPage() {
     "kurla.sc@vivoelectronics.com",
     "ghatkopar.sc@vivoelectronics.com",
     "l3ahmedabad@vivogujarat.com",
+    "Suresh.Kumar@vivorajasthan.com"
   ];
 
   const handleLogin = async (credentials: LoginCredentials) => {
