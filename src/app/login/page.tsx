@@ -29,7 +29,9 @@ export default function LoginPage() {
     "Suresh.Kumar@vivorajasthan.com",
     "ravindra.ghuge@junwei.in",
     "nashik.vivoglobal@gmail.com",
-    "parbhani.vivoglobal@gmail.com"
+    "parbhani.vivoglobal@gmail.com",
+    "l3surat@vivogujarat.com",
+    "l3bapunagar@vivogujarat.com"
   ];
 
   const handleLogin = async (credentials: LoginCredentials) => {
