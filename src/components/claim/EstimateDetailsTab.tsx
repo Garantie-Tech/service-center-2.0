@@ -79,7 +79,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             : "",
         replacementConfirmed: isImeiChangedCheckbox,
         damagePhotos:
-          selectedClaim?.mobile_damage_photos && !claimRevised && claimStatus != "Claim Initiated"
+          selectedClaim?.mobile_damage_photos &&
+          !claimRevised &&
+          claimStatus != "Claim Initiated"
             ? selectedClaim?.mobile_damage_photos
             : [],
         estimateDocument:
@@ -295,7 +297,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               handleInputChange("estimateAmount", e.target.value)
             }
             className="input text-sm input-bordered w-full mb-4 bg-inputBg"
-            placeholder="Ex: ₹ 9000"
+            placeholder="Ex: 9000"
             disabled={isFormDisabled}
           />
 
@@ -642,7 +644,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               handleInputChange("estimateAmount", e.target.value)
             }
             className="input text-sm input-bordered w-full mb-4 bg-inputBg"
-            placeholder="Ex: ₹ 9000"
+            placeholder="Ex: 9000"
             disabled={isFormDisabled}
           />
 

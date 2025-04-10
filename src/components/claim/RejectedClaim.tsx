@@ -49,7 +49,7 @@ const RejectedClaim: React.FC<RejectedClaimProps> = ({ data }) => {
       {data?.copayRefundedAmount && (
         <div>
           <p className="text-gray-500 text-xs">Copay Refund Amount</p>
-          <p className="font-bold text-sm">{data?.copayRefundedAmount}</p>
+          <p className="font-bold text-sm">₹ {data?.copayRefundedAmount}</p>
         </div>
       )}
     </div>

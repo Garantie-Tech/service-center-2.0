@@ -153,7 +153,7 @@ const PlanFinder = () => {
                       <td>{plan.name}</td>
                       <td>{plan.imei_number}</td>
                       <td>{plan.phone_model}</td>
-                      <td>{plan.invoice_amount}</td>
+                      <td>₹ {plan.invoice_amount}</td>
                     </tr>
                   ))
                 ) : (

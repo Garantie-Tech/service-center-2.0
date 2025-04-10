@@ -15,7 +15,7 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
         <div>
           <h4 className="text-xs text-gray-500">Estimate Amount</h4>
           <p className="text-sm font-semibold">
-            {estimateDetailsState.estimateAmount}
+            ₹ {estimateDetailsState.estimateAmount}
           </p>
         </div>
 

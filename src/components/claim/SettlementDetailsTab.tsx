@@ -29,7 +29,7 @@ const SettlementDetailsTab: React.FC<{ data: SettlementDetailsProps }> = ({
         {/* Payment Amount */}
         <div>
           <h4 className="text-xs text-gray-500">Payment Amount</h4>
-          <p className="text-sm font-semibold">{payment_amount || "N/A"}</p>
+          <p className="text-sm font-semibold">₹ {payment_amount || "N/A"}</p>
         </div>
       </div>
     </div>

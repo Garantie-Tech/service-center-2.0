@@ -83,6 +83,18 @@ export const getFilteredTabs = (
     return ["Claim Details", "Estimate"];
   }
 
+  if (
+    claimStatus === "Claim Cancelled" &&
+    selectedClaim?.job_sheet_number &&
+    selectedClaim?.approval_date
+  ) {
+    return ["Claim Details", "Estimate", "Approval", "Cancelled"];
+  }
+
+  if (claimStatus === "Claim Cancelled" && selectedClaim?.job_sheet_number) {
+    return ["Claim Details", "Estimate", "Cancelled"];
+  }
+
   if (claimStatus === "Claim Cancelled") {
     return ["Claim Details", "Cancelled"];
   }
@@ -104,7 +116,7 @@ export const getFilteredTabs = (
   }
 
   if (claimStatus === "Rejected") {
-    return ["Claim Details", "Rejected"];
+    return ["Claim Details", "Estimate", "Rejected"];
   }
 
   if (claimStatus === "Estimate Revised") {

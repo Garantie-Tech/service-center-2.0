@@ -86,7 +86,9 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
             {/* Model Price */}
             <div>
               <p className="text-gray-500 text-xs">Model Price</p>
-              <p className="font-bold text-sm">{selectedClaim?.model_price}</p>
+              <p className="font-bold text-sm">
+                ₹ {selectedClaim?.model_price}
+              </p>
             </div>
           </div>
         </div>

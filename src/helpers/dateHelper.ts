@@ -71,7 +71,17 @@ export function convertDateTime(dateTimeString: string): string {
 }
 
 export const formatToDateTime = (dateString: string): string => {
-  const parsedDate = new Date(Date.parse(dateString));
+  let parsedDate: Date;
+
+  // Check if date is in dd-mm-yyyy or dd/mm/yyyy format
+  const match = dateString.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+  if (match) {
+    const [_, dd, mm, yyyy] = match;
+    parsedDate = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+  } else {
+    // Try standard parsing (for ISO or already-valid formats)
+    parsedDate = new Date(dateString);
+  }
 
   if (isNaN(parsedDate.getTime())) {
     return "Invalid date";
@@ -99,3 +109,4 @@ export const formatToDateTime = (dateString: string): string => {
 
   return `${year}-${month}-${day} ${formattedTime}`;
 };
+
