@@ -75,7 +75,7 @@ export async function loginService(
     secure: process.env.NODE_ENV === "production",
     httpOnly: false, // Set to true if the token is only needed server-side
     path: "/",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 100 * 365 * 24 * 60 * 60, // 7 days
   });
 
   return data;
