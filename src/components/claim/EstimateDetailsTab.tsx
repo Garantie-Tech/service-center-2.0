@@ -15,6 +15,7 @@ import {
   MAX_FILE_SIZE,
   MIN_DAMAGE_IMAGES,
 } from "@/globalConstant";
+import { urlToFile } from "@/helpers/fileHelper";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -233,7 +234,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     damagePhotos.length < 5 ||
     damagePhotos.length > 11;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const formData = new FormData();
     formData.append("claimed_amount", estimateAmount);
     formData.append("estimate_details", estimateDetails);
@@ -247,11 +248,16 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       formData.append("estimate_document", estimateDocument);
     }
 
-    damagePhotos.forEach((photo, index) => {
+    // Attach damage photos
+    for (let index = 0; index < damagePhotos.length; index++) {
+      const photo = damagePhotos[index];
       if (typeof photo !== "string") {
         formData.append(`mobile_damage_photos[${index}]`, photo);
+      } else {
+        const file = await urlToFile(photo, `damage_${index}`);
+        formData.append(`mobile_damage_photos[${index}]`, file);
       }
-    });
+    }
 
     try {
       onSubmit(formData);
