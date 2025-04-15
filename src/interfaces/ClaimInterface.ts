@@ -69,6 +69,7 @@ export default interface Claim {
   copay_refunded_id?: string,
   copay_refunded_amount?: string | number,
   isActionRequired?: boolean,
+  claim_type?: string,
 }
 
 export interface ClaimDetailsProps {

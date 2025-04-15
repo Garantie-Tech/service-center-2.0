@@ -327,6 +327,11 @@ const ClaimList: React.FC = () => {
                   <p className="text-base font-semibold text-gray-800 mr-2">
                     {claim.id}
                   </p>
+                  {claim?.claim_type && claim?.claim_type == "Special Approval" && (
+                      <div className="text-xxs text-red-500 mr-2 rounded-full border border-red-400 p-1">
+                        {'Special Case'}
+                      </div>
+                    )}
                   {(actionRequiredStatus.includes(claim.status) ||
                     claim?.isActionRequired) && (
                     <Image
