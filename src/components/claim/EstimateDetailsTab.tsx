@@ -361,7 +361,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed == true
+                  isFormDisabled
+                    ? "bg-[#c9c9c9]"
+                    : replacementConfirmed === true
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
