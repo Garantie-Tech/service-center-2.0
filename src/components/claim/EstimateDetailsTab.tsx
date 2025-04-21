@@ -16,6 +16,7 @@ import {
   MIN_DAMAGE_IMAGES,
 } from "@/globalConstant";
 import { urlToFile } from "@/helpers/fileHelper";
+import { compressImage } from "@/utils/compressImage";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -155,7 +156,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     setEstimateDetailsState({ [key]: value });
   };
 
-  const handleDamagePhotoUpload = (
+  const handleDamagePhotoUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files) {
@@ -169,18 +170,32 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         return;
       }
 
-      if (damagePhotos.length + newFiles.length < MIN_DAMAGE_IMAGES) {
-        setDamagePhotosError(
-          `Please upload Minimum ${MIN_DAMAGE_IMAGES} images.`
+      try {
+        // Compress all files
+        const compressedFiles = await Promise.all(
+          newFiles.map((file) => compressImage(file))
         );
-        return;
-      }
 
-      setEstimateDetailsState({
-        damagePhotos: [...damagePhotos, ...newFiles],
-      });
-      setDamagePhotosError(null);
-      event.target.value = "";
+        const updatedPhotos = [...damagePhotos, ...compressedFiles];
+
+        setEstimateDetailsState({
+          damagePhotos: updatedPhotos,
+        });
+
+        // Show error if still below minimum after adding
+        if (updatedPhotos.length < MIN_DAMAGE_IMAGES) {
+          setDamagePhotosError(
+            `Please upload Minimum ${MIN_DAMAGE_IMAGES} images.`
+          );
+        } else {
+          setDamagePhotosError(null);
+        }
+
+        event.target.value = "";
+      } catch (err) {
+        console.error("Image compression failed:", err);
+        setDamagePhotosError("Failed to process images. Please try again.");
+      }
     }
   };
 

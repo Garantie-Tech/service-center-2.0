@@ -9,6 +9,7 @@ import ErrorAlert from "@/components/ui/ErrorAlert";
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { getDocumentInfo } from "@/helpers/globalHelper";
+import { compressImage } from "@/utils/compressImage";
 
 const FinalDocumentsTab: React.FC = () => {
   const [repairInvoice, setRepairInvoice] = useState<File[]>([]);
@@ -156,13 +157,22 @@ const FinalDocumentsTab: React.FC = () => {
     repairMobilePhotoInfo.statusValue != true ||
     (replacementReceiptInfo.statusValue != true && isImeiChanged);
 
-  const handleSingleImageSelect = (
+  const handleSingleImageSelect = async (
     files: File[],
-    setter: (fileArray: File[]) => void
+    setter: (fileArray: File[]) => void,
+    setError?: (val: boolean) => void
   ) => {
     if (files.length > 0) {
-      setRepairMobilePhotoError(false);
-      setter([files[files.length - 1]]);
+      try {
+        const latestFile = files[files.length - 1];
+        const compressed = await compressImage(latestFile);
+
+        if (setError) setError(false);
+        setter([compressed]);
+      } catch (err) {
+        console.error("Image compression failed:", err);
+        if (setError) setError(true);
+      }
     } else {
       setter([]);
     }
