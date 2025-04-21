@@ -15,53 +15,25 @@ export default function LoginPage() {
   const { notifySuccess, notifyError } = useNotification();
   const setIsLoading = useGlobalStore((state) => state.setIsLoading);
 
-  const validEmailList = [
-    "lucknowcentral.vivo.up@gmail.com",
-    "khan.naved305@gmail.com",
-    "firozabad.vivo.up@gmail.com",
-    "pukhrayan.vivo.up@gmail.com",
-    "Kanpurcentral123@gmail.com",
-    "kanpur.vivo.up@gmail.com",
-    "bhiwandi.sc@vivoelectronics.com",
-    "kurla.sc@vivoelectronics.com",
-    "ghatkopar.sc@vivoelectronics.com",
-    "l3ahmedabad@vivogujarat.com",
-    "Suresh.Kumar@vivorajasthan.com",
-    "ravindra.ghuge@junwei.in",
-    "nashik.vivoglobal@gmail.com",
-    "parbhani.vivoglobal@gmail.com",
-    "l3surat@vivogujarat.com",
-    "l3bapunagar@vivogujarat.com",
-    "gaurav.chaturvedi@vivoup.in",
-    "naresh.patel@vivogujarat.com",
-    "ritesh.sonawane@junwei.in",
-    "Abdul.shaikh@vivoelectronics.com",
-    "rashesh.raval@vivogujarat.com",
-  ];
-
   const handleLogin = async (credentials: LoginCredentials) => {
-    if (validEmailList.includes(credentials.email)) {
-      try {
-        setIsLoading(true);
-        const userData = await loginService(credentials);
-        notifySuccess("Login Successful");
-        setUser({
-          token: userData?.data?.token || null,
-          name: userData?.data?.name || null,
-          id: userData?.data?.service_centre_id || null,
-          user_type: userData?.data?.user_type || null,
-        });
+    try {
+      setIsLoading(true);
+      const userData = await loginService(credentials);
+      notifySuccess("Login Successful");
+      setUser({
+        token: userData?.data?.token || null,
+        name: userData?.data?.name || null,
+        id: userData?.data?.service_centre_id || null,
+        user_type: userData?.data?.user_type || null,
+      });
 
-        router.push("/dashboard");
-      } catch (error) {
-        if (error instanceof Error) {
-          notifyError(error.message);
-        }
-      } finally {
-        setIsLoading(false);
+      router.push("/dashboard");
+    } catch (error) {
+      if (error instanceof Error) {
+        notifyError(error.message);
       }
-    } else {
-      notifyError("Sorry, you're not authorized to use this service center.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
