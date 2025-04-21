@@ -3,14 +3,19 @@
 import { create } from "zustand";
 import Claim from "@/interfaces/ClaimInterface";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
-import { ApprovalState, EstimateDetailsState, Tab } from "@/interfaces/GlobalInterface";
+import {
+  ApprovalState,
+  EstimateDetailsState,
+  Tab,
+} from "@/interfaces/GlobalInterface";
 
 interface FilterProps {
   fromDate: string;
   toDate: string;
   claimTypes: {
-    myClaims: boolean;
-    otherClaims: boolean;
+    myClaims?: boolean;
+    otherClaims?: boolean;
+    allClaims?: boolean;
     pendingClaims: boolean;
   };
 }
@@ -65,13 +70,15 @@ interface StoreType {
   setToDate: (date: string) => void;
 
   claimTypes: {
-    myClaims: boolean;
-    otherClaims: boolean;
+    myClaims?: boolean;
+    otherClaims?: boolean;
+    allClaims?: boolean;
     pendingClaims: boolean;
   };
   setClaimTypes: (types: {
-    myClaims: boolean;
-    otherClaims: boolean;
+    myClaims?: boolean;
+    otherClaims?: boolean;
+    allClaims?: boolean;
     pendingClaims: boolean;
   }) => void;
 
@@ -159,6 +166,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   claimTypes: {
     myClaims: true,
     otherClaims: false,
+    allClaims: true,
     pendingClaims: false,
   },
   setClaimTypes: (types) => set({ claimTypes: types }),
@@ -181,8 +189,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setSortBy: (sortKey: SortByOptions) => set({ sortBy: sortKey }),
 
   sortOrder: "Desc",
-  setSortOrder: (order: "Asc" | "Desc") =>
-    set({ sortOrder: order }),
+  setSortOrder: (order: "Asc" | "Desc") => set({ sortOrder: order }),
 
   globalSearch: "",
   setGlobalSearch: (search) => set({ globalSearch: search }),

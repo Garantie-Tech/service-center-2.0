@@ -10,7 +10,12 @@ import EstimateTabViewComponent from "@/components/claim/view/EstimateTabView";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import { useEffect, useState } from "react";
 import GalleryPopup from "@/components/ui/GalleryPopup";
-import { MAX_DAMAGE_IMAGES, MAX_FILE_SIZE } from "@/globalConstant";
+import {
+  MAX_DAMAGE_IMAGES,
+  MAX_FILE_SIZE,
+  MIN_DAMAGE_IMAGES,
+} from "@/globalConstant";
+import { urlToFile } from "@/helpers/fileHelper";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -164,6 +169,13 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         return;
       }
 
+      if (damagePhotos.length + newFiles.length < MIN_DAMAGE_IMAGES) {
+        setDamagePhotosError(
+          `Please upload Minimum ${MIN_DAMAGE_IMAGES} images.`
+        );
+        return;
+      }
+
       setEstimateDetailsState({
         damagePhotos: [...damagePhotos, ...newFiles],
       });
@@ -196,6 +208,12 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const handleRemoveDamagePhoto = (index: number) => {
     const updatedPhotos = damagePhotos.filter((_, i) => i !== index);
     setEstimateDetailsState({ damagePhotos: updatedPhotos });
+    if (updatedPhotos?.length < MIN_DAMAGE_IMAGES) {
+      setDamagePhotosError(
+        `Please upload Minimum ${MIN_DAMAGE_IMAGES} images.`
+      );
+      return;
+    }
     if (!updatedPhotos) {
       setShowDamageMobImageError(true);
     }
@@ -216,7 +234,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     damagePhotos.length < 5 ||
     damagePhotos.length > 11;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const formData = new FormData();
     formData.append("claimed_amount", estimateAmount);
     formData.append("estimate_details", estimateDetails);
@@ -230,11 +248,16 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       formData.append("estimate_document", estimateDocument);
     }
 
-    damagePhotos.forEach((photo, index) => {
+    // Attach damage photos
+    for (let index = 0; index < damagePhotos.length; index++) {
+      const photo = damagePhotos[index];
       if (typeof photo !== "string") {
         formData.append(`mobile_damage_photos[${index}]`, photo);
+      } else {
+        const file = await urlToFile(photo, `damage_${index}`);
+        formData.append(`mobile_damage_photos[${index}]`, file);
       }
-    });
+    }
 
     try {
       onSubmit(formData);
@@ -252,11 +275,11 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     const updates: Partial<typeof estimateDetailsState> = {};
     updates.replacementConfirmed = null;
 
-    if (damageImageStatus == false) {
+    if (isInvalidImages == true) {
       updates.damagePhotos = [];
     }
 
-    if (estimateDocStatus == false) {
+    if (isInvalidDocument == true) {
       updates.estimateDocument = null;
     }
 
@@ -338,7 +361,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed == true
+                  isFormDisabled
+                    ? "bg-[#c9c9c9]"
+                    : replacementConfirmed === true
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
@@ -368,7 +393,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <button
                 type="button"
                 className={`flex border border-[#EEEEEE] items-center justify-center w-[24px] h-[24px] rounded-md text-white ${
-                  replacementConfirmed == false
+                  isFormDisabled
+                    ? "bg-[#c9c9c9]"
+                    : replacementConfirmed === false
                     ? "bg-checkboxCheckedBg"
                     : "bg-inputBg"
                 }`}
@@ -489,7 +516,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 ) : (
                   <></>
                 )}
-                {!isFormDisabled && (
+                {!isFormDisabled && estimateDocStatus != true && (
                   <button
                     type="button"
                     className="absolute top-[-4px] right-[-4px] bg-crossBg rounded-full p-[1px]"
@@ -563,7 +590,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 <GalleryPopup
                   images={estimateDetailsState?.damagePhotos}
                   onRemoveImage={handleRemoveDamagePhoto}
-                  allowRemoval={!isFormDisabled && damageImageStatus == false}
+                  allowRemoval={!isFormDisabled && damageImageStatus != true}
                 />
               </div>
             )}

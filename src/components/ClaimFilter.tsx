@@ -31,9 +31,27 @@ const ClaimFilter: React.FC = () => {
   } = useGlobalStore();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [claimTypeOptions, setClaimTypeOptions] = useState([
+    "mySC",
+    "otherSC",
+    "pendingClaims",
+  ]);
   const dropdownRef = useRef<HTMLDetailsElement | null>(null);
 
   useEffect(() => {
+    const user = localStorage.getItem("user");
+    let serviceCenter: { user_type?: string } | null = null;
+
+    try {
+      serviceCenter = user ? JSON.parse(user) : null;
+    } catch (e) {
+      console.error("Invalid user data in localStorage", e);
+    }
+
+    if (serviceCenter?.user_type != "service_centre") {
+      setClaimTypeOptions(["allClaims", "pendingClaims"]);
+    }
+
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
@@ -126,33 +144,58 @@ const ClaimFilter: React.FC = () => {
     setClaimTypes({
       myClaims: selectedType === "mySC",
       otherClaims: selectedType === "otherSC",
+      allClaims: selectedType === "allClaims",
       pendingClaims: selectedType === "pendingClaims",
     });
   };
 
   const handleCancel = () => {
     const isAnyClaimTypeSelected =
-      claimTypes.myClaims || claimTypes.otherClaims || claimTypes.pendingClaims;
+      claimTypes.myClaims ||
+      claimTypes.otherClaims ||
+      claimTypes.allClaims ||
+      claimTypes.pendingClaims;
 
     if (fromDate || toDate || isAnyClaimTypeSelected) {
       setToDate("");
       setFromDate("");
-      setClaimTypes({
-        myClaims: true,
-        otherClaims: false,
-        pendingClaims: false,
-      });
+
+      const user = localStorage.getItem("user");
+      let serviceCenter: { user_type?: string } | null = null;
+
+      try {
+        serviceCenter = user ? JSON.parse(user) : null;
+      } catch (e) {
+        console.error("Invalid user data in localStorage", e);
+      }
+
+      if (serviceCenter?.user_type != "service_centre") {
+        setClaimTypes({
+          myClaims: false,
+          otherClaims: false,
+          allClaims: true,
+          pendingClaims: false,
+        });
+      } else {
+        setClaimTypes({
+          myClaims: true,
+          otherClaims: false,
+          allClaims: false,
+          pendingClaims: false,
+        });
+      }
       setAppliedFilters({ fromDate: "", toDate: "", claimTypes });
     }
     toggleFilter();
   };
 
   const mappedClaimType: Record<
-    "mySC" | "otherSC" | "pendingClaims",
+    "mySC" | "otherSC" | "allClaims" | "pendingClaims",
     keyof typeof claimTypes
   > = {
     mySC: "myClaims",
     otherSC: "otherClaims",
+    allClaims: "allClaims",
     pendingClaims: "pendingClaims",
   };
 
@@ -331,29 +374,27 @@ const ClaimFilter: React.FC = () => {
           {/* Claim Types */}
           <h3 className="text-sm font-bold mb-3">Claim Type</h3>
           <div className="flex gap-2 mb-4">
-            {(
-              ["mySC", "otherSC", "pendingClaims"] as Array<
-                keyof typeof claimTypes
-              >
-            ).map((type) => (
-              <label key={type} className="flex items-center">
-                <input
-                  type="radio"
-                  name="claimType"
-                  className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
-                  value={type}
-                  checked={
-                    claimTypes[
-                      mappedClaimType[type as keyof typeof mappedClaimType]
-                    ]
-                  }
-                  onChange={handleClaimTypeChange}
-                />
-                <span className="ml-2 text-xs capitalize">
-                  {type.replace("SC", " SC").replace("Claims", " Claims")}
-                </span>
-              </label>
-            ))}
+            {(claimTypeOptions as Array<keyof typeof claimTypes>).map(
+              (type) => (
+                <label key={type} className="flex items-center">
+                  <input
+                    type="radio"
+                    name="claimType"
+                    className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
+                    value={type}
+                    checked={
+                      claimTypes[
+                        mappedClaimType[type as keyof typeof mappedClaimType]
+                      ]
+                    }
+                    onChange={handleClaimTypeChange}
+                  />
+                  <span className="ml-2 text-xs capitalize">
+                    {type.replace("SC", " SC").replace("Claims", " Claims")}
+                  </span>
+                </label>
+              )
+            )}
           </div>
 
           {/* Action Buttons */}

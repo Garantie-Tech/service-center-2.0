@@ -51,9 +51,6 @@ const ClaimList: React.FC = () => {
         source: "service_centre",
       };
 
-      // const user = localStorage.getItem("user");
-      // const serviceCenter = user ? JSON.parse(user) : null;
-
       const user = localStorage.getItem("user");
       let serviceCenter: { user_type?: string } | null = null;
 
@@ -74,14 +71,23 @@ const ClaimList: React.FC = () => {
           basePayload.endDate = appliedFilters.toDate;
         }
 
-        const selectedClaimType = Object.entries(claimTypes).find(
-          ([, value]) => value === true
-        )?.[0];
+        const activeClaimTypes = Object.entries(claimTypes)
+          .filter(([, value]) => value)
+          .map(([key]) => key);
 
-        if (
-          selectedClaimType &&
-          serviceCenter?.user_type === "service_centre"
-        ) {
+        let selectedClaimType = "";
+
+        if (serviceCenter?.user_type != "service_centre") {
+          selectedClaimType = activeClaimTypes.includes("allClaims")
+            ? "allClaims"
+            : activeClaimTypes[0];
+        } else {
+          selectedClaimType = activeClaimTypes.includes("myClaims")
+            ? "myClaims"
+            : activeClaimTypes[0];
+        }
+
+        if (selectedClaimType) {
           basePayload.claim_type = selectedClaimType;
         }
 
@@ -95,7 +101,7 @@ const ClaimList: React.FC = () => {
     [appliedFilters, filterStatus, globalSearch, claimTypes, sortOrder]
   );
 
-  // Fetch claims (main function)
+  // Fetch claims (main function)s
   const fetchClaimsData = useCallback(
     async (pageNumber: number, reset: boolean = false) => {
       if (loading || (!hasMore && !reset) || isFetching.current) return;
@@ -321,6 +327,11 @@ const ClaimList: React.FC = () => {
                   <p className="text-base font-semibold text-gray-800 mr-2">
                     {claim.id}
                   </p>
+                  {claim?.claim_type && claim?.claim_type == "Special Approval" && (
+                      <div className="text-xxs text-red-500 mr-2 rounded-full border border-red-400 p-1">
+                        {'Special Case'}
+                      </div>
+                    )}
                   {(actionRequiredStatus.includes(claim.status) ||
                     claim?.isActionRequired) && (
                     <Image
