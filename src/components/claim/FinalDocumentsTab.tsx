@@ -281,8 +281,12 @@ const FinalDocumentsTab: React.FC = () => {
               label="Repaired Mobile (Add repaired mobile photo)"
               images={repairedMobilePhotos}
               setImages={(files: File[]) =>
-                handleSingleImageSelect(files, setRepairedMobilePhotos, setRepairMobilePhotoError)
-              }              
+                handleSingleImageSelect(
+                  files,
+                  setRepairedMobilePhotos,
+                  setRepairMobilePhotoError
+                )
+              }
             />
           ) : finalDocuments.repairMobilePhoto.endsWith(".pdf") ? (
             <>
