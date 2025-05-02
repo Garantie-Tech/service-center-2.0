@@ -9,6 +9,7 @@ import { useGlobalStore } from "@/store/store";
 import { uploadCustomerDocuments } from "@/services/claimService";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import ErrorAlert from "@/components/ui/ErrorAlert";
+import { handleFileUploadWithCompression } from "@/utils/handleFileUploadWithCompression";
 
 const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   documents,
@@ -251,36 +252,20 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     aadharBackImageStatus != "valid" ||
     bankDetailsStatus != "valid";
 
-  const handleAadharFrontImageUpload = (files: File[]) => {
-    if (files.length > 0) {
-      setAadharFrontSideImage([files[files.length - 1]]);
-    } else {
-      setAadharFrontSideImage([]);
-    }
+  const handleAadharFrontImageUpload = async (files: File[]) => {
+    await handleFileUploadWithCompression(files, setAadharFrontSideImage);
   };
 
-  const handleAadharBackImageUpload = (files: File[]) => {
-    if (files.length > 0) {
-      setAadharBackSideImage([files[files.length - 1]]);
-    } else {
-      setAadharBackSideImage([]);
-    }
+  const handleAadharBackImageUpload = async (files: File[]) => {
+    await handleFileUploadWithCompression(files, setAadharBackSideImage);
   };
 
-  const handleBankDetailImageUpload = (files: File[]) => {
-    if (files.length > 0) {
-      setBankDetailImage([files[files.length - 1]]);
-    } else {
-      setBankDetailImage([]);
-    }
+  const handleBankDetailImageUpload = async (files: File[]) => {
+    await handleFileUploadWithCompression(files, setBankDetailImage);
   };
 
-  const handlePanCardUpload = (files: File[]) => {
-    if (files.length > 0) {
-      setPanCardImage([files[files.length - 1]]);
-    } else {
-      setPanCardImage([]);
-    }
+  const handlePanCardUpload = async (files: File[]) => {
+    await handleFileUploadWithCompression(files, setPanCardImage);
   };
 
   return (
