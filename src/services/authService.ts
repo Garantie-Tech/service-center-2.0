@@ -1,3 +1,4 @@
+import { StateMap } from "@/interfaces/GlobalInterface";
 import { addCookie, getCookie } from "@/utils/cookieManager";
 
 export type LoginCredentials = {
@@ -14,6 +15,7 @@ export type LoginResponse = {
     service_centre_id?: string;
     token?: string;
     user_type?: string;
+    states?: StateMap;
   };
 };
 

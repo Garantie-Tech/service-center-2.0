@@ -7,6 +7,7 @@ import { exportToCSV } from "@/utils/exportCsv";
 import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
+import StateMultiSelectDropdown from "./filters/StateMultiSelectDropdown";
 
 const SearchSection: React.FC = () => {
   const {
@@ -16,6 +17,7 @@ const SearchSection: React.FC = () => {
     setIsLoading,
     filterStatus,
     claimCount,
+    stateOptions,
   } = useGlobalStore();
 
   const { notifySuccess, notifyError } = useNotification();
@@ -53,6 +55,11 @@ const SearchSection: React.FC = () => {
       <div className="flex justify-between items-between w-full gap-8">
         {/* Claims Summary */}
         <div className="flex w-1/4 items-center justify-between gap-2">
+          {stateOptions && (
+            <div className="w-2/3 relative">
+              <StateMultiSelectDropdown />
+            </div>
+          )}
           <div>
             <h2 className="text-sm font-bold">Claims</h2>
             <p className="text-xxs text-gray-500">{claimCount}</p>
