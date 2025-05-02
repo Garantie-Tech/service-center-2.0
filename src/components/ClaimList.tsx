@@ -28,6 +28,7 @@ const ClaimList: React.FC = () => {
     setClaimCount,
     claimTypes,
     sortOrder,
+    filterState,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -94,11 +95,21 @@ const ClaimList: React.FC = () => {
         if (sortOrder) {
           basePayload.sort_by = sortOrder;
         }
+        if (filterState.trim()) {
+          basePayload.state_id = filterState;
+        }
       }
 
       return basePayload;
     },
-    [appliedFilters, filterStatus, globalSearch, claimTypes, sortOrder]
+    [
+      appliedFilters,
+      filterStatus,
+      globalSearch,
+      claimTypes,
+      sortOrder,
+      filterState,
+    ]
   );
 
   // Fetch claims (main function)s
@@ -146,7 +157,7 @@ const ClaimList: React.FC = () => {
         setClaimRevised(false);
       }
     },
-    [loading, hasMore, generatePayload]
+    [loading, hasMore, generatePayload, filterState]
   );
 
   // Fetch claims in the background when triggered
@@ -204,14 +215,14 @@ const ClaimList: React.FC = () => {
     } catch (error) {
       console.error("Background refresh failed:", error);
     }
-  }, [refreshClaimsTrigger, generatePayload, selectedClaim]);
+  }, [refreshClaimsTrigger, generatePayload, selectedClaim, filterState]);
 
   // Initial & Filter/Search API Call
   useEffect(() => {
     setPage(0);
     setHasMore(true);
     fetchClaimsData(0, true);
-  }, [appliedFilters, filterStatus, globalSearch, sortOrder]);
+  }, [appliedFilters, filterStatus, globalSearch, sortOrder, filterState]);
 
   // Background refresh effect
   useEffect(() => {
@@ -254,7 +265,7 @@ const ClaimList: React.FC = () => {
         setSelectedClaim(filteredClaims[0] || null);
       }
     }
-  }, [filteredClaims, globalSearch, sortOrder]);
+  }, [filteredClaims, globalSearch, sortOrder, filterState]);
 
   const setClaimStates = (currentClaim: Claim) => {
     if (currentClaim) {
@@ -327,9 +338,10 @@ const ClaimList: React.FC = () => {
                   <p className="text-base font-semibold text-gray-800 mr-2">
                     {claim.id}
                   </p>
-                  {claim?.claim_type && claim?.claim_type == "Special Approval" && (
+                  {claim?.claim_type &&
+                    claim?.claim_type == "Special Approval" && (
                       <div className="text-xxs text-red-500 mr-2 rounded-full border border-red-400 p-1">
-                        {'Special Case'}
+                        {"Special Case"}
                       </div>
                     )}
                   {(actionRequiredStatus.includes(claim.status) ||

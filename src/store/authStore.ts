@@ -1,5 +1,6 @@
 "use client";
 
+import { StateMap } from "@/interfaces/GlobalInterface";
 import { create } from "zustand";
 
 interface User {
@@ -7,6 +8,7 @@ interface User {
   name: string | null;
   id: string | null;
   user_type?: string | null;
+  states?: StateMap;
 }
 
 interface AuthState {

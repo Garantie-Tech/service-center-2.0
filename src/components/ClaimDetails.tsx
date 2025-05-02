@@ -129,7 +129,9 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     },
     bankDetails: selectedClaim?.documents?.["77"],
     panCard: selectedClaim?.documents?.["78"],
-    accessoriesProvided: selectedClaim?.data?.accessory_provided ? String(selectedClaim?.data?.accessory_provided) : '',
+    accessoriesProvided: selectedClaim?.data?.accessory_provided
+      ? String(selectedClaim?.data?.accessory_provided)
+      : "",
   };
 
   const settlementDetailsData: SettlementDetailsProps = {
