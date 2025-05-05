@@ -52,7 +52,7 @@ const StateMultiSelectDropdown: React.FC = () => {
           if (!isLoading) setOpen(!open);
         }}
       >
-        <span className="truncate">
+        <span className="truncate w-[75%]">
           {selected.length > 0
             ? stateList
                 .filter((s) => selected.includes(s.id))
@@ -60,30 +60,31 @@ const StateMultiSelectDropdown: React.FC = () => {
                 .join(", ")
             : "Select States"}
         </span>
+        <div className="flex justify-end items-center w-[25%]">
+          {selected.length > 0 ? (
+            <button
+              className="absolute mr-[25px] text-gray-500 hover:text-red-600"
+              onClick={(e) => {
+                e.stopPropagation();
+                clearAll();
+                setOpen(false);
+              }}
+              title="Clear selection"
+            >
+              ✕
+            </button>
+          ) : null}
 
-        {selected.length > 0 ? (
-          <button
-            className="absolute right-8 text-gray-500 hover:text-red-600"
-            onClick={(e) => {
-              e.stopPropagation(); // prevent dropdown toggle
-              clearAll();
-              setOpen(false);
-            }}
-            title="Clear selection"
+          <svg
+            className={`w-4 h-4 transform ${open ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
           >
-            ✕
-          </button>
-        ) : null}
-
-        <svg
-          className={`w-4 h-4 ml-2 transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M19 9l-7 7-7-7" />
-        </svg>
+            <path d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
 
       {open && (

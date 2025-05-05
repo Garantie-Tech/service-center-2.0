@@ -14,12 +14,13 @@ import React, { useState } from "react";
 const PlanFinder = () => {
   const [plans, setPlans] = useState<PolicyItem[] | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const { setIsLoading } = useGlobalStore();
+  const { setIsLoading, setFilterState } = useGlobalStore();
   const router = useRouter();
   const { notifyError } = useNotification();
 
   const logout = useAuthStore((state) => state.logout);
   const handleLogout = () => {
+    setFilterState("");
     logout();
     router.push("/");
   };
