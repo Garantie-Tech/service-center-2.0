@@ -14,6 +14,7 @@ export default function LoginPage() {
   const setUser = useAuthStore((state) => state.setUser);
   const { notifySuccess, notifyError } = useNotification();
   const setIsLoading = useGlobalStore((state) => state.setIsLoading);
+  const setStateOptions = useGlobalStore((state) => state.setStateOptions);
 
   const handleLogin = async (credentials: LoginCredentials) => {
     try {
@@ -26,6 +27,8 @@ export default function LoginPage() {
         id: userData?.data?.service_centre_id || null,
         user_type: userData?.data?.user_type || null,
       });
+      setStateOptions(userData?.data?.states);
+      localStorage.setItem("states", JSON.stringify(userData?.data?.states));
 
       router.push("/dashboard");
     } catch (error) {

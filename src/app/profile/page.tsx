@@ -14,7 +14,8 @@ import React, { useEffect, useState } from "react";
 
 const ProfileDetails = () => {
   const [profile, setProfile] = useState<ServiceCenterProfile | null>(null);
-  const { setIsLoading } = useGlobalStore();
+  const { setIsLoading, setFilterState, setSelectedDropdown } =
+    useGlobalStore();
   const router = useRouter();
   const [showResetPasswordSection, setShowResetPasswordSection] =
     useState(false);
@@ -30,6 +31,8 @@ const ProfileDetails = () => {
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {
+    setFilterState("");
+    setSelectedDropdown("All Claims");
     logout();
     router.push("/");
   };

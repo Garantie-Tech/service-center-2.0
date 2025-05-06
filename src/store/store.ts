@@ -6,6 +6,7 @@ import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
 import {
   ApprovalState,
   EstimateDetailsState,
+  StateMap,
   Tab,
 } from "@/interfaces/GlobalInterface";
 
@@ -114,6 +115,11 @@ interface StoreType {
   triggerClaimRefresh: () => void;
   claimCount: number;
   setClaimCount: (claimCount: number) => void;
+  filterState: string;
+  setFilterState: (state: string) => void;
+  stateOptions: StateMap;
+  setStateOptions: (states: StateMap) => void;
+  getStateDropdownList: () => { id: string; name: string }[];
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -296,4 +302,16 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setClaimRevised: (claimRevised) => set({ claimRevised: claimRevised }),
   claimCount: 0,
   setClaimCount: (claimCount) => set({ claimCount: claimCount }),
+  filterState: "",
+  setFilterState: (state: string) => set({ filterState: state }),
+  stateOptions: {},
+  setStateOptions: (states) => set({ stateOptions: states }),
+  getStateDropdownList: () => {
+    const stateMap = get().stateOptions ?? {};
+    return Object.entries(stateMap).map(([id, name]) => ({
+      id,
+      name: name as string,
+    }));
+  },
+  
 }));

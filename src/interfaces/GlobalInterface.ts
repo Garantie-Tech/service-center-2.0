@@ -143,6 +143,7 @@ export interface ClaimFetchPayload {
   claim_search?: string;
   claim_type?: string;
   sort_by?: string;
+  state_id?: string;
 }
 
 export interface UploadFinalDocuments {
@@ -360,3 +361,5 @@ export interface PolicyApiResponse {
   message: string;
   data: PolicyResponseData;
 }
+
+export type StateMap = Record<string, string> | undefined;
