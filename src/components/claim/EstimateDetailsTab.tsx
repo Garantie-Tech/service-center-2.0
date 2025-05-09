@@ -264,13 +264,15 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
 
     // Attach damage photos
-    for (let index = 0; index < damagePhotos.length; index++) {
-      const photo = damagePhotos[index];
-      if (typeof photo !== "string") {
-        formData.append(`mobile_damage_photos[${index}]`, photo);
-      } else {
-        const file = await urlToFile(photo, `damage_${index}`);
-        formData.append(`mobile_damage_photos[${index}]`, file);
+    if (damageImageStatus == false) {
+      for (let index = 0; index < damagePhotos.length; index++) {
+        const photo = damagePhotos[index];
+        if (typeof photo !== "string") {
+          formData.append(`mobile_damage_photos[${index}]`, photo);
+        } else {
+          const file = await urlToFile(photo, `damage_${index}`);
+          formData.append(`mobile_damage_photos[${index}]`, file);
+        }
       }
     }
 
