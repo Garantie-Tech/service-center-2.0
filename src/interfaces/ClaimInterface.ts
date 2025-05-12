@@ -17,6 +17,7 @@ export default interface Claim {
     inputs?: {
       damage_details?: string;
       estimate_details?: string;
+      date_of_damage?: string;
     };
     replacement_payment?: {
       replace_payment_successful: boolean;
@@ -82,6 +83,7 @@ export interface ClaimDetailsProps {
     };
     claimDetails?: string;
     service_centre_name: string;
+    damageDate?: string;
   };
 }
 
