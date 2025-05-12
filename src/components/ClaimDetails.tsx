@@ -83,6 +83,8 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     },
     claimDetails: selectedClaim?.data?.inputs?.damage_details || "",
     service_centre_name: selectedClaim?.service_centre_name || "",
+    damageDate:
+      formatDate(String(selectedClaim?.data?.inputs?.date_of_damage)) || "",
   };
 
   const handleEstimateSubmit = async (formData: FormData) => {

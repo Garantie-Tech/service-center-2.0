@@ -105,8 +105,9 @@ export const formatToDateTime = (dateString: string): string => {
   let displayHours = hours % 12;
   displayHours = displayHours ? displayHours : 12;
 
-  const formattedTime = `${String(displayHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
+  const formattedTime = `${String(displayHours).padStart(2, "0")}:${String(
+    minutes
+  ).padStart(2, "0")} ${ampm}`;
 
   return `${year}-${month}-${day} ${formattedTime}`;
 };
-

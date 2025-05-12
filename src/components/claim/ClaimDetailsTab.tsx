@@ -13,6 +13,12 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
           <p className="text-sm font-semibold">{data.claimDate}</p>
         </div>
 
+        {/* Damage Date */}
+        <div>
+          <h4 className="text-xs text-gray-500">Damage Date</h4>
+          <p className="text-sm font-semibold">{data.damageDate}</p>
+        </div>
+
         {/* Plan Type */}
         <div>
           <h4 className="text-xs text-gray-500">Plan Type</h4>
