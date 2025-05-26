@@ -1,6 +1,6 @@
 "use client";
 
-import useInitializeStates from "@/hooks/useInitializeStates";
+// import useInitializeStates from "@/hooks/useInitializeStates";
 import { useGlobalStore } from "@/store/store";
 import { useEffect, useRef, useState } from "react";
 
@@ -10,7 +10,7 @@ const StateMultiSelectDropdown: React.FC = () => {
   const isLoading = useGlobalStore((s) => s.isLoading);
   const selected = filterState.split(",").filter(Boolean);
   const getStateDropdownList = useGlobalStore((s) => s.getStateDropdownList);
-  useInitializeStates();
+  // useInitializeStates();
   const stateList = getStateDropdownList();
 
   const [open, setOpen] = useState(false);
