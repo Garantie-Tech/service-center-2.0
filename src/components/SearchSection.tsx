@@ -8,6 +8,8 @@ import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
 import StateMultiSelectDropdown from "./filters/StateMultiSelectDropdown";
+import { useEffect } from "react";
+import { StateMap } from "@/interfaces/GlobalInterface";
 
 const SearchSection: React.FC = () => {
   const {
@@ -18,6 +20,7 @@ const SearchSection: React.FC = () => {
     filterStatus,
     claimCount,
     stateOptions,
+    setStateOptions,
   } = useGlobalStore();
 
   const { notifySuccess, notifyError } = useNotification();
@@ -50,12 +53,33 @@ const SearchSection: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const loadStates = async () => {
+      // Load from localStorage if present
+      const storedStates = localStorage.getItem("states");
+
+      if (storedStates && storedStates !== "undefined") {
+        try {
+          const parsedStates: StateMap = JSON.parse(storedStates);
+          setStateOptions(parsedStates);
+          return;
+        } catch (err) {
+          console.error("Failed to parse stored states:", err);
+        }
+      }
+    };
+
+    if (Object.keys(stateOptions ?? {}).length === 0) {
+      loadStates();
+    }
+  }, [setStateOptions, stateOptions]);
+
   return (
     <div className="bg-white p-3 mt-3 rounded-md shadow-sm w-[98%] mx-auto">
       <div className="flex justify-between items-between w-full gap-8">
         {/* Claims Summary */}
         <div className="flex w-1/4 items-center justify-between gap-2">
-          {stateOptions && Object.keys(stateOptions).length > 0 &&  (
+          {stateOptions && Object.keys(stateOptions).length > 0 && (
             <div className="w-2/3 relative">
               <StateMultiSelectDropdown />
             </div>
