@@ -22,19 +22,6 @@ const useInitializeStates = () => {
           console.error("Failed to parse stored states:", err);
         }
       }
-
-      // If not present in localStorage, fetch from API
-      try {
-        const response = await fetch("/api/get-states");
-        const data = await response.json();
-
-        if (data?.states) {
-          localStorage.setItem("states", JSON.stringify(data.states));
-          setStateOptions(data.states);
-        }
-      } catch (err) {
-        console.error("Failed to fetch state list:", err);
-      }
     };
 
     if (Object.keys(stateOptions ?? {}).length === 0) {

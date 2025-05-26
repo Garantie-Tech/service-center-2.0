@@ -55,7 +55,7 @@ const SearchSection: React.FC = () => {
       <div className="flex justify-between items-between w-full gap-8">
         {/* Claims Summary */}
         <div className="flex w-1/4 items-center justify-between gap-2">
-          {stateOptions && (
+          {stateOptions && Object.keys(stateOptions).length > 0 &&  (
             <div className="w-2/3 relative">
               <StateMultiSelectDropdown />
             </div>
