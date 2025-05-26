@@ -182,7 +182,6 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     NEW: "Estimate Pending",
     "IN PROGRESS": "Approval Pending",
     APPROVED: "Approved",
-    "PAYMENT PENDING": "Payment Pending",
     REJECTED: "Rejected",
     CLOSED: "Completed",
     CANCELLED: "Cancelled",
