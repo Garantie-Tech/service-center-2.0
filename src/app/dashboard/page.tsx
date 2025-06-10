@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
       <Header onLogout={handleLogout} />
       <SearchSection />
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
-        <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh-128px)]">
+        <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh)]">
           <ClaimFilter />
           <ClaimList />
         </aside>

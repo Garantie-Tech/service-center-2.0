@@ -65,12 +65,16 @@ export default interface Claim {
   plan_end_date?: string;
   model_name?: string;
   model_price?: string | number;
-  copay_refunded?: boolean,
-  copay_refunded_date?: string,
-  copay_refunded_id?: string,
-  copay_refunded_amount?: string | number,
-  isActionRequired?: boolean,
-  claim_type?: string,
+  copay_refunded?: boolean;
+  copay_refunded_date?: string;
+  copay_refunded_id?: string;
+  copay_refunded_amount?: string | number;
+  isActionRequired?: boolean;
+  claim_type?: string;
+  is_tvs_claim?: boolean;
+  customer_pickup_details: CustomerPickupDetails | null;
+  pickup_photos: string[] | null;
+  pickup_video: string | null;
 }
 
 export interface ClaimDetailsProps {
@@ -84,6 +88,12 @@ export interface ClaimDetailsProps {
     claimDetails?: string;
     service_centre_name: string;
     damageDate?: string;
+    pickup_details?: {
+      is_tvs_claim?: boolean;
+      customer_pickup_details: CustomerPickupDetails | null;
+      pickup_photos: string[] | null;
+      pickup_video: string | null;
+    };
   };
 }
 
@@ -116,4 +126,16 @@ export interface SettlementDetailsProps {
   utr_number: string;
   payment_date: string;
   payment_amount: string;
+}
+
+export interface CustomerPickupDetails {
+  id: number;
+  claim_id: number;
+  imei_number: string;
+  pickup_address: string;
+  pickup_landmark: string;
+  pickup_alternate_mobile: number;
+  pickup_pincode: number;
+  created_at: string;
+  updated_at: string;
 }
