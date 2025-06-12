@@ -57,7 +57,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
       </div>
 
       {/* pickup details */}
-      {data?.pickup_details?.is_tvs_claim == true && (
+      {(data?.pickup_details?.is_tvs_claim == true && data?.pickup_details?.customer_pickup_details != null) && (
         <div className="border-t py-[25px] border-[#e5e7eb] mt-[25px]">
           <div>
             <h2 className="text-lg font-semibold mb-4">Pickup Details</h2>
