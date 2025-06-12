@@ -66,7 +66,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
             <div className="space-y-8">
               {/* Address */}
               <div>
-                <h4 className="text-xs text-gray-500">Address</h4>
+                <h4 className="text-xs text-gray-500">Pickup Address</h4>
                 <p className="text-sm font-semibold">
                   {data?.pickup_details?.customer_pickup_details
                     ?.pickup_address ?? "N/A"}
@@ -75,7 +75,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
 
               {/* Pincode */}
               <div>
-                <h4 className="text-xs text-gray-500">Pincode</h4>
+                <h4 className="text-xs text-gray-500">Pin code</h4>
                 <p className="text-sm font-semibold">
                   {data?.pickup_details?.customer_pickup_details
                     ?.pickup_pincode ?? "N/A"}
@@ -84,7 +84,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
 
               {/* Alternate Mobile */}
               <div>
-                <h4 className="text-xs text-gray-500">Alternate Mobile</h4>
+                <h4 className="text-xs text-gray-500">Alternate Mobile Number</h4>
                 <p className="text-sm font-semibold">
                   {data?.pickup_details?.customer_pickup_details
                     ?.pickup_alternate_mobile ?? "N/A"}
@@ -96,7 +96,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
             <div className="space-y-8">
               {/* Landmark */}
               <div>
-                <h4 className="text-xs text-gray-500">Landmark</h4>
+                <h4 className="text-xs text-gray-500">Nearest Landmark</h4>
                 <p className="text-sm font-semibold">
                   {data?.pickup_details?.customer_pickup_details
                     ?.pickup_landmark ?? "N/A"}
