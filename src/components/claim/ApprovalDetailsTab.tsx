@@ -8,6 +8,7 @@ import { useNotification } from "@/context/NotificationProvider";
 import {
   generatePaymentLink,
   handleBerDecision,
+  handlePickupTrackingStatus,
 } from "@/services/claimService";
 import Link from "next/link";
 import CopyToClipboardButton from "@/components/ui/CopyToClipboardButton";
@@ -31,6 +32,13 @@ const ApprovalDetailsTab: React.FC = () => {
   const { notifySuccess, notifyError } = useNotification();
 
   const berOptions = ["repair", "settle"];
+  const approvedStatuses = [
+    "Approved",
+    "BER Approved",
+    "BER Replacement Approved",
+    "BER Repair Approved",
+  ];
+  const isApprovedStatus = approvedStatuses.includes(claimStatus);
 
   // this will execute in background
   useEffect(() => {
@@ -51,6 +59,9 @@ const ApprovalDetailsTab: React.FC = () => {
           selectedClaim?.data?.replacement_payment?.replace_payment_link,
         replacementAmount:
           selectedClaim?.data?.replacement_payment?.replace_amount,
+        pickupTracking: selectedClaim?.pickup_tracking,
+        is_tvs_claim: selectedClaim?.is_tvs_claim ?? false,
+        customer_pickup_details: selectedClaim?.customer_pickup_details,
       });
     }
   }, [selectedClaim, setApprovalDetails]);
@@ -184,6 +195,50 @@ const ApprovalDetailsTab: React.FC = () => {
       notifyError(`Failed to generate Payment link ! ${error}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePickupTracking = async (pickup_type: string) => {
+    if (pickup_type == "ready") {
+      try {
+        setIsLoading(false);
+        const response = await handlePickupTrackingStatus(
+          Number(selectedClaim?.id),
+          String(pickup_type)
+        );
+
+        if (!response.success) {
+          notifyError("Failed to mark ready for pickup !");
+        } else {
+          triggerClaimRefresh();
+          notifySuccess("Marked as ready for pickup ");
+        }
+      } catch (error) {
+        notifyError(`Failed to mark ready for pickup ! ${error}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (pickup_type == "picked") {
+      try {
+        setIsLoading(false);
+        const response = await handlePickupTrackingStatus(
+          Number(selectedClaim?.id),
+          String(pickup_type)
+        );
+
+        if (!response.success) {
+          notifyError("Failed to mark as picked up !");
+        } else {
+          triggerClaimRefresh();
+          notifySuccess("Marked as picked up ");
+        }
+      } catch (error) {
+        notifyError(`Failed to mark as picked up ! ${error}`);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -414,6 +469,38 @@ const ApprovalDetailsTab: React.FC = () => {
               </button>
             </div>
           )}
+        {/* pickup tracking section  */}
+        {approvalDetails?.is_tvs_claim &&
+          isApprovedStatus &&
+          approvalDetails?.customer_pickup_details != null &&
+          approvalDetails?.pickupTracking?.is_readyfor_pickup != true && (
+            <div className="pb-[10px] w-[45%]">
+              <button
+                className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold bg-blue-600 hover:bg-blue-700 h-[45px]`}
+                onClick={() => {
+                  handlePickupTracking("ready");
+                }}
+              >
+                Ready For Pickup
+              </button>
+            </div>
+          )}
+        {approvalDetails?.is_tvs_claim &&
+          isApprovedStatus &&
+          approvalDetails?.customer_pickup_details != null &&
+          approvalDetails?.pickupTracking?.is_readyfor_pickup == true &&
+          approvalDetails?.pickupTracking?.is_pickup_initiated == true && (
+            <div className="pb-[10px] w-[45%]">
+              <button
+                className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold bg-blue-600 hover:bg-blue-700 h-[45px]`}
+                onClick={() => {
+                  handlePickupTracking("picked");
+                }}
+              >
+                Mark As Picked
+              </button>
+            </div>
+          )}
       </div>
 
       {/* modal */}
@@ -432,6 +519,7 @@ const ApprovalDetailsTab: React.FC = () => {
           onSubmit={handleBerSubmit}
         />
       )}
+
       {approvalDetails.berDecision === "settle" && (
         <BerSettleModal
           isOpen={isBerModalOpen}

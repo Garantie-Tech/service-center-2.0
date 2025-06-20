@@ -1,4 +1,7 @@
-import { DocumentItem } from "@/interfaces/GlobalInterface";
+import {
+  DocumentItem,
+  pickupTrackingInterface,
+} from "@/interfaces/GlobalInterface";
 
 export default interface Claim {
   id: number;
@@ -75,6 +78,7 @@ export default interface Claim {
   customer_pickup_details: CustomerPickupDetails | null;
   pickup_photos: string[] | null;
   pickup_video: string | null;
+  pickup_tracking?: null | pickupTrackingInterface;
 }
 
 export interface ClaimDetailsProps {

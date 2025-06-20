@@ -286,6 +286,9 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     replacementPaymentSuccessful: false,
     replacementPaymentLink: "",
     replacementAmount: 0,
+    selectedClaim: null,
+    is_tvs_claim: false,
+    customer_pickup_details: null,
   },
   setApprovalDetails: (updatedDetails) =>
     set((state) => ({
@@ -312,5 +315,4 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
       name: name as string,
     }));
   },
-  
 }));
