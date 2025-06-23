@@ -30,6 +30,7 @@ const ApprovalDetailsTab: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isBerModalOpen, setIsBerModalOpen] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
+  const [inlineLoader, setInlineLoader] = useState(false);
 
   const berOptions = ["repair", "settle"];
   const approvedStatuses = [
@@ -201,7 +202,8 @@ const ApprovalDetailsTab: React.FC = () => {
   const handlePickupTracking = async (pickup_type: string) => {
     if (pickup_type == "ready") {
       try {
-        setIsLoading(false);
+        setInlineLoader(true);
+        setIsLoading(true);
         const response = await handlePickupTrackingStatus(
           Number(selectedClaim?.id),
           String(pickup_type)
@@ -217,6 +219,7 @@ const ApprovalDetailsTab: React.FC = () => {
         notifyError(`Failed to mark ready for pickup ! ${error}`);
       } finally {
         setIsLoading(false);
+        setInlineLoader(false);
       }
     }
 
@@ -241,6 +244,9 @@ const ApprovalDetailsTab: React.FC = () => {
       }
     }
   };
+
+  console.log(isApprovedStatus, "===");
+  console.log(approvalDetails);
 
   return (
     <div className="text-[#515151]">
@@ -481,23 +487,38 @@ const ApprovalDetailsTab: React.FC = () => {
                   handlePickupTracking("ready");
                 }}
               >
-                Ready For Pickup
+                {inlineLoader ? (
+                  <span className="loading loading-spinner text-white"></span>
+                ) : (
+                  <>Ready For Pickup</>
+                )}
               </button>
             </div>
           )}
         {approvalDetails?.is_tvs_claim &&
           isApprovedStatus &&
           approvalDetails?.customer_pickup_details != null &&
-          approvalDetails?.pickupTracking?.is_readyfor_pickup == true &&
-          approvalDetails?.pickupTracking?.is_pickup_initiated == true && (
+          approvalDetails?.pickupTracking?.is_readyfor_pickup == true && (
             <div className="pb-[10px] w-[45%]">
               <button
-                className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold bg-blue-600 hover:bg-blue-700 h-[45px]`}
+                className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold h-[45px] ${
+                  !approvalDetails?.pickupTracking?.is_pickup_initiated == true
+                    ? "bg-gray-400 cursor-not-allowed disabled"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }
+  `}
+                disabled={
+                  !approvalDetails?.pickupTracking?.is_pickup_initiated == true
+                }
                 onClick={() => {
                   handlePickupTracking("picked");
                 }}
               >
-                Mark As Picked
+                {inlineLoader ? (
+                  <span className="loading loading-spinner text-white"></span>
+                ) : (
+                  <>Mark As Picked</>
+                )}
               </button>
             </div>
           )}
