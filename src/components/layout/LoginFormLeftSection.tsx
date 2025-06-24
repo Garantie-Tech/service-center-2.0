@@ -44,8 +44,7 @@ const LoginFormLeftSection: React.FC = () => {
               height={40}
               className="pr-2"
             />
-            <a href="tel:+918800502077">+91 8800502077</a> /
-            <a href="tel:+919650604181">9650604181</a>
+            <a href="tel:+918800502077">+91 9667 866 866</a>
           </p>
         </div>
 
