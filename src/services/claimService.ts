@@ -6,6 +6,7 @@ import {
   ClaimTimeline,
   GenerateLinkPaymentBody,
   GeneratePaymentLink,
+  PickupTrackingResponse,
   PolicyApiResponse,
   RemarkPayload,
   RemarksApiResponse,
@@ -176,7 +177,28 @@ export const getServiceCenterProfileData = async () => {
 };
 
 export const fetchPlans = async (
-  _params?: Record<string, string | number | boolean> | ClaimFetchPayload | {string: 'search_plan'}
+  _params?:
+    | Record<string, string | number | boolean>
+    | ClaimFetchPayload
+    | { string: "search_plan" }
 ) => {
   return await getRequest<PolicyApiResponse>(`v2/orders/`, _params);
+};
+
+export const handlePickupTrackingStatus = async (
+  claimID: number,
+  pickup_status: string
+) => {
+  const endpoint = `service-center/handle-pickup/${claimID}`;
+  const body: Record<string, string> = {
+    pickup_status: pickup_status,
+  };
+
+  try {
+    const response = await postRequest<PickupTrackingResponse>(endpoint, body);
+    return response;
+  } catch (error) {
+    console.error("Error marking ready for pickup:", error);
+    throw error;
+  }
 };

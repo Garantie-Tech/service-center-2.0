@@ -1,3 +1,5 @@
+import { CustomerPickupDetails } from "./ClaimInterface";
+
 export interface ExportData {
   "Service Req No": number;
   "Job Sheet Number": string;
@@ -87,10 +89,24 @@ export interface ApprovalState {
     replacementPaymentSuccessful?: boolean;
     replacementPaymentLink?: string;
     replacementAmount?: number;
+    pickupTracking?: null | pickupTrackingInterface;
+    is_tvs_claim?: boolean;
+    customer_pickup_details?: CustomerPickupDetails | null;
+    shipping_receipt?: string | null;
   };
   setApprovalDetails: (
     updatedDetails: Partial<ApprovalState["approvalDetails"]>
   ) => void;
+}
+
+export interface pickupTrackingInterface {
+  id: number;
+  claim_id: number;
+  is_readyfor_pickup?: boolean;
+  is_pickup_initiated?: boolean;
+  is_picked?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface DocumentItem {
@@ -128,6 +144,19 @@ export interface CancelClaim {
     cancellation_reason: string;
     cancelled_by: string;
     update_type?: string;
+  };
+}
+
+export interface PickupTrackingResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: {
+    message: string;
+    claimId: number;
+    error?: string;
+    error_msg?: string;
   };
 }
 
