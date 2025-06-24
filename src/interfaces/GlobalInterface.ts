@@ -92,6 +92,7 @@ export interface ApprovalState {
     pickupTracking?: null | pickupTrackingInterface;
     is_tvs_claim?: boolean;
     customer_pickup_details?: CustomerPickupDetails | null;
+    shipping_receipt?: string | null;
   };
   setApprovalDetails: (
     updatedDetails: Partial<ApprovalState["approvalDetails"]>

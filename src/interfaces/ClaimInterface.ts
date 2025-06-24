@@ -79,6 +79,7 @@ export default interface Claim {
   pickup_photos: string[] | null;
   pickup_video: string | null;
   pickup_tracking?: null | pickupTrackingInterface;
+  shipping_receipt?: null | string;
 }
 
 export interface ClaimDetailsProps {
