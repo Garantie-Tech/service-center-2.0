@@ -8,14 +8,13 @@ import { useNotification } from "@/context/NotificationProvider";
 import {
   generatePaymentLink,
   handleBerDecision,
-  handlePickupTrackingStatus,
 } from "@/services/claimService";
 import Link from "next/link";
 import CopyToClipboardButton from "@/components/ui/CopyToClipboardButton";
 import BerReplaceModal from "../BerReplaceModel";
 import BerSettleModal from "../BerSettleModel";
 import { formatToDateTime } from "@/helpers/dateHelper";
-import Image from "next/image";
+// import Image from "next/image";
 // import { convertDateTime } from "@/helpers/dateHelper";
 
 const ApprovalDetailsTab: React.FC = () => {
@@ -31,16 +30,8 @@ const ApprovalDetailsTab: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isBerModalOpen, setIsBerModalOpen] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
-  const [inlineLoader, setInlineLoader] = useState(false);
 
   const berOptions = ["repair", "settle"];
-  const approvedStatuses = [
-    "Approved",
-    "BER Approved",
-    "BER Replacement Approved",
-    "BER Repair Approved",
-  ];
-  const isApprovedStatus = approvedStatuses.includes(claimStatus);
 
   // this will execute in background
   useEffect(() => {
@@ -61,10 +52,6 @@ const ApprovalDetailsTab: React.FC = () => {
           selectedClaim?.data?.replacement_payment?.replace_payment_link,
         replacementAmount:
           selectedClaim?.data?.replacement_payment?.replace_amount,
-        pickupTracking: selectedClaim?.pickup_tracking,
-        is_tvs_claim: selectedClaim?.is_tvs_claim ?? false,
-        customer_pickup_details: selectedClaim?.customer_pickup_details,
-        shipping_receipt: selectedClaim?.shipping_receipt,
       });
     }
   }, [selectedClaim, setApprovalDetails]);
@@ -200,72 +187,6 @@ const ApprovalDetailsTab: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  const handlePickupTracking = async (pickup_type: string) => {
-    if (pickup_type == "ready") {
-      try {
-        setInlineLoader(true);
-        setIsLoading(true);
-        const response = await handlePickupTrackingStatus(
-          Number(selectedClaim?.id),
-          String(pickup_type)
-        );
-
-        if (!response.success) {
-          notifyError("Failed to mark ready for pickup !");
-        } else {
-          triggerClaimRefresh();
-          notifySuccess("Marked as ready for pickup ");
-        }
-      } catch (error) {
-        notifyError(`Failed to mark ready for pickup ! ${error}`);
-      } finally {
-        setIsLoading(false);
-        setInlineLoader(false);
-      }
-    }
-
-    if (pickup_type == "picked") {
-      try {
-        setIsLoading(true);
-        const response = await handlePickupTrackingStatus(
-          Number(selectedClaim?.id),
-          String(pickup_type)
-        );
-
-        if (!response.success) {
-          notifyError("Failed to mark as picked up !");
-        } else {
-          triggerClaimRefresh();
-          notifySuccess("Marked as picked up ");
-        }
-      } catch (error) {
-        notifyError(`Failed to mark as picked up ! ${error}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const readyToPickupStatus =
-    approvalDetails?.is_tvs_claim &&
-    isApprovedStatus &&
-    approvalDetails?.customer_pickup_details != null &&
-    approvalDetails?.pickupTracking?.is_readyfor_pickup != true;
-
-  const isShipmentInitiated =
-    approvalDetails?.is_tvs_claim &&
-    isApprovedStatus &&
-    approvalDetails?.customer_pickup_details != null &&
-    approvalDetails?.pickupTracking?.is_readyfor_pickup == true &&
-    approvalDetails?.pickupTracking?.is_picked != true;
-
-  const isShipmentCompleted =
-    approvalDetails?.is_tvs_claim &&
-    isApprovedStatus &&
-    approvalDetails?.customer_pickup_details != null &&
-    approvalDetails?.pickupTracking?.is_picked == true &&
-    approvalDetails?.shipping_receipt != null;
 
   return (
     <div className="text-[#515151]">
@@ -495,127 +416,6 @@ const ApprovalDetailsTab: React.FC = () => {
             </div>
           )}
       </div>
-
-      {/* shipment details  */}
-      {approvalDetails?.is_tvs_claim && (
-        <div className="text-[#515151] border-t py-[25px] border-[#e5e7eb] mt-[25px]">
-          <h2 className="text-lg font-semibold mb-4">Shipment Details</h2>
-          <div className="flex gap-8 flex-wrap">
-            <div className="pb-[10px] w-[45%]">
-              <label className="block text-darkGray text-xs font-medium">
-                Status
-              </label>
-              <p className="text-sm font-bold">
-                {readyToPickupStatus == true ? (
-                  <>Ready For Pickup</>
-                ) : isShipmentInitiated == true ? (
-                  <>Pickup Initiated</>
-                ) : isShipmentCompleted == true ? (
-                  <>Shipment Completed</>
-                ) : (
-                  <>N/A</>
-                )}
-              </p>
-            </div>
-
-            {/* pickup tracking section  */}
-            {readyToPickupStatus && (
-              <div className="pb-[10px] w-[45%]">
-                <label className="block text-darkGray text-xs font-medium">
-                  Action
-                </label>
-                <button
-                  className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold bg-blue-600 hover:bg-blue-700 h-[45px]`}
-                  onClick={() => {
-                    handlePickupTracking("ready");
-                  }}
-                >
-                  {inlineLoader ? (
-                    <span className="loading loading-spinner text-white"></span>
-                  ) : (
-                    <>Ready For Pickup</>
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* pickup initiated */}
-            {isShipmentInitiated && (
-              <div className="pb-[10px] w-[45%]">
-                <label className="block text-darkGray text-xs font-medium">
-                  Action
-                </label>
-                <div className="flex items-center gap-2">
-                  <button
-                    className={`w-1/2 px-4 py-2 rounded-md text-white text-sm font-semibold h-[45px] ${
-                      !approvalDetails?.pickupTracking?.is_pickup_initiated ==
-                      true
-                        ? "bg-gray-400 cursor-not-allowed disabled"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }`}
-                    disabled={
-                      !approvalDetails?.pickupTracking?.is_pickup_initiated ==
-                      true
-                    }
-                    onClick={() => {
-                      handlePickupTracking("picked");
-                    }}
-                  >
-                    {inlineLoader ? (
-                      <span className="loading loading-spinner text-white"></span>
-                    ) : (
-                      <>Mark As Picked</>
-                    )}
-                  </button>
-                  <div>
-                    <a
-                      href={String(approvalDetails?.shipping_receipt)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
-                      data-tip="View Shipping Receipt"
-                    >
-                      <Image
-                        src="/images/pdf-icon.svg"
-                        alt="Estimate Upload"
-                        width={30}
-                        height={50}
-                        className="h-[100%]"
-                      />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* shipment completed */}
-            {isShipmentCompleted && (
-              <div className="pb-[10px] w-[45%]">
-                <label className="block text-darkGray text-xs font-medium">
-                  Shipment Receipt
-                </label>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={String(approvalDetails?.shipping_receipt)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
-                    data-tip="View Shipping Receipt"
-                  >
-                    <Image
-                      src="/images/pdf-icon.svg"
-                      alt="Estimate Upload"
-                      width={30}
-                      height={50}
-                      className="h-[100%]"
-                    />
-                  </a>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* modal */}
       {approvalDetails.berDecision === "repair" && (
