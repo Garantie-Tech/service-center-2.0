@@ -1,10 +1,5 @@
 import { useGlobalStore } from "@/store/store";
-import { useEffect, useState } from "react";
-import { useNotification } from "@/context/NotificationProvider";
-import {
-  uploadFinalDocuments,
-  handlePickupTrackingStatus,
-} from "@/services/claimService";
+import { useEffect } from "react";
 import FinalDocumentsView from "@/components/claim/view/FinalDocumentsView";
 import ShipmentDetailsSection from "@/components/claim/ShipmentDetailsSection";
 import RepairedMobileSection from "@/components/claim/RepairedMobileSection";
@@ -14,9 +9,7 @@ import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
 import { useFinalDocuments } from "@/hooks/useFinalDocuments";
 
 const FinalDocumentsTab: React.FC = () => {
-  const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
-  const { notifySuccess, notifyError } = useNotification();
-  const [inlineLoader, setInlineLoader] = useState(false);
+  const { selectedClaim } = useGlobalStore();
   
   const {
     // State
@@ -29,11 +22,9 @@ const FinalDocumentsTab: React.FC = () => {
     reuploadFinalDocs,
     setReuploadFinalDocs,
     repairInvoiceError,
-    setRepairInvoiceError,
     repairMobilePhotoError,
     setRepairMobilePhotoError,
     replacementReceiptError,
-    setReplacementReceiptError,
     showRepairInvoiceError,
     setShowRepairInvoiceError,
     showRepairMobilePhotoError,
@@ -58,7 +49,6 @@ const FinalDocumentsTab: React.FC = () => {
     isEditable,
     showReuploadButton,
     finalDocuments,
-    showSubmitButton,
 
     // Handlers
     handleSubmit,
@@ -66,111 +56,105 @@ const FinalDocumentsTab: React.FC = () => {
     handleReplacementReceiptUpload,
   } = useFinalDocuments();
 
-  const approvedStatuses = [
-    "Approved",
-    "BER Approved",
-    "BER Replacement Approved",
-    "BER Repair Approved",
-  ];
-  const isApprovedStatus = approvedStatuses.includes(selectedClaim?.status || "");
+  // const approvedStatuses = [
+  //   "Approved",
+  //   "BER Approved",
+  //   "BER Replacement Approved",
+  //   "BER Repair Approved",
+  // ];
+  // const isApprovedStatus = approvedStatuses.includes(selectedClaim?.status || "");
 
   useEffect(() => {
     setReuploadMobile(false);
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
 
-  const handlePickupTracking = async (pickup_type: string) => {
-    if (pickup_type == "ready") {
-      if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
-        notifyError(
-          "Please upload repaired mobile image before marking as ready for pickup."
-        );
-        return;
-      }
-      try {
-        setInlineLoader(true);
-        setIsLoading(true);
-        // Upload repaired mobile images before marking as ready
-        const formData = new FormData();
-        // Only upload repaired mobile images (doc type 74)
-        repairedMobilePhotos.forEach((file: File) => {
-          formData.append(`74[delete_existing_document]`, "1");
-          formData.append(`74[document]`, file);
-          formData.append(`74[document_type_id]`, "74");
-        });
-        const uploadResponse = await uploadFinalDocuments(
-          Number(selectedClaim?.id),
-          formData
-        );
-        if (!uploadResponse.data) {
-          notifyError(
-            "Failed to upload repaired mobile images. Please try again."
-          );
-          setIsLoading(false);
-          setInlineLoader(false);
-          return;
-        }
-        // Now mark as ready for pickup
-        const response = await handlePickupTrackingStatus(
-          Number(selectedClaim?.id),
-          String(pickup_type)
-        );
+  // const handlePickupTracking = async (pickup_type: string) => {
+  //   if (pickup_type == "ready") {
+  //     if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
+  //       notifyError(
+  //         "Please upload repaired mobile image before marking as ready for pickup."
+  //       );
+  //       return;
+  //     }
+  //     try {
+  //       setIsLoading(true);
+  //       const formData = new FormData();
+  //       repairedMobilePhotos.forEach((file: File) => {
+  //         formData.append(`74[delete_existing_document]`, "1");
+  //         formData.append(`74[document]`, file);
+  //         formData.append(`74[document_type_id]`, "74");
+  //       });
+  //       const uploadResponse = await uploadFinalDocuments(
+  //         Number(selectedClaim?.id),
+  //         formData
+  //       );
+  //       if (!uploadResponse.data) {
+  //         notifyError(
+  //           "Failed to upload repaired mobile images. Please try again."
+  //         );
+  //         setIsLoading(false);
+  //         return;
+  //       }
+  //       const response = await handlePickupTrackingStatus(
+  //         Number(selectedClaim?.id),
+  //         String(pickup_type)
+  //       );
 
-        if (!response.success) {
-          notifyError("Failed to mark ready for pickup !");
-        } else {
-          triggerClaimRefresh();
-          notifySuccess("Marked as ready for pickup ");
-        }
-      } catch (error) {
-        notifyError(`Failed to mark ready for pickup ! ${error}`);
-      } finally {
-        setIsLoading(false);
-        setInlineLoader(false);
-      }
-    }
+  //       if (!response.success) {
+  //         notifyError("Failed to mark ready for pickup !");
+  //       } else {
+  //         triggerClaimRefresh();
+  //         notifySuccess("Marked as ready for pickup ");
+  //       }
+  //     } catch (error) {
+  //       notifyError(`Failed to mark ready for pickup ! ${error}`);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   }
 
-    if (pickup_type == "picked") {
-      try {
-        setIsLoading(true);
-        const response = await handlePickupTrackingStatus(
-          Number(selectedClaim?.id),
-          String(pickup_type)
-        );
+  //   if (pickup_type == "picked") {
+  //     try {
+  //       setIsLoading(true);
+  //       const response = await handlePickupTrackingStatus(
+  //         Number(selectedClaim?.id),
+  //         String(pickup_type)
+  //       );
 
-        if (!response.success) {
-          notifyError("Failed to mark as picked up !");
-        } else {
-          triggerClaimRefresh();
-          notifySuccess("Marked as picked up ");
-        }
-      } catch (error) {
-        notifyError(`Failed to mark as picked up ! ${error}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  //       if (!response.success) {
+  //         notifyError("Failed to mark as picked up !");
+  //       } else {
+  //         triggerClaimRefresh();
+  //         notifySuccess("Marked as picked up ");
+  //       }
+  //     } catch (error) {
+  //       notifyError(`Failed to mark as picked up ! ${error}`);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   }
+  // };
 
-  const readyToPickupStatus =
-    selectedClaim?.is_tvs_claim &&
-    isApprovedStatus &&
-    selectedClaim?.customer_pickup_details != null &&
-    selectedClaim?.pickup_tracking?.is_readyfor_pickup != true;
+  // const readyToPickupStatus =
+  //   selectedClaim?.is_tvs_claim &&
+  //   isApprovedStatus &&
+  //   selectedClaim?.customer_pickup_details != null &&
+  //   selectedClaim?.pickup_tracking?.is_readyfor_pickup != true;
 
-  const isShipmentInitiated =
-    selectedClaim?.is_tvs_claim &&
-    isApprovedStatus &&
-    selectedClaim?.customer_pickup_details != null &&
-    selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
-    selectedClaim?.pickup_tracking?.is_picked != true;
+  // const isShipmentInitiated =
+  //   selectedClaim?.is_tvs_claim &&
+  //   isApprovedStatus &&
+  //   selectedClaim?.customer_pickup_details != null &&
+  //   selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
+  //   selectedClaim?.pickup_tracking?.is_picked != true;
 
-  const isShipmentCompleted =
-    selectedClaim?.is_tvs_claim &&
-    isApprovedStatus &&
-    selectedClaim?.pickup_tracking != null &&
-    selectedClaim?.pickup_tracking?.is_picked == true &&
-    selectedClaim?.shipping_receipt != null;
+  // const isShipmentCompleted =
+  //   selectedClaim?.is_tvs_claim &&
+  //   isApprovedStatus &&
+  //   selectedClaim?.pickup_tracking != null &&
+  //   selectedClaim?.pickup_tracking?.is_picked == true &&
+  //   selectedClaim?.shipping_receipt != null;
 
   return isEditable ? (
     <div>

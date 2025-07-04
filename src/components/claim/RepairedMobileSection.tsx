@@ -7,7 +7,6 @@ import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
 import { uploadFinalDocuments } from "@/services/claimService";
 import { compressImage } from "@/utils/compressImage";
-import { useState } from "react";
 import { RepairedMobileSectionProps } from "@/interfaces/ClaimInterface";
 
 const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({

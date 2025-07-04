@@ -14,7 +14,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   isInvalidRepairInvoice,
   isInvalidRepairInvoiceReason,
   isInvalidRepairInvoiceStatus,
-  isValidRepairInvoice,
   isInvalidReplacementReceipt,
   isInvalidReplacementReceiptReason,
   isInvalidReplacementReceiptStatus,
