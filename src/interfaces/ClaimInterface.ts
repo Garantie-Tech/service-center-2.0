@@ -144,3 +144,93 @@ export interface CustomerPickupDetails {
   created_at: string;
   updated_at: string;
 }
+
+export interface RepairedMobileSectionProps {
+  repairedMobilePhotos: File[];
+  setRepairedMobilePhotos: (files: File[]) => void;
+  reuploadMobile: boolean;
+  setReuploadMobile: (value: boolean) => void;
+  repairMobilePhotoError: boolean;
+  setRepairMobilePhotoError: (value: boolean) => void;
+  isInvalidRepairMobilePhoto: boolean;
+  isInvalidRepairMobilePhotoReason: string;
+  isInvalidRepairMobilePhotoStatus: boolean | null;
+  finalDocuments: {
+    repairMobilePhoto: string;
+  };
+}
+
+export interface FinalDocumentsSectionProps {
+  repairInvoice: File[] | undefined;
+  replacementReceipt: File[];
+  handleRepairInvoiceUpload: (files: File[]) => void;
+  handleReplacementReceiptUpload: (files: File[]) => void;
+  reuploadFinalDocs: boolean;
+  isInvalidRepairInvoice: boolean;
+  isInvalidRepairInvoiceReason: string;
+  isInvalidRepairInvoiceStatus: boolean | null;
+  isValidRepairInvoice: boolean;
+  isInvalidReplacementReceipt: boolean;
+  isInvalidReplacementReceiptReason: string;
+  isInvalidReplacementReceiptStatus: boolean | null;
+  isValidReplacementReceipt: boolean;
+  isImeiChanged: boolean;
+  finalDocuments: {
+    repairInvoiceImage: string;
+    replacementReceiptImage: string;
+    isImeiChanged: boolean;
+  };
+  repairInvoiceError: boolean;
+  replacementReceiptError: boolean;
+}
+
+export interface DocumentErrorAlertsProps {
+  isInvalidRepairInvoice: boolean;
+  isInvalidRepairMobilePhoto: boolean;
+  isInvalidReplacementReceipt: boolean;
+  isImeiChanged: boolean;
+  showRepairInvoiceError: boolean;
+  showRepairMobilePhotoError: boolean;
+  showReplacementReceiptError: boolean;
+  repairInvoiceError: boolean;
+  repairMobilePhotoError: boolean;
+  replacementReceiptError: boolean;
+  isInvalidRepairInvoiceReason: string;
+  isInvalidRepairMobilePhotoReason: string;
+  isInvalidReplacementReceiptReason: string;
+  setShowRepairInvoiceError: (value: boolean) => void;
+  setShowRepairMobilePhotoError: (value: boolean) => void;
+  setShowReplacementReceiptError: (value: boolean) => void;
+}
+
+export interface DocumentActionButtonsProps {
+  reuploadFinalDocs: boolean;
+  showReuploadButton: boolean;
+  finalDocuments: {
+    repairInvoiceImage: string;
+    replacementReceiptImage: string;
+    isImeiChanged: boolean;
+  };
+  isImeiChanged: boolean;
+  setReuploadFinalDocs: (value: boolean) => void;
+  handleSubmit: () => void;
+}
+
+export interface FinalDocumentsViewProps {
+  finalDocuments: {
+    repairInvoiceImage?: string;
+    repairMobilePhoto: string;
+    replacementReceiptImage: string;
+    isImeiChanged: boolean;
+    shipmentReceipt?: string;
+  };
+}
+
+export interface ShipmentDetailsSectionProps {
+  isValidRepairMobilePhoto: boolean;
+  repairedMobilePhotos: File[];
+}
+
+export interface EstimateDetailsTabProps {
+  onSubmit: (formData: FormData) => void;
+}

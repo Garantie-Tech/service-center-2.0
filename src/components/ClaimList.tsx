@@ -295,10 +295,6 @@ const ClaimList: React.FC = () => {
           currentClaim?.data?.replacement_payment?.replace_payment_link,
         replacementAmount:
           currentClaim?.data?.replacement_payment?.replace_amount,
-        pickupTracking: currentClaim?.pickup_tracking,
-        is_tvs_claim: currentClaim?.is_tvs_claim ?? false,
-        customer_pickup_details: currentClaim?.customer_pickup_details,
-        shipping_receipt: currentClaim?.shipping_receipt,
       });
       setActiveTab(
         getActiveTab(currentClaim.status) as

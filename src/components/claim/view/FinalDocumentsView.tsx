@@ -2,15 +2,7 @@
 
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
-
-interface FinalDocumentsViewProps {
-  finalDocuments: {
-    repairInvoiceImage: string;
-    repairMobilePhoto: string;
-    replacementReceiptImage: string;
-    isImeiChanged: boolean;
-  };
-}
+import { FinalDocumentsViewProps } from "@/interfaces/ClaimInterface";
 
 const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
   finalDocuments,
@@ -27,8 +19,8 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
         <div className="w-1/2">
           <div className="mt-4">
             <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
-            {finalDocuments?.repairInvoiceImage &&
-              (isPdf(finalDocuments.repairInvoiceImage) ? (
+            {finalDocuments?.repairInvoiceImage ? (
+              isPdf(finalDocuments.repairInvoiceImage) ? (
                 <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
                   <a
                     href={finalDocuments.repairInvoiceImage}
@@ -45,7 +37,8 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
                 </div>
               ) : (
                 <GalleryPopup images={[finalDocuments.repairInvoiceImage]} />
-              ))}
+              )
+            ) : null}
             <span className="p-2 text-[#19AD61] text-xxs font-semibold">
               Valid
             </span>
@@ -80,6 +73,30 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
               Valid
             </span>
           </div>
+
+          {/* Shipment Receipt Section */}
+          {finalDocuments.shipmentReceipt && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium mb-2">Shipment Receipt</h3>
+              <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
+                <a
+                  href={finalDocuments.shipmentReceipt}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image
+                    src="/images/pdf-icon.svg"
+                    alt="Shipment Receipt PDF"
+                    width={30}
+                    height={50}
+                  />
+                </a>
+              </div>
+              <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+                Valid
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Repaired Mobile Photos Section */}
