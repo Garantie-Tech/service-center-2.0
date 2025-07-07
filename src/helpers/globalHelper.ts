@@ -232,16 +232,25 @@ export const getDocumentInfo = (
   docKey: "16" | "74" | "75"
 ) => {
   const doc = selectedClaim?.documents?.[docKey];
-
   const status = doc?.status;
-  const statusValue = status == "1" ? true : status == "0" ? false : null;
+  const isDoc74 = docKey === "74";
+  let statusValue = null;
+  if (isDoc74) {
+    statusValue = status === 1 ? true : status === 0 ? null : null;
+  } else {
+    statusValue = status === "1" ? true : status === "0" ? false : null;
+  }
+
+  const hasImages = (selectedClaim?.repaired_mobile_images?.length ?? 0) > 0;
 
   return {
     isInvalid: !!doc?.status_reason_id,
     invalidReason: doc?.status_reason || "",
     statusValue: statusValue,
-    isValid: status === "1",
-    hasInvalidStatus: !!(doc?.url && statusValue === null),
+    isValid: isDoc74 ? status === 1 : status === "1",
+    hasInvalidStatus: isDoc74
+      ? hasImages && statusValue === null
+      : !!(doc?.url && statusValue === null),
   };
 };
 

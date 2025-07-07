@@ -80,6 +80,7 @@ export default interface Claim {
   pickup_video: string | null;
   pickup_tracking?: null | pickupTrackingInterface;
   shipping_receipt?: null | string;
+  repaired_mobile_images?: string[] | null;
 }
 
 export interface ClaimDetailsProps {
@@ -151,12 +152,12 @@ export interface RepairedMobileSectionProps {
   reuploadMobile: boolean;
   setReuploadMobile: (value: boolean) => void;
   repairMobilePhotoError: boolean;
-  setRepairMobilePhotoError: (value: boolean) => void;
+  setRepairMobilePhotoError?: (value: boolean) => void;
   isInvalidRepairMobilePhoto: boolean;
   isInvalidRepairMobilePhotoReason: string;
   isInvalidRepairMobilePhotoStatus: boolean | null;
   finalDocuments: {
-    repairMobilePhoto: string;
+    repairMobilePhoto: string[] | null;
   };
 }
 
@@ -219,7 +220,7 @@ export interface DocumentActionButtonsProps {
 export interface FinalDocumentsViewProps {
   finalDocuments: {
     repairInvoiceImage?: string;
-    repairMobilePhoto: string;
+    repairMobilePhoto: string[] | null;
     replacementReceiptImage: string;
     isImeiChanged: boolean;
     shipmentReceipt?: string;

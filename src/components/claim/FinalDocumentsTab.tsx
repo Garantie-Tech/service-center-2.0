@@ -54,6 +54,7 @@ const FinalDocumentsTab: React.FC = () => {
     handleSubmit,
     handleRepairInvoiceUpload,
     handleReplacementReceiptUpload,
+    repairMobilePhotoInfo
   } = useFinalDocuments();
 
   // const approvedStatuses = [
@@ -65,7 +66,9 @@ const FinalDocumentsTab: React.FC = () => {
   // const isApprovedStatus = approvedStatuses.includes(selectedClaim?.status || "");
 
   useEffect(() => {
-    setReuploadMobile(false);
+    if(repairMobilePhotoInfo?.statusValue != true && selectedClaim?.repaired_mobile_images?.length == 0){
+      setReuploadMobile(true);
+    }
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
 

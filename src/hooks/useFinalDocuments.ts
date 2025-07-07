@@ -68,7 +68,7 @@ export const useFinalDocuments = () => {
   // document
   const finalDocuments = {
     repairInvoiceImage: selectedClaim?.documents?.["16"]?.url ?? "",
-    repairMobilePhoto: selectedClaim?.documents?.["74"]?.url ?? "",
+    repairMobilePhoto: selectedClaim?.repaired_mobile_images ?? [],
     replacementReceiptImage: selectedClaim?.documents?.["75"]?.url ?? "",
     isImeiChanged: isImeiChanged,
     shipmentReceipt: selectedClaim?.shipping_receipt ?? undefined,
@@ -92,8 +92,9 @@ export const useFinalDocuments = () => {
         return;
       }
       if (
-        (!repairedMobilePhotos || repairedMobilePhotos.length === 0) &&
-        !selectedClaim?.documents?.["74"]?.url
+        (!repairedMobilePhotos ||
+          selectedClaim?.repaired_mobile_images?.length === 0) &&
+        !selectedClaim?.documents?.["74"]?.status
       ) {
         notifyError("Please Upload Repair Mobile Images");
         return;
@@ -217,5 +218,6 @@ export const useFinalDocuments = () => {
     handleSubmit,
     handleRepairInvoiceUpload,
     handleReplacementReceiptUpload,
+    repairMobilePhotoInfo,
   };
-}; 
+};
