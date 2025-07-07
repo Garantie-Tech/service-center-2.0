@@ -7,9 +7,12 @@ import FinalDocumentsSection from "@/components/claim/FinalDocumentsSection";
 import DocumentErrorAlerts from "@/components/claim/DocumentErrorAlerts";
 import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
 import { useFinalDocuments } from "@/hooks/useFinalDocuments";
+import { useNotification } from "@/context/NotificationProvider";
+import { handlePickupTrackingStatus } from "@/services/claimService";
 
 const FinalDocumentsTab: React.FC = () => {
-  const { selectedClaim } = useGlobalStore();
+  const { selectedClaim , setIsLoading, triggerClaimRefresh} = useGlobalStore();
+  const { notifySuccess, notifyError } = useNotification();
   
   const {
     // State
@@ -72,72 +75,34 @@ const FinalDocumentsTab: React.FC = () => {
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
 
-  // const handlePickupTracking = async (pickup_type: string) => {
-  //   if (pickup_type == "ready") {
-  //     if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
-  //       notifyError(
-  //         "Please upload repaired mobile image before marking as ready for pickup."
-  //       );
-  //       return;
-  //     }
-  //     try {
-  //       setIsLoading(true);
-  //       const formData = new FormData();
-  //       repairedMobilePhotos.forEach((file: File) => {
-  //         formData.append(`74[delete_existing_document]`, "1");
-  //         formData.append(`74[document]`, file);
-  //         formData.append(`74[document_type_id]`, "74");
-  //       });
-  //       const uploadResponse = await uploadFinalDocuments(
-  //         Number(selectedClaim?.id),
-  //         formData
-  //       );
-  //       if (!uploadResponse.data) {
-  //         notifyError(
-  //           "Failed to upload repaired mobile images. Please try again."
-  //         );
-  //         setIsLoading(false);
-  //         return;
-  //       }
-  //       const response = await handlePickupTrackingStatus(
-  //         Number(selectedClaim?.id),
-  //         String(pickup_type)
-  //       );
+  const handlePickupTracking = async (pickup_type: string) => {
+    if (pickup_type == "ready") {
+      if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
+        notifyError(
+          "Please upload repaired mobile image before marking as ready for pickup."
+        );
+        return;
+      }
+      try {
+        setIsLoading(true);
+        const response = await handlePickupTrackingStatus(
+          Number(selectedClaim?.id),
+          String(pickup_type)
+        );
 
-  //       if (!response.success) {
-  //         notifyError("Failed to mark ready for pickup !");
-  //       } else {
-  //         triggerClaimRefresh();
-  //         notifySuccess("Marked as ready for pickup ");
-  //       }
-  //     } catch (error) {
-  //       notifyError(`Failed to mark ready for pickup ! ${error}`);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
-
-  //   if (pickup_type == "picked") {
-  //     try {
-  //       setIsLoading(true);
-  //       const response = await handlePickupTrackingStatus(
-  //         Number(selectedClaim?.id),
-  //         String(pickup_type)
-  //       );
-
-  //       if (!response.success) {
-  //         notifyError("Failed to mark as picked up !");
-  //       } else {
-  //         triggerClaimRefresh();
-  //         notifySuccess("Marked as picked up ");
-  //       }
-  //     } catch (error) {
-  //       notifyError(`Failed to mark as picked up ! ${error}`);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
-  // };
+        if (!response.success) {
+          notifyError("Failed to mark ready for pickup !");
+        } else {
+          triggerClaimRefresh();
+          notifySuccess("Marked as ready for pickup ");
+        }
+      } catch (error) {
+        notifyError(`Failed to mark ready for pickup ! ${error}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   // const readyToPickupStatus =
   //   selectedClaim?.is_tvs_claim &&
@@ -196,6 +161,7 @@ const FinalDocumentsTab: React.FC = () => {
             isInvalidRepairMobilePhotoReason={isInvalidRepairMobilePhotoReason}
             isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
             finalDocuments={finalDocuments}
+            handlePickupTracking={handlePickupTracking}
           />
           <div className="w-1/2">
             {/* shipment details  */}

@@ -8,7 +8,12 @@ import { uploadFinalDocuments } from "@/services/claimService";
 import { compressImage } from "@/utils/compressImage";
 import { RepairedMobileSectionProps } from "@/interfaces/ClaimInterface";
 
-const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
+// Extend the prop type to include handlePickupTracking
+interface RepairedMobileSectionPropsWithPickup extends RepairedMobileSectionProps {
+  handlePickupTracking: (pickup_type: string) => Promise<void>;
+}
+
+const RepairedMobileSection: React.FC<RepairedMobileSectionPropsWithPickup> = ({
   repairedMobilePhotos,
   setRepairedMobilePhotos,
   reuploadMobile,
@@ -18,6 +23,7 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
   isInvalidRepairMobilePhotoReason,
   isInvalidRepairMobilePhotoStatus,
   finalDocuments,
+  handlePickupTracking,
 }) => {
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -86,7 +92,10 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
           {selectedClaim?.is_tvs_claim ? (
             <button
               className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
-              onClick={handleMobilePhotoUpload}
+              onClick={async () => {
+                await handleMobilePhotoUpload();
+                await handlePickupTracking('ready');
+              }}
               disabled={repairedMobilePhotos.length < 3 || repairedMobilePhotos.length > 5}
             >
               Ready For Pickup
