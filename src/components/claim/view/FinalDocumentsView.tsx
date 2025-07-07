@@ -36,7 +36,7 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
                   </a>
                 </div>
               ) : (
-                <GalleryPopup images={[finalDocuments.repairInvoiceImage]} />
+                <GalleryPopup images={finalDocuments.repairMobilePhoto ?? []} />
               )
             ) : null}
             <span className="p-2 text-[#19AD61] text-xxs font-semibold">
@@ -103,7 +103,7 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
         <div className="w-1/2">
           <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
           {finalDocuments?.repairMobilePhoto && (
-            <GalleryPopup images={[finalDocuments.repairMobilePhoto]} />
+            <GalleryPopup images={finalDocuments?.repairMobilePhoto} />
           )}
           <span className="p-2 text-[#19AD61] text-xxs font-semibold">
             Valid

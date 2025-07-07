@@ -12,7 +12,9 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
 }) => {
   return (
     <>
-      {(!finalDocuments.repairInvoiceImage && (!isImeiChanged || (isImeiChanged && !finalDocuments.replacementReceiptImage))) ? (
+      {!finalDocuments.repairInvoiceImage &&
+      (!isImeiChanged ||
+        (isImeiChanged && !finalDocuments.replacementReceiptImage)) ? (
         <button
           className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
           onClick={handleSubmit}
@@ -38,4 +40,4 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
   );
 };
 
-export default DocumentActionButtons; 
+export default DocumentActionButtons;

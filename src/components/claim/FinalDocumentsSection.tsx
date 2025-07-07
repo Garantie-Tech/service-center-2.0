@@ -28,7 +28,8 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
       {/* Repair Invoice PDF */}
       <div className="w-1/2">
         {/* Always show input for invoice if reuploadFinalDocs is true and invoice is invalid or under review */}
-        {(reuploadFinalDocs && (isInvalidRepairInvoice || isInvalidRepairInvoiceStatus == null)) ||
+        {(reuploadFinalDocs &&
+          (isInvalidRepairInvoice || isInvalidRepairInvoiceStatus == null)) ||
         !finalDocuments?.repairInvoiceImage ? (
           <PdfUpload
             label="Repair Invoice (Please add Invoice document pdf)"
@@ -147,4 +148,4 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   );
 };
 
-export default FinalDocumentsSection; 
+export default FinalDocumentsSection;

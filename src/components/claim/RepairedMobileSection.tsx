@@ -1,7 +1,6 @@
 "use client";
 
 import ImageUpload from "@/components/ui/ImageUpload";
-import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
@@ -15,7 +14,6 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
   reuploadMobile,
   setReuploadMobile,
   repairMobilePhotoError,
-  setRepairMobilePhotoError,
   isInvalidRepairMobilePhoto,
   isInvalidRepairMobilePhotoReason,
   isInvalidRepairMobilePhotoStatus,
@@ -24,39 +22,33 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
 
-  const handleSingleImageSelect = async (
-    files: File[],
-    setter: (fileArray: File[]) => void,
-    setError?: (val: boolean) => void
-  ) => {
-    if (files.length > 0) {
-      try {
-        const latestFile = files[files.length - 1];
-        const compressed = await compressImage(latestFile);
-
-        if (setError) setError(false);
-        setter([compressed]);
-      } catch (err) {
-        console.error("Image compression failed:", err);
-        if (setError) setError(true);
-      }
-    } else {
-      setter([]);
-    }
-  };
-
   const handleMobilePhotoUpload = async () => {
-    if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
-      notifyError("Please select a repaired mobile image to upload.");
+    if (!repairedMobilePhotos || repairedMobilePhotos.length < 3) {
+      notifyError("Please select at least 3 repaired mobile images to upload.");
+      return;
+    }
+    if (repairedMobilePhotos.length > 5) {
+      notifyError("You can upload a maximum of 5 repaired mobile images.");
       return;
     }
     setIsLoading(true);
     const formData = new FormData();
-    repairedMobilePhotos.forEach((file) => {
-      formData.append(`74[delete_existing_document]`, "1");
-      formData.append(`74[document]`, file);
-      formData.append(`74[document_type_id]`, "74");
-    });
+    formData.append(`74[delete_existing_document]`, "1");
+    formData.append(`74[document_type_id]`, "74");
+
+    // Compress images > 1MB before appending
+    for (const file of repairedMobilePhotos) {
+      let fileToUpload = file;
+      if (file.size > 1024 * 1024) { // 1MB
+        try {
+          fileToUpload = await compressImage(file);
+        } catch (e) {
+          notifyError("Failed to compress an image. Uploading original."+e);
+        }
+      }
+      formData.append(`74[document][]`, fileToUpload);
+    }
+
     const uploadResponse = await uploadFinalDocuments(
       Number(selectedClaim?.id),
       formData
@@ -67,7 +59,7 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
     } else {
       triggerClaimRefresh();
       setReuploadMobile(false);
-      notifySuccess("Repaired mobile image uploaded successfully!");
+      notifySuccess("Repaired mobile images uploaded successfully!");
     }
   };
 
@@ -76,20 +68,26 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
       {reuploadMobile ? (
         <>
           <ImageUpload
-            label="Repaired Mobile (Add repaired mobile photo)"
+            label="Repaired Mobile (Add repaired mobile photos)"
             images={repairedMobilePhotos}
-            setImages={(files: File[]) =>
-              handleSingleImageSelect(
-                files,
-                setRepairedMobilePhotos,
-                setRepairMobilePhotoError
-              )
-            }
+            setImages={setRepairedMobilePhotos}
+            multiple={true}
           />
+          <div className="text-xs text-gray-500 mt-1">Minimum 3 and maximum 5 images required.</div>
+          {repairedMobilePhotos.length > 0 && (
+            <div className={`text-xs mt-1 ${repairedMobilePhotos.length < 3 || repairedMobilePhotos.length > 5 ? 'text-red-500' : 'text-green-600'}`}>{
+              repairedMobilePhotos.length < 3
+                ? `You have selected ${repairedMobilePhotos.length}. Please select at least 3 images.`
+                : repairedMobilePhotos.length > 5
+                ? `You have selected ${repairedMobilePhotos.length}. Maximum 5 images allowed.`
+                : `You have selected ${repairedMobilePhotos.length} images.`
+            }</div>
+          )}
           {selectedClaim?.is_tvs_claim ? (
             <button
               className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
               onClick={handleMobilePhotoUpload}
+              disabled={repairedMobilePhotos.length < 3 || repairedMobilePhotos.length > 5}
             >
               Ready For Pickup
             </button>
@@ -97,33 +95,16 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
             <button
               className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
               onClick={handleMobilePhotoUpload}
+              disabled={repairedMobilePhotos.length < 3 || repairedMobilePhotos.length > 5}
             >
               Submit
             </button>
           )}
         </>
-      ) : finalDocuments.repairMobilePhoto.endsWith(".pdf") ? (
-        <>
-          <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
-          <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
-            <a
-              href={finalDocuments.repairMobilePhoto}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src="/images/pdf-icon.svg"
-                alt="Repair Invoice PDF"
-                width={30}
-                height={50}
-              />
-            </a>
-          </div>
-        </>
       ) : (
         <>
           <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
-          <GalleryPopup images={[finalDocuments.repairMobilePhoto]} />
+          <GalleryPopup images={finalDocuments.repairMobilePhoto ?? []} />
         </>
       )}
 
