@@ -89,7 +89,7 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionPropsWithPickup> = ({
                 : `You have selected ${repairedMobilePhotos.length} images.`
             }</div>
           )}
-          {selectedClaim?.is_tvs_claim ? (
+          {selectedClaim?.is_tvs_claim && selectedClaim?.customer_pickup_details != null ? (
             <button
               className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
               onClick={async () => {
