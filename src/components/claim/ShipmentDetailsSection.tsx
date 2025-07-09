@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
-import { handlePickupTrackingStatus, uploadFinalDocuments } from "@/services/claimService";
+import {
+  handlePickupTrackingStatus,
+  uploadFinalDocuments,
+} from "@/services/claimService";
 import { useNotification } from "@/context/NotificationProvider";
 import { useState } from "react";
 import { ShipmentDetailsSectionProps } from "@/interfaces/ClaimInterface";
@@ -11,12 +14,8 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
   isValidRepairMobilePhoto,
   repairedMobilePhotos,
 }) => {
-  const {
-    selectedClaim,
-    setIsLoading,
-    triggerClaimRefresh,
-    claimStatus,
-  } = useGlobalStore();
+  const { selectedClaim, setIsLoading, triggerClaimRefresh, claimStatus } =
+    useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
   const [inlineLoader, setInlineLoader] = useState(false);
 
@@ -124,13 +123,11 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
   if (!selectedClaim?.is_tvs_claim) return null;
 
   return (
-    <div className="text-[#515151] mt-2">
+    <div className="text-[#515151]">
       <div className="flex gap-8 flex-wrap">
         {isShipmentCompleted == true && (
           <div className="pb-[10px] w-[45%]">
-            <label className="block text-darkGray text-xs font-medium">
-              Status
-            </label>
+            <h3 className="text-sm font-medium mb-2">Status</h3>
             <p className="text-sm font-bold">
               {readyToPickupStatus == true ? (
                 <>Ready For Pickup</>
@@ -147,26 +144,8 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
         {/* pickup initiated */}
         {isShipmentInitiated && isValidRepairMobilePhoto && (
           <div className="pb-[10px] w-[45%]">
-            <div className="flex items-center gap-2">
-              <button
-                className={`px-4 py-2 rounded-md text-white text-sm font-semibold h-[45px] ${
-                  !selectedClaim?.pickup_tracking?.is_pickup_initiated == true
-                    ? "bg-gray-400 cursor-not-allowed disabled"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-                disabled={
-                  !selectedClaim?.pickup_tracking?.is_pickup_initiated == true
-                }
-                onClick={() => {
-                  handlePickupTracking("picked");
-                }}
-              >
-                {inlineLoader ? (
-                  <span className="loading loading-spinner text-white"></span>
-                ) : (
-                  <>Mark As Picked</>
-                )}
-              </button>
+            <h3 className="text-sm font-medium mb-2">Action</h3>
+            <div className="flex items-center gap-4 mt-4">
               {selectedClaim?.shipping_receipt && (
                 <div>
                   <a
@@ -186,15 +165,33 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
                   </a>
                 </div>
               )}
+
+              <button
+                className={`px-4 py-2 rounded-md text-white text-sm font-semibold h-[45px] ${
+                  !selectedClaim?.pickup_tracking?.is_pickup_initiated == true
+                    ? "bg-gray-400 cursor-not-allowed disabled"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                disabled={
+                  !selectedClaim?.pickup_tracking?.is_pickup_initiated == true
+                }
+                onClick={() => {
+                  handlePickupTracking("picked");
+                }}
+              >
+                {inlineLoader ? (
+                  <span className="loading loading-spinner text-white"></span>
+                ) : (
+                  <>Mark As Picked</>
+                )}
+              </button>
             </div>
           </div>
         )}
         {/* shipment completed */}
         {isShipmentCompleted && (
           <div className="pb-[10px] w-[45%]">
-            <label className="block text-darkGray text-xs font-medium">
-              Shipment Receipt
-            </label>
+            <h3 className="text-sm font-medium mb-2">Shipment Receipt</h3>
             <div className="flex items-center gap-2">
               <a
                 href={String(selectedClaim?.shipping_receipt)}
@@ -219,4 +216,4 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
   );
 };
 
-export default ShipmentDetailsSection; 
+export default ShipmentDetailsSection;
