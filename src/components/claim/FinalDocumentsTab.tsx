@@ -11,9 +11,9 @@ import { useNotification } from "@/context/NotificationProvider";
 import { handlePickupTrackingStatus } from "@/services/claimService";
 
 const FinalDocumentsTab: React.FC = () => {
-  const { selectedClaim , setIsLoading, triggerClaimRefresh} = useGlobalStore();
+  const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
-  
+
   const {
     // State
     repairInvoice,
@@ -57,7 +57,7 @@ const FinalDocumentsTab: React.FC = () => {
     handleSubmit,
     handleRepairInvoiceUpload,
     handleReplacementReceiptUpload,
-    repairMobilePhotoInfo
+    repairMobilePhotoInfo,
   } = useFinalDocuments();
 
   // const approvedStatuses = [
@@ -69,7 +69,10 @@ const FinalDocumentsTab: React.FC = () => {
   // const isApprovedStatus = approvedStatuses.includes(selectedClaim?.status || "");
 
   useEffect(() => {
-    if(repairMobilePhotoInfo?.statusValue != true && selectedClaim?.repaired_mobile_images?.length == 0){
+    if (
+      repairMobilePhotoInfo?.statusValue != true &&
+      selectedClaim?.repaired_mobile_images?.length == 0
+    ) {
       setReuploadMobile(true);
     }
     setReuploadFinalDocs(false);
@@ -123,6 +126,8 @@ const FinalDocumentsTab: React.FC = () => {
   //   selectedClaim?.pickup_tracking != null &&
   //   selectedClaim?.pickup_tracking?.is_picked == true &&
   //   selectedClaim?.shipping_receipt != null;
+  const isMinThreeRepairImageRequired =
+    !!selectedClaim?.is_tvs_claim && !!selectedClaim?.customer_pickup_details;
 
   return isEditable ? (
     <div>
@@ -162,6 +167,7 @@ const FinalDocumentsTab: React.FC = () => {
             isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
             finalDocuments={finalDocuments}
             handlePickupTracking={handlePickupTracking}
+            isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
           />
           <div className="w-1/2">
             {/* shipment details  */}
@@ -179,7 +185,7 @@ const FinalDocumentsTab: React.FC = () => {
       {isValidRepairMobilePhoto && (
         <div className="border-t py-[25px] border-[#e5e7eb] mt-[25px]">
           <h2 className="text-lg font-semibold mb-4">Final Documents</h2>
-          
+
           <FinalDocumentsSection
             repairInvoice={repairInvoice}
             replacementReceipt={replacementReceipt}
@@ -191,8 +197,12 @@ const FinalDocumentsTab: React.FC = () => {
             isInvalidRepairInvoiceStatus={isInvalidRepairInvoiceStatus}
             isValidRepairInvoice={isValidRepairInvoice}
             isInvalidReplacementReceipt={isInvalidReplacementReceipt}
-            isInvalidReplacementReceiptReason={isInvalidReplacementReceiptReason}
-            isInvalidReplacementReceiptStatus={isInvalidReplacementReceiptStatus}
+            isInvalidReplacementReceiptReason={
+              isInvalidReplacementReceiptReason
+            }
+            isInvalidReplacementReceiptStatus={
+              isInvalidReplacementReceiptStatus
+            }
             isValidReplacementReceipt={isValidReplacementReceipt}
             isImeiChanged={isImeiChanged}
             finalDocuments={finalDocuments}

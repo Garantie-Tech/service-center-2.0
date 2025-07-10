@@ -159,6 +159,7 @@ export interface RepairedMobileSectionProps {
   finalDocuments: {
     repairMobilePhoto: string[] | null;
   };
+  isMinThreeRepairImageRequired:boolean;
 }
 
 export interface FinalDocumentsSectionProps {
