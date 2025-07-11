@@ -24,6 +24,8 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
     "BER Approved",
     "BER Replacement Approved",
     "BER Repair Approved",
+    "BER Settlement Initiated",
+    'BER Settlement Completed'
   ];
   const isApprovedStatus = approvedStatuses.includes(claimStatus);
 
@@ -192,7 +194,7 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
         {isShipmentCompleted && (
           <div className="pb-[10px] w-[45%]">
             <h3 className="text-sm font-medium mb-2">Shipment Receipt</h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4">
               <a
                 href={String(selectedClaim?.shipping_receipt)}
                 target="_blank"
@@ -203,8 +205,8 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
                 <Image
                   src="/images/pdf-icon.svg"
                   alt="Estimate Upload"
-                  width={30}
-                  height={50}
+                  width={40}
+                  height={60}
                   className="h-[100%]"
                 />
               </a>
