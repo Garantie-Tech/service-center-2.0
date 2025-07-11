@@ -25,7 +25,10 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
     "BER Replacement Approved",
     "BER Repair Approved",
     "BER Settlement Initiated",
-    'BER Settlement Completed'
+    'BER Settlement Completed',
+    'Settlement Initiated',
+    'Settlement Completed'
+
   ];
   const isApprovedStatus = approvedStatuses.includes(claimStatus);
 
