@@ -1,424 +1,229 @@
-import ImageUpload from "@/components/ui/ImageUpload";
-import PdfUpload from "@/components/ui/PdfUpload";
-import { useNotification } from "@/context/NotificationProvider";
-import { uploadFinalDocuments } from "@/services/claimService";
 import { useGlobalStore } from "@/store/store";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import FinalDocumentsView from "@/components/claim/view/FinalDocumentsView";
-import ErrorAlert from "@/components/ui/ErrorAlert";
-import Image from "next/image";
-import GalleryPopup from "@/components/ui/GalleryPopup";
-import { getDocumentInfo } from "@/helpers/globalHelper";
-import { compressImage } from "@/utils/compressImage";
+import ShipmentDetailsSection from "@/components/claim/ShipmentDetailsSection";
+import RepairedMobileSection from "@/components/claim/RepairedMobileSection";
+import FinalDocumentsSection from "@/components/claim/FinalDocumentsSection";
+import DocumentErrorAlerts from "@/components/claim/DocumentErrorAlerts";
+import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
+import { useFinalDocuments } from "@/hooks/useFinalDocuments";
+import { useNotification } from "@/context/NotificationProvider";
+import { handlePickupTrackingStatus } from "@/services/claimService";
 
 const FinalDocumentsTab: React.FC = () => {
-  const [repairInvoice, setRepairInvoice] = useState<File[]>([]);
-  const [replacementReceipt, setReplacementReceipt] = useState<File[]>([]);
-  const [repairedMobilePhotos, setRepairedMobilePhotos] = useState<File[]>([]);
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
-  const [showRepairInvoiceError, setShowRepairInvoiceError] = useState(true);
-  const [showRepairMobilePhotoError, setShowRepairMobilePhotoError] =
-    useState(true);
-  const [showReplacementReceiptError, setShowReplacementReceiptError] =
-    useState(true);
 
-  const [reupload, setReupload] = useState(false);
-  const [repairInvoiceError, setRepairInvoiceError] = useState(true);
-  const [repairMobilePhotoError, setRepairMobilePhotoError] = useState(true);
-  const [replacementReceiptError, setReplacementReceiptError] = useState(true);
+  const {
+    // State
+    repairInvoice,
+    replacementReceipt,
+    repairedMobilePhotos,
+    setRepairedMobilePhotos,
+    reuploadMobile,
+    setReuploadMobile,
+    reuploadFinalDocs,
+    setReuploadFinalDocs,
+    repairInvoiceError,
+    repairMobilePhotoError,
+    setRepairMobilePhotoError,
+    replacementReceiptError,
+    showRepairInvoiceError,
+    setShowRepairInvoiceError,
+    showRepairMobilePhotoError,
+    setShowRepairMobilePhotoError,
+    showReplacementReceiptError,
+    setShowReplacementReceiptError,
+
+    // Document info
+    isImeiChanged,
+    isInvalidRepairInvoice,
+    isInvalidRepairMobilePhoto,
+    isInvalidReplacementReceipt,
+    isInvalidRepairInvoiceReason,
+    isInvalidRepairMobilePhotoReason,
+    isInvalidReplacementReceiptReason,
+    isInvalidRepairInvoiceStatus,
+    isInvalidRepairMobilePhotoStatus,
+    isInvalidReplacementReceiptStatus,
+    isValidRepairInvoice,
+    isValidRepairMobilePhoto,
+    isValidReplacementReceipt,
+    isEditable,
+    showReuploadButton,
+    finalDocuments,
+
+    // Handlers
+    handleSubmit,
+    handleRepairInvoiceUpload,
+    handleReplacementReceiptUpload,
+    repairMobilePhotoInfo,
+  } = useFinalDocuments();
+
+  // const approvedStatuses = [
+  //   "Approved",
+  //   "BER Approved",
+  //   "BER Replacement Approved",
+  //   "BER Repair Approved",
+  // ];
+  // const isApprovedStatus = approvedStatuses.includes(selectedClaim?.status || "");
 
   useEffect(() => {
-    setReupload(false);
+    if (
+      repairMobilePhotoInfo?.statusValue != true &&
+      selectedClaim?.repaired_mobile_images?.length == 0
+    ) {
+      setReuploadMobile(true);
+    }
+    setReuploadFinalDocs(false);
   }, [selectedClaim]);
 
-  const handleSubmit = async () => {
-    const formData = new FormData();
-
-    try {
-      if (
-        (!repairInvoice || repairInvoice.length === 0) &&
-        !selectedClaim?.documents?.["16"]?.url
-      ) {
-        notifyError("Please Upload Repair Invoice");
+  const handlePickupTracking = async (pickup_type: string) => {
+    if (pickup_type == "ready") {
+      if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
+        notifyError(
+          "Please upload repaired mobile image before marking as ready for pickup."
+        );
         return;
       }
-      if (
-        (!repairedMobilePhotos || repairedMobilePhotos.length === 0) &&
-        !selectedClaim?.documents?.["74"]?.url
-      ) {
-        notifyError("Please Upload Repair Mobile Images");
-        return;
-      }
-
-      if (
-        selectedClaim?.imei_changed &&
-        (!replacementReceipt || replacementReceipt.length === 0) &&
-        !selectedClaim?.documents?.["75"]?.url
-      ) {
-        notifyError("Please Upload Replacement Receipt");
-        return;
-      }
-      setIsLoading(true);
-
-      // Helper function to append files in required format
-      const appendFiles = (files: File[], documentTypeId: number) => {
-        files.forEach((file) => {
-          formData.append(`${documentTypeId}[delete_existing_document]`, "1");
-          formData.append(`${documentTypeId}[document]`, file);
-          formData.append(
-            `${documentTypeId}[document_type_id]`,
-            documentTypeId.toString()
-          );
-        });
-      };
-
-      if (repairInvoice) {
-        appendFiles(repairInvoice, 16);
-      }
-      if (repairedMobilePhotos) {
-        appendFiles(repairedMobilePhotos, 74);
-      }
-      if (selectedClaim?.imei_changed) {
-        appendFiles(replacementReceipt, 75);
-      }
-
-      // Send formData to API
-      const response = await uploadFinalDocuments(
-        Number(selectedClaim?.id),
-        formData
-      );
-
-      if (!response.data) {
-        notifyError("Failed to upload documents. Please try again.");
-      } else {
-        triggerClaimRefresh();
-        notifySuccess("Final documents uploaded successfully!");
-      }
-    } catch (error) {
-      console.error("Error submitting final documents:", error);
-      notifyError("Failed to upload documents. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isImeiChanged = selectedClaim?.imei_changed ? true : false;
-
-  // Get document info for each type
-  const repairInvoiceInfo = getDocumentInfo(selectedClaim, "16");
-  const repairMobilePhotoInfo = getDocumentInfo(selectedClaim, "74");
-  const replacementReceiptInfo = getDocumentInfo(selectedClaim, "75");
-
-  // Assign values
-  const isInvalidRepairInvoice = repairInvoiceInfo.isInvalid;
-  const isInvalidRepairMobilePhoto = repairMobilePhotoInfo.isInvalid;
-  const isInvalidReplacementReceipt = replacementReceiptInfo.isInvalid;
-
-  const isInvalidRepairInvoiceReason = repairInvoiceInfo.invalidReason;
-  const isInvalidRepairMobilePhotoReason = repairMobilePhotoInfo.invalidReason;
-  const isInvalidReplacementReceiptReason =
-    replacementReceiptInfo.invalidReason;
-
-  const isInvalidRepairInvoiceStatus = repairInvoiceInfo.statusValue;
-  const isInvalidRepairMobilePhotoStatus = repairMobilePhotoInfo.statusValue;
-  const isInvalidReplacementReceiptStatus = replacementReceiptInfo.statusValue;
-
-  const isValidRepairInvoice = repairInvoiceInfo.isValid;
-  const isValidRepairMobilePhoto = repairMobilePhotoInfo.isValid;
-  const isValidReplacementReceipt = replacementReceiptInfo.isValid;
-
-  const isEditable =
-    isInvalidRepairInvoice ||
-    isInvalidRepairMobilePhoto ||
-    (isImeiChanged && isInvalidReplacementReceipt) ||
-    repairInvoiceInfo.statusValue === null ||
-    repairMobilePhotoInfo.statusValue === null ||
-    replacementReceiptInfo.statusValue === null;
-
-  const showReuploadButton =
-    isInvalidRepairInvoice ||
-    isInvalidRepairMobilePhoto ||
-    (isImeiChanged && isInvalidReplacementReceipt) ||
-    repairInvoiceInfo.hasInvalidStatus ||
-    repairMobilePhotoInfo.hasInvalidStatus ||
-    replacementReceiptInfo.hasInvalidStatus;
-
-  // document
-  const finalDocuments = {
-    repairInvoiceImage: selectedClaim?.documents?.["16"]?.url ?? "",
-    repairMobilePhoto: selectedClaim?.documents?.["74"]?.url ?? "",
-    replacementReceiptImage: selectedClaim?.documents?.["75"]?.url ?? "",
-    isImeiChanged: isImeiChanged,
-  };
-
-  const showSubmitButton =
-    repairInvoiceInfo.statusValue != true ||
-    repairMobilePhotoInfo.statusValue != true ||
-    (replacementReceiptInfo.statusValue != true && isImeiChanged);
-
-  const handleSingleImageSelect = async (
-    files: File[],
-    setter: (fileArray: File[]) => void,
-    setError?: (val: boolean) => void
-  ) => {
-    if (files.length > 0) {
       try {
-        const latestFile = files[files.length - 1];
-        const compressed = await compressImage(latestFile);
+        setIsLoading(true);
+        const response = await handlePickupTrackingStatus(
+          Number(selectedClaim?.id),
+          String(pickup_type)
+        );
 
-        if (setError) setError(false);
-        setter([compressed]);
-      } catch (err) {
-        console.error("Image compression failed:", err);
-        if (setError) setError(true);
+        if (!response.success) {
+          notifyError("Failed to mark ready for pickup !");
+        } else {
+          triggerClaimRefresh();
+          notifySuccess("Marked as ready for pickup ");
+        }
+      } catch (error) {
+        notifyError(`Failed to mark ready for pickup ! ${error}`);
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      setter([]);
     }
   };
 
-  const handleRepairInvoiceUpload = (files: File[]) => {
-    setRepairInvoice(files);
-    setRepairInvoiceError(false);
-  };
+  // const readyToPickupStatus =
+  //   selectedClaim?.is_tvs_claim &&
+  //   isApprovedStatus &&
+  //   selectedClaim?.customer_pickup_details != null &&
+  //   selectedClaim?.pickup_tracking?.is_readyfor_pickup != true;
 
-  const handleReplacementReceiptUpload = (files: File[]) => {
-    setReplacementReceipt(files);
-    setReplacementReceiptError(false);
-  };
+  // const isShipmentInitiated =
+  //   selectedClaim?.is_tvs_claim &&
+  //   isApprovedStatus &&
+  //   selectedClaim?.customer_pickup_details != null &&
+  //   selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
+  //   selectedClaim?.pickup_tracking?.is_picked != true;
+
+  // const isShipmentCompleted =
+  //   selectedClaim?.is_tvs_claim &&
+  //   isApprovedStatus &&
+  //   selectedClaim?.pickup_tracking != null &&
+  //   selectedClaim?.pickup_tracking?.is_picked == true &&
+  //   selectedClaim?.shipping_receipt != null;
+  const isMinThreeRepairImageRequired =
+    !!selectedClaim?.is_tvs_claim && !!selectedClaim?.customer_pickup_details;
 
   return isEditable ? (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Final Invoice Documents</h2>
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Repair Mobile Images</h2>
 
-      {isInvalidRepairInvoice &&
-        showRepairInvoiceError &&
-        repairInvoiceError && (
-          <ErrorAlert
-            message={isInvalidRepairInvoiceReason}
-            onClose={() => setShowRepairInvoiceError(false)}
+        <DocumentErrorAlerts
+          isInvalidRepairInvoice={isInvalidRepairInvoice}
+          isInvalidRepairMobilePhoto={isInvalidRepairMobilePhoto}
+          isInvalidReplacementReceipt={isInvalidReplacementReceipt}
+          isImeiChanged={isImeiChanged}
+          showRepairInvoiceError={showRepairInvoiceError}
+          showRepairMobilePhotoError={showRepairMobilePhotoError}
+          showReplacementReceiptError={showReplacementReceiptError}
+          repairInvoiceError={repairInvoiceError}
+          repairMobilePhotoError={repairMobilePhotoError}
+          replacementReceiptError={replacementReceiptError}
+          isInvalidRepairInvoiceReason={isInvalidRepairInvoiceReason}
+          isInvalidRepairMobilePhotoReason={isInvalidRepairMobilePhotoReason}
+          isInvalidReplacementReceiptReason={isInvalidReplacementReceiptReason}
+          setShowRepairInvoiceError={setShowRepairInvoiceError}
+          setShowRepairMobilePhotoError={setShowRepairMobilePhotoError}
+          setShowReplacementReceiptError={setShowReplacementReceiptError}
+        />
+
+        {/* Repaired Mobile Photos and shipment details */}
+        <div className="flex gap-8">
+          <RepairedMobileSection
+            repairedMobilePhotos={repairedMobilePhotos}
+            setRepairedMobilePhotos={setRepairedMobilePhotos}
+            reuploadMobile={reuploadMobile}
+            setReuploadMobile={setReuploadMobile}
+            repairMobilePhotoError={repairMobilePhotoError}
+            setRepairMobilePhotoError={setRepairMobilePhotoError}
+            isInvalidRepairMobilePhoto={isInvalidRepairMobilePhoto}
+            isInvalidRepairMobilePhotoReason={isInvalidRepairMobilePhotoReason}
+            isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
+            finalDocuments={finalDocuments}
+            handlePickupTracking={handlePickupTracking}
+            isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
           />
-        )}
-
-      {isInvalidRepairMobilePhoto &&
-        showRepairMobilePhotoError &&
-        repairMobilePhotoError && (
-          <ErrorAlert
-            message={isInvalidRepairMobilePhotoReason}
-            onClose={() => setShowRepairMobilePhotoError(false)}
-          />
-        )}
-
-      {isInvalidReplacementReceipt &&
-        isImeiChanged &&
-        showReplacementReceiptError &&
-        replacementReceiptError && (
-          <ErrorAlert
-            message={isInvalidReplacementReceiptReason}
-            onClose={() => setShowReplacementReceiptError(false)}
-          />
-        )}
-
-      <div className="flex gap-8">
-        {/* Repair Invoice PDF */}
-        <div className="w-1/2">
-          {(!isValidRepairInvoice && reupload) ||
-          !finalDocuments?.repairInvoiceImage ? (
-            <PdfUpload
-              label="Repair Invoice (Please add Invoice document pdf)"
-              pdfs={repairInvoice}
-              setPdfs={handleRepairInvoiceUpload}
-            />
-          ) : finalDocuments.repairInvoiceImage.endsWith(".pdf") ? (
-            <>
-              <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
-              <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
-                <a
-                  href={finalDocuments.repairInvoiceImage}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image
-                    src="/images/pdf-icon.svg"
-                    alt="Repair Invoice PDF"
-                    width={30}
-                    height={50}
-                  />
-                </a>
-              </div>
-            </>
-          ) : (
-            <>
-              <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
-              <GalleryPopup images={[finalDocuments.repairInvoiceImage]} />
-            </>
-          )}
-
-          {isInvalidRepairInvoice && repairInvoiceError ? (
-            <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
-              Invalid Invoice : {isInvalidRepairInvoiceReason}
-            </span>
-          ) : isInvalidRepairInvoiceStatus == null &&
-            finalDocuments?.repairInvoiceImage ? (
-            <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
-              Uploaded (Under Review)
-            </span>
-          ) : isInvalidRepairInvoiceStatus == true ? (
-            <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
-              Valid
-            </span>
-          ) : (
-            <></>
-          )}
-        </div>
-
-        {/* Repaired Mobile Photos */}
-        <div className="w-1/2">
-          {(!isValidRepairMobilePhoto && reupload) ||
-          !finalDocuments?.repairMobilePhoto ? (
-            <ImageUpload
-              label="Repaired Mobile (Add repaired mobile photo)"
-              images={repairedMobilePhotos}
-              setImages={(files: File[]) =>
-                handleSingleImageSelect(
-                  files,
-                  setRepairedMobilePhotos,
-                  setRepairMobilePhotoError
-                )
-              }
-            />
-          ) : finalDocuments.repairMobilePhoto.endsWith(".pdf") ? (
-            <>
-              <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
-              <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
-                <a
-                  href={finalDocuments.repairMobilePhoto}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image
-                    src="/images/pdf-icon.svg"
-                    alt="Repair Invoice PDF"
-                    width={30}
-                    height={50}
-                  />
-                </a>
-              </div>
-            </>
-          ) : (
-            <>
-              <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
-              <GalleryPopup images={[finalDocuments.repairMobilePhoto]} />
-            </>
-          )}
-
-          {isInvalidRepairMobilePhoto && repairMobilePhotoError ? (
-            <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
-              Invalid Photo : {isInvalidRepairMobilePhotoReason}
-            </span>
-          ) : isInvalidRepairMobilePhotoStatus == null &&
-            finalDocuments?.repairMobilePhoto ? (
-            <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
-              Uploaded (Under Review)
-            </span>
-          ) : isInvalidRepairMobilePhotoStatus == true ? (
-            <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
-              Valid
-            </span>
-          ) : (
-            <></>
-          )}
+          <div className="w-1/2">
+            {/* shipment details  */}
+            {selectedClaim?.is_tvs_claim && (
+              <ShipmentDetailsSection
+                isValidRepairMobilePhoto={isValidRepairMobilePhoto}
+                repairedMobilePhotos={repairedMobilePhotos}
+              />
+            )}
+          </div>
         </div>
       </div>
-      <div className="flex gap-8">
-        <div className="w-1/2">
-          {/* Replacement Receipt PDF */}
-          {isImeiChanged && (
-            <div className="">
-              {(!isValidReplacementReceipt && reupload) ||
-              !finalDocuments?.replacementReceiptImage ? (
-                <PdfUpload
-                  label="Replacement Receipt (Add replacement receipt pdf)"
-                  pdfs={replacementReceipt}
-                  setPdfs={handleReplacementReceiptUpload}
-                />
-              ) : finalDocuments.replacementReceiptImage.endsWith(".pdf") ? (
-                <>
-                  <h3 className="text-sm font-medium mb-2">
-                    Replacement Receipt
-                  </h3>
-                  <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
-                    <a
-                      href={finalDocuments.replacementReceiptImage}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Image
-                        src="/images/pdf-icon.svg"
-                        alt="Repair Invoice PDF"
-                        width={30}
-                        height={50}
-                      />
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-sm font-medium mb-2">
-                    Replacement Receipt
-                  </h3>
-                  <GalleryPopup
-                    images={[finalDocuments.replacementReceiptImage]}
-                  />
-                </>
-              )}
 
-              {isInvalidReplacementReceipt && replacementReceiptError ? (
-                <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
-                  Invalid Receipt : {isInvalidReplacementReceiptReason}
-                </span>
-              ) : isInvalidReplacementReceiptStatus == null &&
-                finalDocuments?.replacementReceiptImage &&
-                finalDocuments?.isImeiChanged ? (
-                <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
-                  Uploaded (Under Review)
-                </span>
-              ) : isInvalidReplacementReceiptStatus == true ? (
-                <span className="p-2 text-[#19AD61] text-xxs font-semibold">
-                  Valid
-                </span>
-              ) : (
-                <></>
-              )}
-            </div>
-          )}
+      {/* final invoice doc */}
+      {isValidRepairMobilePhoto && (
+        <div className="border-t py-[25px] border-[#e5e7eb] mt-[25px]">
+          <h2 className="text-lg font-semibold mb-4">Final Documents</h2>
+
+          <FinalDocumentsSection
+            repairInvoice={repairInvoice}
+            replacementReceipt={replacementReceipt}
+            handleRepairInvoiceUpload={handleRepairInvoiceUpload}
+            handleReplacementReceiptUpload={handleReplacementReceiptUpload}
+            reuploadFinalDocs={reuploadFinalDocs}
+            isInvalidRepairInvoice={isInvalidRepairInvoice}
+            isInvalidRepairInvoiceReason={isInvalidRepairInvoiceReason}
+            isInvalidRepairInvoiceStatus={isInvalidRepairInvoiceStatus}
+            isValidRepairInvoice={isValidRepairInvoice}
+            isInvalidReplacementReceipt={isInvalidReplacementReceipt}
+            isInvalidReplacementReceiptReason={
+              isInvalidReplacementReceiptReason
+            }
+            isInvalidReplacementReceiptStatus={
+              isInvalidReplacementReceiptStatus
+            }
+            isValidReplacementReceipt={isValidReplacementReceipt}
+            isImeiChanged={isImeiChanged}
+            finalDocuments={finalDocuments}
+            repairInvoiceError={repairInvoiceError}
+            replacementReceiptError={replacementReceiptError}
+          />
+
+          {/* Add Upload Again and Submit buttons for reupload mode */}
+          <DocumentActionButtons
+            reuploadFinalDocs={reuploadFinalDocs}
+            showReuploadButton={showReuploadButton}
+            finalDocuments={finalDocuments}
+            isImeiChanged={isImeiChanged}
+            setReuploadFinalDocs={setReuploadFinalDocs}
+            handleSubmit={handleSubmit}
+          />
         </div>
-      </div>
-      <div className="flex gap-8">
-        {showReuploadButton && !reupload ? (
-          <button
-            className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
-            onClick={() => setReupload(true)}
-          >
-            Upload Again
-          </button>
-        ) : showSubmitButton ? (
-          <button
-            className={`btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-6`}
-            onClick={handleSubmit}
-          >
-            Submit
-          </button>
-        ) : (
-          <></>
-        )}
-      </div>
+      )}
     </div>
   ) : (
-    <div>
-      <FinalDocumentsView finalDocuments={finalDocuments} />
-    </div>
+    <FinalDocumentsView finalDocuments={finalDocuments} />
   );
 };
 

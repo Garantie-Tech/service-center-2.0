@@ -93,6 +93,16 @@ export interface ApprovalState {
   ) => void;
 }
 
+export interface pickupTrackingInterface {
+  id: number;
+  claim_id: number;
+  is_readyfor_pickup?: boolean;
+  is_pickup_initiated?: boolean;
+  is_picked?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface DocumentItem {
   title: string;
   status?: string | number | null;
@@ -128,6 +138,19 @@ export interface CancelClaim {
     cancellation_reason: string;
     cancelled_by: string;
     update_type?: string;
+  };
+}
+
+export interface PickupTrackingResponse {
+  success: boolean;
+  code: number;
+  locale: string;
+  message: string;
+  data?: {
+    message: string;
+    claimId: number;
+    error?: string;
+    error_msg?: string;
   };
 }
 

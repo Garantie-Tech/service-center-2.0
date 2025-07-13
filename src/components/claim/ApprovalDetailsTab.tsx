@@ -14,6 +14,7 @@ import CopyToClipboardButton from "@/components/ui/CopyToClipboardButton";
 import BerReplaceModal from "../BerReplaceModel";
 import BerSettleModal from "../BerSettleModel";
 import { formatToDateTime } from "@/helpers/dateHelper";
+// import Image from "next/image";
 // import { convertDateTime } from "@/helpers/dateHelper";
 
 const ApprovalDetailsTab: React.FC = () => {
@@ -432,6 +433,7 @@ const ApprovalDetailsTab: React.FC = () => {
           onSubmit={handleBerSubmit}
         />
       )}
+
       {approvalDetails.berDecision === "settle" && (
         <BerSettleModal
           isOpen={isBerModalOpen}

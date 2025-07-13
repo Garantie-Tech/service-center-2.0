@@ -2,15 +2,7 @@
 
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
-
-interface FinalDocumentsViewProps {
-  finalDocuments: {
-    repairInvoiceImage: string;
-    repairMobilePhoto: string;
-    replacementReceiptImage: string;
-    isImeiChanged: boolean;
-  };
-}
+import { FinalDocumentsViewProps } from "@/interfaces/ClaimInterface";
 
 const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
   finalDocuments,
@@ -22,13 +14,24 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
     <div>
       <h2 className="text-lg font-semibold mb-4">Final Invoice Documents</h2>
 
-      <div className="flex gap-8">
+      <div className="flex w-full gap-8 flex-wrap">
+        {/* Repaired Mobile Photos Section */}
+        <div className="w-[45%]">
+          <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
+          {finalDocuments?.repairMobilePhoto && (
+            <GalleryPopup images={finalDocuments?.repairMobilePhoto} />
+          )}
+          <span className="p-2 text-[#19AD61] text-xxs font-semibold">
+            Valid
+          </span>
+        </div>
+
         {/* Repair Invoice Section */}
-        <div className="w-1/2">
+        <div className="w-[45%]">
           <div className="mt-4">
             <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
-            {finalDocuments?.repairInvoiceImage &&
-              (isPdf(finalDocuments.repairInvoiceImage) ? (
+            {finalDocuments?.repairInvoiceImage ? (
+              isPdf(finalDocuments.repairInvoiceImage) ? (
                 <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
                   <a
                     href={finalDocuments.repairInvoiceImage}
@@ -44,13 +47,17 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
                   </a>
                 </div>
               ) : (
-                <GalleryPopup images={[finalDocuments.repairInvoiceImage]} />
-              ))}
+                <GalleryPopup images={finalDocuments.repairMobilePhoto ?? []} />
+              )
+            ) : null}
             <span className="p-2 text-[#19AD61] text-xxs font-semibold">
               Valid
             </span>
           </div>
+        </div>
 
+        {/* replacement receipt */}
+        <div className="w-[45%]">
           <div className="mt-4">
             {/* Replacement Receipt Section */}
             <h3 className="text-sm font-medium mb-2">Replacement Receipt</h3>
@@ -82,15 +89,27 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
           </div>
         </div>
 
-        {/* Repaired Mobile Photos Section */}
-        <div className="w-1/2">
-          <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
-          {finalDocuments?.repairMobilePhoto && (
-            <GalleryPopup images={[finalDocuments.repairMobilePhoto]} />
+        {/* Shipment Receipt Section */}
+        <div className="w-[45%]">
+          {finalDocuments.shipmentReceipt && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium mb-2">Shipment Receipt</h3>
+              <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
+                <a
+                  href={finalDocuments.shipmentReceipt}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image
+                    src="/images/pdf-icon.svg"
+                    alt="Shipment Receipt PDF"
+                    width={30}
+                    height={50}
+                  />
+                </a>
+              </div>
+            </div>
           )}
-          <span className="p-2 text-[#19AD61] text-xxs font-semibold">
-            Valid
-          </span>
         </div>
       </div>
     </div>
