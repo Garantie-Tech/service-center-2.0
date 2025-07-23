@@ -185,6 +185,55 @@ export const fetchPlans = async (
   return await getRequest<PolicyApiResponse>(`v2/orders/`, _params);
 };
 
+// New function to validate estimate document
+export const validateEstimateDocument = async (
+  claimId: number,
+  base64Pdf: string
+) => {
+  try {
+    const { externalApiRequest } = await import("@/utils/api");
+
+    const EXTERNAL_API_BASE_URL = process.env.NEXT_PUBLIC_EXTERNAL_API_URL || "https://pyqa.garantie.in/api";
+
+    const response = await externalApiRequest<{
+      success: boolean;
+      message: string;
+      status: string;
+    }>(EXTERNAL_API_BASE_URL, "verify-estimate-document", "POST", {
+      claim_id: claimId,
+      doc_type: "claim",
+      is_verify_doc: true,
+      base64_pdf: base64Pdf,
+    });
+
+    if (!response.success) {
+      return {
+        success: false,
+        message: response.error || "Document validation failed",
+        status: "error",
+      };
+    }
+
+    // Check if the API response indicates failure
+    if (response.data?.status === "failure") {
+      return {
+        success: false,
+        message: response.data?.message || "Document validation failed",
+        status: "failure",
+      };
+    }
+
+    return {
+      success: response.data?.success || false,
+      message: response.data?.message || "Document validation failed",
+      status: response.data?.status || "error",
+    };
+  } catch (error) {
+    console.error("Error validating document:", error);
+    throw error;
+  }
+};
+
 export const handlePickupTrackingStatus = async (
   claimID: number,
   pickup_status: string

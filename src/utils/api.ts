@@ -128,3 +128,47 @@ export function putRequest<T>(
 export function deleteRequest<T>(endpoint: string, extraHeaders?: HeadersInit) {
   return apiRequest<T>(endpoint, "DELETE", undefined, undefined, extraHeaders);
 }
+
+// External API request function for different base URL
+export async function externalApiRequest<T>(
+  baseUrl: string,
+  endpoint: string,
+  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+  body?: Record<string, unknown>,
+  extraHeaders: HeadersInit = {}
+): Promise<ApiResponse<T>> {
+  try {
+    const token = await getCookie("token");
+
+    const headers: HeadersInit = {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(body && { "Content-Type": "application/json" }),
+      ...extraHeaders,
+    };
+
+    const url = `${baseUrl}/${endpoint}`;
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: method !== "GET" && body ? JSON.stringify(body) : undefined,
+    });
+
+    // Ensure the response is valid JSON
+    const rawData = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error:
+          (rawData as { message?: string })?.message || "Something went wrong",
+      };
+    }
+
+    // Explicitly cast rawData to type T after successful response
+    return { success: true, data: rawData as T };
+  } catch (error) {
+    console.error("External API request error:", error);
+    return { success: false, error: "Network error. Please try again." };
+  }
+}
