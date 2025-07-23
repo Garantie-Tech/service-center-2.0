@@ -15,8 +15,9 @@ import {
   MAX_FILE_SIZE,
   MIN_DAMAGE_IMAGES,
 } from "@/globalConstant";
-import { urlToFile } from "@/helpers/fileHelper";
+import { urlToFile, fileToBase64 } from "@/helpers/fileHelper";
 import { compressImage } from "@/utils/compressImage";
+import { validateEstimateDocument } from "@/services/claimService";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -54,6 +55,10 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const [showEstimateDocValidationError, setShowEstimateDocValidationError] =
     useState(true);
   const [showDamageMobImageError, setShowDamageMobImageError] = useState(true);
+  const [isValidatingDocument, setIsValidatingDocument] = useState(false);
+  const [documentValidationMessage, setDocumentValidationMessage] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     setIsFormDisabled(
@@ -199,7 +204,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
   };
 
-  const handleEstimateDocumentUpload = (
+  const handleEstimateDocumentUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files[0]) {
@@ -214,8 +219,46 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         return;
       }
 
-      // Update state with valid file
-      setEstimateDetailsState({ estimateDocument: file });
+      // Check if file is PDF
+      if (file.type !== "application/pdf") {
+        setEstimateDetailsState({ estimateDocument: null });
+        setEstimateDocumentError("Please upload a PDF file.");
+        event.target.value = "";
+        return;
+      }
+
+      setIsValidatingDocument(true);
+      setDocumentValidationMessage(null); // Clear any previous messages
+      // Convert PDF to base64
+      const base64Pdf = await fileToBase64(file);
+
+      // Validate document with API
+      const validationResponse = await validateEstimateDocument(
+        Number(selectedClaim?.id),
+        base64Pdf
+      );
+
+      if (validationResponse.success) {
+        // Document is valid, update state
+        setEstimateDetailsState({ estimateDocument: file });
+        setEstimateDocumentError(null);
+        // Show success message from API response
+        if (validationResponse.message) {
+          setDocumentValidationMessage(validationResponse.message);
+          // Clear the success message after 5 seconds
+          setTimeout(() => setDocumentValidationMessage(null), 5000);
+        }
+      } else {
+        // Document validation failed
+        setEstimateDetailsState({ estimateDocument: null });
+        setEstimateDocumentError(
+          validationResponse.message || "Document validation failed."
+        );
+        setDocumentValidationMessage(null);
+      }
+
+      setIsValidatingDocument(false);
+
       event.target.value = "";
     }
   };
@@ -469,21 +512,42 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           </label>
           <div className="mb-4">
             {!isFormDisabled && estimateDocStatus == false && (
-              <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleEstimateDocumentUpload}
-                  className="hidden"
-                />
-                <span className="text-grayFont text-sm">Add Document</span>
-                <Image
-                  src="/images/upload-icon.svg"
-                  alt="Upload"
-                  width={20}
-                  height={20}
-                />
-              </label>
+              <div className="space-y-2">
+                <label
+                  className={`w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded px-[10px] ${
+                    isValidatingDocument
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleEstimateDocumentUpload}
+                    className="hidden"
+                    disabled={isValidatingDocument}
+                  />
+                  <span className="text-grayFont text-sm">
+                    {isValidatingDocument ? "Validating..." : "Add Document"}
+                  </span>
+                  {isValidatingDocument ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primaryBlue"></div>
+                  ) : (
+                    <Image
+                      src="/images/upload-icon.svg"
+                      alt="Upload"
+                      width={20}
+                      height={20}
+                    />
+                  )}
+                </label>
+                {isValidatingDocument && (
+                  <div className="flex items-center gap-2 text-sm text-blue-600">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                    <span>Validating document...</span>
+                  </div>
+                )}
+              </div>
             )}
 
             {estimateDocument && (
@@ -551,10 +615,34 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             )}
 
             {estimateDocumentError && (
-              <ErrorAlert
-                message={estimateDocumentError}
-                onClose={() => setEstimateDocumentError(null)}
-              />
+              <div className="mt-2">
+                <ErrorAlert
+                  message={estimateDocumentError}
+                  onClose={() => setEstimateDocumentError(null)}
+                />
+              </div>
+            )}
+            {documentValidationMessage && (
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-2 h-2 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-green-800 font-medium">
+                    {documentValidationMessage}
+                  </span>
+                </div>
+              </div>
             )}
 
             {isInvalidDocument && showEstimateDocValidationError ? (
@@ -801,21 +889,42 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             Estimate Document (pdf)
           </label>
           <div className="mb-4">
-            <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handleEstimateDocumentUpload}
-                className="hidden"
-              />
-              <span className="text-grayFont text-sm">Add Document</span>
-              <Image
-                src="/images/upload-icon.svg"
-                alt="Upload"
-                width={20}
-                height={20}
-              />
-            </label>
+            <div className="space-y-2">
+              <label
+                className={`w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded px-[10px] ${
+                  isValidatingDocument
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-pointer"
+                }`}
+              >
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleEstimateDocumentUpload}
+                  className="hidden"
+                  disabled={isValidatingDocument}
+                />
+                <span className="text-grayFont text-sm">
+                  {isValidatingDocument ? "Validating..." : "Add Document"}
+                </span>
+                {isValidatingDocument ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primaryBlue"></div>
+                ) : (
+                  <Image
+                    src="/images/upload-icon.svg"
+                    alt="Upload"
+                    width={20}
+                    height={20}
+                  />
+                )}
+              </label>
+              {isValidatingDocument && (
+                <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                  <span>Validating document...</span>
+                </div>
+              )}
+            </div>
 
             {estimateDocument && (
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
@@ -876,6 +985,37 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     height={12}
                   />
                 </button>
+              </div>
+            )}
+
+            {estimateDocumentError && (
+              <div className="mt-2">
+                <ErrorAlert
+                  message={estimateDocumentError}
+                  onClose={() => setEstimateDocumentError(null)}
+                />
+              </div>
+            )}
+            {documentValidationMessage && (
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-2 h-2 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-green-800 font-medium">
+                    {documentValidationMessage}
+                  </span>
+                </div>
               </div>
             )}
           </div>
