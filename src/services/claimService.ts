@@ -193,7 +193,7 @@ export const validateEstimateDocument = async (
   try {
     const { externalApiRequest } = await import("@/utils/api");
 
-    const EXTERNAL_API_BASE_URL = process.env.NEXT_PUBLIC_EXTERNAL_API_URL || "https://pyqa.garantie.in/api";
+    const EXTERNAL_API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL_PY || "https://pyqa.garantie.in/api";
 
     const response = await externalApiRequest<{
       success: boolean;
