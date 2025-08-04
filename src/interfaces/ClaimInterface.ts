@@ -81,6 +81,7 @@ export default interface Claim {
   pickup_tracking?: null | pickupTrackingInterface;
   shipping_receipt?: null | string;
   repaired_mobile_images?: string[] | null;
+  shipping_info?: ShippingInfo | null;
 }
 
 export interface ClaimDetailsProps {
@@ -100,6 +101,7 @@ export interface ClaimDetailsProps {
       pickup_photos: string[] | null;
       pickup_video: string | null;
     };
+    shipping_info?: ShippingInfo | null;
   };
 }
 
@@ -235,4 +237,21 @@ export interface ShipmentDetailsSectionProps {
 
 export interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
+}
+
+export interface ShippingInfo {
+  shipment_pickup_tracking_awb: string;
+  shipment_customer_name: string;
+  shipment_customer_phone: string;
+  shipment_customer_address_line_one: string;
+  shipment_customer_city: string;
+  shipment_customer_state: string;
+  shipment_customer_pincode: string;
+  shipment_pickup_courier_name: string;
+  shipment_pickup_order_id: string;
+  shipment_delivery_order_id: string | null;
+  shipment_delivery_tracking_awb: string | null;
+  shipment_delivery_courier_name: string | null;
+  shipment_delivery_label_image: string | null;
+  pickup_photos: string[];
 }
