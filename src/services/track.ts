@@ -1,4 +1,3 @@
-// track.ts (or keep in same file)
 import { getRequest } from "@/utils/api";
 
 interface ScanDetail {
@@ -6,6 +5,7 @@ interface ScanDetail {
   status: string;
   location: string;
 }
+
 export interface TrackingData {
   order_id: string;
   refrence_id: string;
@@ -19,28 +19,21 @@ export interface TrackingData {
 }
 
 interface RawTrackingResponse {
-  result: string;          // "1" | "0"
+  result: string; // "1" | "0"
   message: string;
   data?: TrackingData;
 }
 
-// Envelope your getRequest returns
-interface ApiEnvelope<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-}
-
 export async function fetchTrackingDetails(awb: string): Promise<TrackingData> {
-  const resp = await getRequest<ApiEnvelope<RawTrackingResponse>>(
+  const resp = await getRequest<RawTrackingResponse>(
     `v1/track-order?awb_number=${awb}`
   );
 
-  if (!resp?.success) {
-    throw new Error(resp?.message || "Failed to fetch tracking details.");
+  if (!resp.success) {
+    throw new Error(resp.message ?? "Failed to fetch tracking details.");
   }
 
-  const inner = resp.data; // { result, message, data }
+  const inner = resp.data; // RawTrackingResponse
   if (!inner || inner.result !== "1") {
     throw new Error(inner?.message || "Tracking details not available.");
   }
@@ -49,5 +42,5 @@ export async function fetchTrackingDetails(awb: string): Promise<TrackingData> {
     throw new Error("Empty tracking payload.");
   }
 
-  return inner.data; // return clean TrackingData
+  return inner.data;
 }

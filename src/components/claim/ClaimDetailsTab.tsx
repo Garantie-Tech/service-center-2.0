@@ -7,10 +7,12 @@ import TrackPopup from "../TrackPopup";
 
 const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
   const [showTrackingPopup, setShowTrackingPopup] = useState(false);
+  const [trackingAwb, setTrackingAwb] = useState<string | null>(null);
+
   const showPickupDetailsSection =
     data?.pickup_details?.is_tvs_claim == true &&
     data?.pickup_details?.customer_pickup_details != null &&
-    data?.shipping_info?.shipment_pickup_tracking_awb;
+    data?.shipping_info?.shipment_outbound_awb_number;
 
   return (
     <div>
@@ -81,8 +83,8 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                 <div>
                   <h4 className="text-xs text-gray-500">Pickup Address</h4>
                   <p className="text-sm font-semibold">
-                    {data?.pickup_details?.customer_pickup_details
-                      ?.pickup_address ?? "N/A"}
+                    {data?.shipping_info?.shipment_customer_address_line_one ??
+                      "N/A"}
                   </p>
                 </div>
 
@@ -90,8 +92,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                 <div>
                   <h4 className="text-xs text-gray-500">Pin code</h4>
                   <p className="text-sm font-semibold">
-                    {data?.pickup_details?.customer_pickup_details
-                      ?.pickup_pincode ?? "N/A"}
+                    {data?.shipping_info?.shipment_customer_pincode ?? "N/A"}
                   </p>
                 </div>
 
@@ -101,15 +102,23 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                     Alternate Mobile Number
                   </h4>
                   <p className="text-sm font-semibold">
-                    {data?.pickup_details?.customer_pickup_details
-                      ?.pickup_alternate_mobile ?? "N/A"}
+                    {data?.shipping_info?.shipment_customer_alternate_phone
+                      ? data?.shipping_info?.shipment_customer_alternate_phone
+                      : "N/A"}
                   </p>
                 </div>
 
                 {/* tracking button */}
-                {data?.shipping_info?.shipment_pickup_tracking_awb && (
+                {data?.shipping_info?.shipment_outbound_awb_number && (
                   <button
-                    onClick={() => setShowTrackingPopup(true)}
+                    onClick={() => {
+                      setTrackingAwb(
+                        String(
+                          data?.shipping_info?.shipment_outbound_awb_number
+                        )
+                      );
+                      setShowTrackingPopup(true);
+                    }}
                     className="bg-primaryBlue text-white px-4 py-2 rounded"
                   >
                     Track
@@ -123,18 +132,19 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                 <div>
                   <h4 className="text-xs text-gray-500">Nearest Landmark</h4>
                   <p className="text-sm font-semibold">
-                    {data?.pickup_details?.customer_pickup_details
-                      ?.pickup_landmark ?? "N/A"}
+                    {data?.shipping_info?.shipment_customer_address_landmark
+                      ? data?.shipping_info?.shipment_customer_address_landmark
+                      : "N/A"}
                   </p>
                 </div>
 
                 {/* pickup images */}
                 <div>
                   <h4 className="text-xs text-gray-500">Pickup Images</h4>
-                  {data?.pickup_details?.pickup_photos ? (
+                  {data?.shipping_info?.pickup_photos ? (
                     <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
                       <GalleryPopup
-                        images={data?.pickup_details?.pickup_photos}
+                        images={data?.shipping_info?.pickup_photos}
                         allowRemoval={true}
                       />
                     </div>
@@ -147,7 +157,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
           </div>
 
           {/* delivery tracking */}
-          {data?.shipping_info?.shipment_delivery_tracking_awb && (
+          {data?.shipping_info?.shipment_inbound_awb_number && (
             <div className="p-[25px] pb-[50px]">
               <div>
                 <h2 className="text-md font-semibold mb-4">Delivery Details</h2>
@@ -158,8 +168,10 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                   <div>
                     <h4 className="text-xs text-gray-500">Delivery Address</h4>
                     <p className="text-sm font-semibold">
-                      {data?.pickup_details?.customer_pickup_details
-                        ?.pickup_address ?? "N/A"}
+                      {data?.shipping_info?.shipment_delivery_address_line_one
+                        ? data?.shipping_info
+                            ?.shipment_delivery_address_line_one
+                        : "N/A"}
                     </p>
                   </div>
 
@@ -167,8 +179,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                   <div>
                     <h4 className="text-xs text-gray-500">Pincode</h4>
                     <p className="text-sm font-semibold">
-                      {data?.pickup_details?.customer_pickup_details
-                        ?.pickup_pincode ?? "N/A"}
+                      {data?.shipping_info?.shipment_delivery_pincode ?? "N/A"}
                     </p>
                   </div>
 
@@ -178,15 +189,23 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                       Alternate Mobile Number
                     </h4>
                     <p className="text-sm font-semibold">
-                      {data?.pickup_details?.customer_pickup_details
-                        ?.pickup_alternate_mobile ?? "N/A"}
+                      {data?.shipping_info?.shipment_delivery_alternate_phone
+                        ? data?.shipping_info?.shipment_delivery_alternate_phone
+                        : "N/A"}
                     </p>
                   </div>
 
                   {/* tracking button */}
-                  {data?.shipping_info?.shipment_delivery_tracking_awb && (
+                  {data?.shipping_info?.shipment_inbound_awb_number && (
                     <button
-                      onClick={() => setShowTrackingPopup(true)}
+                      onClick={() => {
+                        setTrackingAwb(
+                          String(
+                            data?.shipping_info?.shipment_inbound_awb_number
+                          )
+                        );
+                        setShowTrackingPopup(true);
+                      }}
                       className="bg-primaryBlue text-white px-4 py-2 rounded"
                     >
                       Track
@@ -200,8 +219,8 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                   <div>
                     <h4 className="text-xs text-gray-500">Nearest Landmark</h4>
                     <p className="text-sm font-semibold">
-                      {data?.pickup_details?.customer_pickup_details
-                        ?.pickup_landmark ?? "N/A"}
+                      {data?.shipping_info
+                        ?.shipment_delivery_address_landmark ?? "N/A"}
                     </p>
                   </div>
 
@@ -226,9 +245,9 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
         </div>
       )}
 
-      {showTrackingPopup && (
+      {showTrackingPopup && trackingAwb && (
         <TrackPopup
-          awb={String(data?.shipping_info?.shipment_pickup_tracking_awb)}
+          awb={trackingAwb}
           onClose={() => setShowTrackingPopup(false)}
         />
       )}

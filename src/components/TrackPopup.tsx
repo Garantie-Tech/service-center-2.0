@@ -22,9 +22,11 @@ const TrackPopup: React.FC<TrackPopupProps> = ({ awb, onClose }) => {
         if (!awb) throw new Error("AWB number is missing.");
         const d = await fetchTrackingDetails(awb);
         if (mounted) setData(d);
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (mounted) {
-          setError(e?.message || "Something went wrong.");
+          const message =
+            e instanceof Error ? e.message : "Something went wrong.";
+          setError(message);
           setData(null);
         }
       } finally {
