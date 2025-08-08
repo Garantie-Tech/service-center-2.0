@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const variantClasses = {
   red: {
-    bg: "bg-red-50", // soft red background
+    bg: "bg-red-50",             // soft red background
     border: "border border-red-200", // subtle red border
-    text: "text-black", // black text for readability
+    text: "text-black",          // black text for readability
   },
 };
+
+type MarqueeStyle = CSSProperties & { ["--marquee-distance"]?: string };
 
 interface NoticeMarqueeProps {
   message: string;
@@ -22,24 +24,23 @@ const NoticeMarquee: React.FC<NoticeMarqueeProps> = ({
   const v = variantClasses.red;
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
-  const [distance, setDistance] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [distance, setDistance] = useState(0); // px to scroll (width of one copy)
+  const [duration, setDuration] = useState(0); // seconds
 
   useEffect(() => {
     const measure = () => {
       if (!containerRef.current || !contentRef.current) return;
       const contentWidth = contentRef.current.offsetWidth;
-      const scrollDistance = contentWidth;
-      const dur = Math.max(
-        1,
-        Math.round((scrollDistance / speedPxPerSec) * 100) / 100
-      );
+
+      const scrollDistance = contentWidth; // we scroll exactly one copy width
+      const dur = Math.max(1, Math.round((scrollDistance / speedPxPerSec) * 100) / 100);
 
       setDistance(scrollDistance);
       setDuration(dur);
     };
 
     measure();
+
     const ro = new ResizeObserver(measure);
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
@@ -50,17 +51,26 @@ const NoticeMarquee: React.FC<NoticeMarqueeProps> = ({
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  const animatedStyle: MarqueeStyle | undefined =
+    prefersReduced || distance === 0
+      ? undefined
+      : {
+          animation: `marquee-slide ${duration}s linear infinite`,
+          ["--marquee-distance"]: `${distance}px`,
+        };
+
   return (
     <div
       className={`relative overflow-hidden ${v.bg} ${v.border} rounded-md shadow-sm w-[98%] m-auto mt-[12px]`}
     >
       <div className="flex items-center px-4 py-2 text-sm gap-2">
-        {/* Alert Icon */}
+        {/* Alert Icon (triangle with exclamation) */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5 text-red-600 flex-shrink-0"
           fill="currentColor"
           viewBox="0 0 20 20"
+          aria-hidden="true"
         >
           <path
             fillRule="evenodd"
@@ -73,15 +83,7 @@ const NoticeMarquee: React.FC<NoticeMarqueeProps> = ({
         <div ref={containerRef} className="relative overflow-hidden h-6 flex-1">
           <div
             className={`${v.text} inline-flex whitespace-nowrap will-change-transform`}
-            style={
-              prefersReduced || distance === 0
-                ? undefined
-                : {
-                    animation: `marquee-slide ${duration}s linear infinite`,
-                    // @ts-ignore
-                    ["--marquee-distance" as any]: `${distance}px`,
-                  }
-            }
+            style={animatedStyle}
           >
             {/* ONE copy we measure */}
             <span ref={contentRef} className="mx-6">
