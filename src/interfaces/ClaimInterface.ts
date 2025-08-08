@@ -240,18 +240,58 @@ export interface EstimateDetailsTabProps {
 }
 
 export interface ShippingInfo {
-  shipment_pickup_tracking_awb: string;
+  shipment_id: number;
+  shipment_claim_id: number;
+  shipment_imei_number: string;
+  shipment_model_name: string;
+  shipment_issue_description: string;
+  shipment_status: string;
+  shipment_customer_id: number;
   shipment_customer_name: string;
   shipment_customer_phone: string;
+  shipment_customer_alternate_phone: string;
+  shipment_customer_email: string;
   shipment_customer_address_line_one: string;
+  shipment_customer_address_landmark: string;
+  shipment_customer_pincode: string;
   shipment_customer_city: string;
   shipment_customer_state: string;
-  shipment_customer_pincode: string;
-  shipment_pickup_courier_name: string;
-  shipment_pickup_order_id: string;
-  shipment_delivery_order_id: string | null;
-  shipment_delivery_tracking_awb: string | null;
-  shipment_delivery_courier_name: string | null;
-  shipment_delivery_label_image: string | null;
+
+  shipment_outbound_order_id: string;
+  shipment_outbound_awb_number: string;
+  shipment_outbound_courier_id: string;
+  shipment_outbound_courier_name: string;
+  shipment_outbound_warehouse_id: string;
+  shipment_outbound_label_data: string;
+  shipment_outbound_status: string;
+  shipment_pickup_scheduled_date: string;
+
+  shipment_inbound_order_id: string;
+  shipment_inbound_awb_number: string;
+  shipment_inbound_courier_id: string;
+  shipment_inbound_courier_name: string;
+  shipment_inbound_warehouse_id: string;
+  shipment_inbound_label_data: string;
+  shipment_inbound_status: string;
+
+  shipment_delivery_scheduled_date: string;
+  shipment_delivery_address_line_one: string;
+  shipment_delivery_address_landmark: string;
+  shipment_delivery_pincode: string;
+  shipment_delivery_city: string;
+  shipment_delivery_state: string;
+  shipment_delivery_phone: string;
+  shipment_delivery_alternate_phone: string;
+
+  shipment_service_center_address_title: string;
+  shipment_service_center_address_line_one: string;
+  shipment_service_center_pin_code: string;
+  shipment_service_center_city: string;
+  shipment_service_center_state: string;
+  shipment_service_center_phone: string;
+  shipment_service_center_email: string;
+
   pickup_photos: string[];
 }
+
+
