@@ -183,18 +183,6 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                     </p>
                   </div>
 
-                  {/* Alternate Mobile */}
-                  <div>
-                    <h4 className="text-xs text-gray-500">
-                      Alternate Mobile Number
-                    </h4>
-                    <p className="text-sm font-semibold">
-                      {data?.shipping_info?.shipment_delivery_alternate_phone
-                        ? data?.shipping_info?.shipment_delivery_alternate_phone
-                        : "N/A"}
-                    </p>
-                  </div>
-
                   {/* tracking button */}
                   {data?.shipping_info?.shipment_inbound_awb_number && (
                     <button
@@ -224,19 +212,16 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                     </p>
                   </div>
 
-                  {/* pickup images */}
+                  {/* Alternate Mobile */}
                   <div>
-                    <h4 className="text-xs text-gray-500">Repaired Images</h4>
-                    {data?.pickup_details?.pickup_photos ? (
-                      <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
-                        <GalleryPopup
-                          images={data?.pickup_details?.pickup_photos}
-                          allowRemoval={true}
-                        />
-                      </div>
-                    ) : (
-                      <p className="text-sm font-semibold">{"N/A"}</p>
-                    )}
+                    <h4 className="text-xs text-gray-500">
+                      Alternate Mobile Number
+                    </h4>
+                    <p className="text-sm font-semibold">
+                      {data?.shipping_info?.shipment_delivery_alternate_phone
+                        ? data?.shipping_info?.shipment_delivery_alternate_phone
+                        : "N/A"}
+                    </p>
                   </div>
                 </div>
               </div>
