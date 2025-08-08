@@ -2,8 +2,16 @@
 
 import { ClaimDetailsProps } from "@/interfaces/ClaimInterface";
 import GalleryPopup from "../ui/GalleryPopup";
+import { useState } from "react";
+import TrackPopup from "../TrackPopup";
 
 const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
+  const [showTrackingPopup, setShowTrackingPopup] = useState(false);
+  const showPickupDetailsSection =
+    data?.pickup_details?.is_tvs_claim == true &&
+    data?.pickup_details?.customer_pickup_details != null &&
+    data?.shipping_info?.shipment_pickup_tracking_awb;
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -57,69 +65,172 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
       </div>
 
       {/* pickup details */}
-      {(data?.pickup_details?.is_tvs_claim == true && data?.pickup_details?.customer_pickup_details != null) && (
+      {showPickupDetailsSection && (
         <div className="border-t py-[25px] border-[#e5e7eb] mt-[25px]">
           <div>
-            <h2 className="text-lg font-semibold mb-4">Pickup Details</h2>
+            <h2 className="text-lg font-semibold mb-4">Shipping Details</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-8">
-              {/* Address */}
-              <div>
-                <h4 className="text-xs text-gray-500">Pickup Address</h4>
-                <p className="text-sm font-semibold">
-                  {data?.pickup_details?.customer_pickup_details
-                    ?.pickup_address ?? "N/A"}
-                </p>
-              </div>
-
-              {/* Pincode */}
-              <div>
-                <h4 className="text-xs text-gray-500">Pin code</h4>
-                <p className="text-sm font-semibold">
-                  {data?.pickup_details?.customer_pickup_details
-                    ?.pickup_pincode ?? "N/A"}
-                </p>
-              </div>
-
-              {/* Alternate Mobile */}
-              <div>
-                <h4 className="text-xs text-gray-500">Alternate Mobile Number</h4>
-                <p className="text-sm font-semibold">
-                  {data?.pickup_details?.customer_pickup_details
-                    ?.pickup_alternate_mobile ?? "N/A"}
-                </p>
-              </div>
+          {/* pickup tracking */}
+          <div className="p-[25px]">
+            <div>
+              <h2 className="text-md font-semibold mb-4">Pickup Details</h2>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-8">
+                {/* Address */}
+                <div>
+                  <h4 className="text-xs text-gray-500">Pickup Address</h4>
+                  <p className="text-sm font-semibold">
+                    {data?.pickup_details?.customer_pickup_details
+                      ?.pickup_address ?? "N/A"}
+                  </p>
+                </div>
 
-            {/* Right Column */}
-            <div className="space-y-8">
-              {/* Landmark */}
-              <div>
-                <h4 className="text-xs text-gray-500">Nearest Landmark</h4>
-                <p className="text-sm font-semibold">
-                  {data?.pickup_details?.customer_pickup_details
-                    ?.pickup_landmark ?? "N/A"}
-                </p>
-              </div>
+                {/* Pincode */}
+                <div>
+                  <h4 className="text-xs text-gray-500">Pin code</h4>
+                  <p className="text-sm font-semibold">
+                    {data?.pickup_details?.customer_pickup_details
+                      ?.pickup_pincode ?? "N/A"}
+                  </p>
+                </div>
 
-              {/* pickup images */}
-              <div>
-                <h4 className="text-xs text-gray-500">Pickup Images</h4>
-                {data?.pickup_details?.pickup_photos ? (
-                  <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
-                    <GalleryPopup
-                      images={data?.pickup_details?.pickup_photos}
-                      allowRemoval={true}
-                    />
-                  </div>
-                ) : (
-                  <p className="text-sm font-semibold">{"N/A"}</p>
+                {/* Alternate Mobile */}
+                <div>
+                  <h4 className="text-xs text-gray-500">
+                    Alternate Mobile Number
+                  </h4>
+                  <p className="text-sm font-semibold">
+                    {data?.pickup_details?.customer_pickup_details
+                      ?.pickup_alternate_mobile ?? "N/A"}
+                  </p>
+                </div>
+
+                {/* tracking button */}
+                {data?.shipping_info?.shipment_pickup_tracking_awb && (
+                  <button
+                    onClick={() => setShowTrackingPopup(true)}
+                    className="bg-primaryBlue text-white px-4 py-2 rounded"
+                  >
+                    Track
+                  </button>
                 )}
               </div>
+
+              {/* Right Column */}
+              <div className="space-y-8">
+                {/* Landmark */}
+                <div>
+                  <h4 className="text-xs text-gray-500">Nearest Landmark</h4>
+                  <p className="text-sm font-semibold">
+                    {data?.pickup_details?.customer_pickup_details
+                      ?.pickup_landmark ?? "N/A"}
+                  </p>
+                </div>
+
+                {/* pickup images */}
+                <div>
+                  <h4 className="text-xs text-gray-500">Pickup Images</h4>
+                  {data?.pickup_details?.pickup_photos ? (
+                    <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
+                      <GalleryPopup
+                        images={data?.pickup_details?.pickup_photos}
+                        allowRemoval={true}
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm font-semibold">{"N/A"}</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* delivery tracking */}
+          {data?.shipping_info?.shipment_delivery_tracking_awb && (
+            <div className="p-[25px] pb-[50px]">
+              <div>
+                <h2 className="text-md font-semibold mb-4">Delivery Details</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-8">
+                  {/* Address */}
+                  <div>
+                    <h4 className="text-xs text-gray-500">Delivery Address</h4>
+                    <p className="text-sm font-semibold">
+                      {data?.pickup_details?.customer_pickup_details
+                        ?.pickup_address ?? "N/A"}
+                    </p>
+                  </div>
+
+                  {/* Pincode */}
+                  <div>
+                    <h4 className="text-xs text-gray-500">Pincode</h4>
+                    <p className="text-sm font-semibold">
+                      {data?.pickup_details?.customer_pickup_details
+                        ?.pickup_pincode ?? "N/A"}
+                    </p>
+                  </div>
+
+                  {/* Alternate Mobile */}
+                  <div>
+                    <h4 className="text-xs text-gray-500">
+                      Alternate Mobile Number
+                    </h4>
+                    <p className="text-sm font-semibold">
+                      {data?.pickup_details?.customer_pickup_details
+                        ?.pickup_alternate_mobile ?? "N/A"}
+                    </p>
+                  </div>
+
+                  {/* tracking button */}
+                  {data?.shipping_info?.shipment_delivery_tracking_awb && (
+                    <button
+                      onClick={() => setShowTrackingPopup(true)}
+                      className="bg-primaryBlue text-white px-4 py-2 rounded"
+                    >
+                      Track
+                    </button>
+                  )}
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-8">
+                  {/* Landmark */}
+                  <div>
+                    <h4 className="text-xs text-gray-500">Nearest Landmark</h4>
+                    <p className="text-sm font-semibold">
+                      {data?.pickup_details?.customer_pickup_details
+                        ?.pickup_landmark ?? "N/A"}
+                    </p>
+                  </div>
+
+                  {/* pickup images */}
+                  <div>
+                    <h4 className="text-xs text-gray-500">Repaired Images</h4>
+                    {data?.pickup_details?.pickup_photos ? (
+                      <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
+                        <GalleryPopup
+                          images={data?.pickup_details?.pickup_photos}
+                          allowRemoval={true}
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-sm font-semibold">{"N/A"}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+      )}
+
+      {showTrackingPopup && (
+        <TrackPopup
+          awb={String(data?.shipping_info?.shipment_pickup_tracking_awb)}
+          onClose={() => setShowTrackingPopup(false)}
+        />
       )}
     </div>
   );
