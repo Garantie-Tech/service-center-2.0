@@ -91,6 +91,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
       pickup_photos: selectedClaim?.pickup_photos,
       pickup_video: selectedClaim?.pickup_video,
     },
+    shipping_info:selectedClaim?.shipping_info
   };
 
   const handleEstimateSubmit = async (formData: FormData) => {
@@ -225,7 +226,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
       </div>
 
       {/* Tab Content */}
-      <div className="px-8 mt-6">
+      <div className="px-8 mt-6 overflow-scroll h-[80vh]">
         {activeTab === "Claim Details" && <ClaimDetailsTab data={claimData} />}
         {activeTab === "Estimate" && (
           <EstimateDetailsTab onSubmit={handleEstimateSubmit} />

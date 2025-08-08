@@ -25,10 +25,9 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
     "BER Replacement Approved",
     "BER Repair Approved",
     "BER Settlement Initiated",
-    'BER Settlement Completed',
-    'Settlement Initiated',
-    'Settlement Completed'
-
+    "BER Settlement Completed",
+    "Settlement Initiated",
+    "Settlement Completed",
   ];
   const isApprovedStatus = approvedStatuses.includes(claimStatus);
 
@@ -123,7 +122,7 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
     isApprovedStatus &&
     selectedClaim?.pickup_tracking != null &&
     selectedClaim?.pickup_tracking?.is_picked == true &&
-    selectedClaim?.shipping_receipt != null;
+    selectedClaim?.shipping_info?.shipment_inbound_label_data != null;
 
   if (!selectedClaim?.is_tvs_claim) return null;
 
@@ -151,14 +150,16 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
           <div className="pb-[10px] w-[45%]">
             <h3 className="text-sm font-medium mb-2">Action</h3>
             <div className="flex items-center gap-4 mt-4">
-              {selectedClaim?.shipping_receipt && (
+              {selectedClaim?.shipping_info?.shipment_inbound_label_data && (
                 <div>
                   <a
-                    href={String(selectedClaim?.shipping_receipt)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={
+                      selectedClaim?.shipping_info
+                        ?.shipment_inbound_label_data || ""
+                    }
+                    download="shipping-receipt.jpg"
                     className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
-                    data-tip="View Shipping Receipt"
+                    data-tip="Download Shipping Receipt"
                   >
                     <Image
                       src="/images/pdf-icon.svg"
@@ -184,7 +185,8 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
                   handlePickupTracking("picked");
                 }}
               >
-                {inlineLoader ? (
+                {inlineLoader &&
+                selectedClaim?.shipping_info?.shipment_inbound_label_data ? (
                   <span className="loading loading-spinner text-white"></span>
                 ) : (
                   <>Mark As Picked</>
@@ -199,11 +201,13 @@ const ShipmentDetailsSection: React.FC<ShipmentDetailsSectionProps> = ({
             <h3 className="text-sm font-medium mb-2">Shipment Receipt</h3>
             <div className="flex items-center gap-2 mt-4">
               <a
-                href={String(selectedClaim?.shipping_receipt)}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={
+                  selectedClaim?.shipping_info?.shipment_inbound_label_data ||
+                  ""
+                }
+                download="shipping-receipt.jpg"
                 className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
-                data-tip="View Shipping Receipt"
+                data-tip="Download Shipping Receipt"
               >
                 <Image
                   src="/images/pdf-icon.svg"
