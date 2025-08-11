@@ -21,6 +21,7 @@ export default interface Claim {
       damage_details?: string;
       estimate_details?: string;
       date_of_damage?: string;
+      damage_date?: string;
     };
     replacement_payment?: {
       replace_payment_successful: boolean;
