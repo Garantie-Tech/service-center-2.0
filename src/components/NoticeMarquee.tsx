@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const variantClasses = {
   red: {
-    bg: "bg-red-50",                 // soft red background
+    bg: "bg-[#dc3131]",                 // soft red background
     border: "border border-red-200", // subtle red border
-    text: "text-black",              // black text for readability
+    text: "text-white",              // black text for readability
   },
 };
 
@@ -67,7 +67,7 @@ const NoticeMarquee: React.FC<NoticeMarqueeProps> = ({
         {/* Marquee container */}
         <div ref={containerRef} className="relative overflow-hidden h-6 flex-1">
           <div
-            className={`${v.text} inline-flex whitespace-nowrap will-change-transform`}
+            className={`${v.text} inline-flex whitespace-nowrap will-change-transform font-semibold`}
             style={animatedStyle}
           >
             {/* COPY 1 (measured) */}
