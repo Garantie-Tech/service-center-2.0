@@ -307,7 +307,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
 
     // Attach damage photos
-    if (damageImageStatus == false) {
+    if (damageImageStatus == false || claimRevised === true) {
       for (let index = 0; index < damagePhotos.length; index++) {
         const photo = damagePhotos[index];
         if (typeof photo !== "string") {
