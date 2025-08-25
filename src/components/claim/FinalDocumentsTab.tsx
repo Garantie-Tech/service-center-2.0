@@ -78,35 +78,6 @@ const FinalDocumentsTab: React.FC = () => {
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
 
-  const handlePickupTracking = async (pickup_type: string) => {
-    if (pickup_type == "ready") {
-      if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
-        notifyError(
-          "Please upload repaired mobile image before marking as ready for pickup."
-        );
-        return;
-      }
-      try {
-        setIsLoading(true);
-        const response = await handlePickupTrackingStatus(
-          Number(selectedClaim?.id),
-          String(pickup_type)
-        );
-
-        if (!response.success) {
-          notifyError("Failed to mark ready for pickup !");
-        } else {
-          triggerClaimRefresh();
-          notifySuccess("Marked as ready for pickup ");
-        }
-      } catch (error) {
-        notifyError(`Failed to mark ready for pickup ! ${error}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   // const readyToPickupStatus =
   //   selectedClaim?.is_tvs_claim &&
   //   isApprovedStatus &&
@@ -166,7 +137,6 @@ const FinalDocumentsTab: React.FC = () => {
             isInvalidRepairMobilePhotoReason={isInvalidRepairMobilePhotoReason}
             isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
             finalDocuments={finalDocuments}
-            handlePickupTracking={handlePickupTracking}
             isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
           />
           <div className="w-1/2">
@@ -175,6 +145,7 @@ const FinalDocumentsTab: React.FC = () => {
               <ShipmentDetailsSection
                 isValidRepairMobilePhoto={isValidRepairMobilePhoto}
                 repairedMobilePhotos={repairedMobilePhotos}
+                isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
               />
             )}
           </div>
