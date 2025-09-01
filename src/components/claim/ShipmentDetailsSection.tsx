@@ -15,14 +15,12 @@ interface RepairedMobileSectionPropsWithPickup
 const ShipmentDetailsSection: React.FC<
   RepairedMobileSectionPropsWithPickup
 > = ({
-  isValidRepairMobilePhoto,
-  repairedMobilePhotos,
-  isMinThreeRepairImageRequired,
+  isValidRepairMobilePhoto
 }) => {
   const { selectedClaim, setIsLoading, triggerClaimRefresh, claimStatus } =
     useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
-  const [inlineLoader, setInlineLoader] = useState(false);
+  const [inlineLoader] = useState(false);
 
   const approvedStatuses = [
     "Approved",
