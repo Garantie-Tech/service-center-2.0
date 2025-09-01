@@ -7,12 +7,9 @@ import FinalDocumentsSection from "@/components/claim/FinalDocumentsSection";
 import DocumentErrorAlerts from "@/components/claim/DocumentErrorAlerts";
 import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
 import { useFinalDocuments } from "@/hooks/useFinalDocuments";
-import { useNotification } from "@/context/NotificationProvider";
-import { handlePickupTrackingStatus } from "@/services/claimService";
 
 const FinalDocumentsTab: React.FC = () => {
-  const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
-  const { notifySuccess, notifyError } = useNotification();
+  const { selectedClaim } = useGlobalStore();
 
   const {
     // State
