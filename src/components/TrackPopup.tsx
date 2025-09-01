@@ -114,12 +114,12 @@ const TrackPopup: React.FC<TrackPopupProps> = ({ awb, onClose }) => {
                 </div>
                 <div
                   className={`text-sm font-semibold mt-1 ${
-                    data.order_status === "CANCELLED"
+                    data.current_status === "CANCELLED"
                       ? "text-red-600"
                       : "text-gray-900"
                   }`}
                 >
-                  {data.order_status}
+                  {data.current_status}
                 </div>
               </div>
             </div>
