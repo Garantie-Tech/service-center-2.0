@@ -97,7 +97,11 @@ const FinalDocumentsTab: React.FC = () => {
   const isMinThreeRepairImageRequired =
     !!selectedClaim?.is_tvs_claim && !!selectedClaim?.customer_pickup_details;
 
-  return isEditable ? (
+  const showReadyforPickupSection = selectedClaim?.is_tvs_claim &&
+            selectedClaim?.customer_pickup_details != null &&
+            selectedClaim?.final_documents == "valid";
+
+  return isEditable || showReadyforPickupSection ? (
     <div>
       <div>
         <h2 className="text-lg font-semibold mb-4">Repair Mobile Images</h2>
