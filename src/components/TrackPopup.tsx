@@ -110,7 +110,7 @@ const TrackPopup: React.FC<TrackPopupProps> = ({ awb, onClose }) => {
 
               <div>
                 <div className="text-[11px] text-gray-500 uppercase tracking-wide">
-                  Order Status
+                  Status
                 </div>
                 <div
                   className={`text-sm font-semibold mt-1 ${
