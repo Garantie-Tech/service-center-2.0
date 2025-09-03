@@ -14,9 +14,7 @@ interface RepairedMobileSectionPropsWithPickup
 
 const ShipmentDetailsSection: React.FC<
   RepairedMobileSectionPropsWithPickup
-> = ({
-  isValidRepairMobilePhoto
-}) => {
+> = ({ isValidRepairMobilePhoto }) => {
   const { selectedClaim, setIsLoading, triggerClaimRefresh, claimStatus } =
     useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -32,7 +30,9 @@ const ShipmentDetailsSection: React.FC<
     "Settlement Initiated",
     "Settlement Completed",
   ];
-  const isApprovedStatus = approvedStatuses.includes(claimStatus) && selectedClaim?.final_documents == 'valid';
+  const isApprovedStatus =
+    approvedStatuses.includes(claimStatus) &&
+    selectedClaim?.final_documents == "valid";
 
   const handlePickupTracking = async (pickup_type: string) => {
     if (pickup_type == "ready") {
@@ -88,7 +88,8 @@ const ShipmentDetailsSection: React.FC<
     selectedClaim?.is_tvs_claim &&
     isApprovedStatus &&
     selectedClaim?.customer_pickup_details != null &&
-    selectedClaim?.pickup_tracking?.is_readyfor_pickup == true && selectedClaim?.pickup_tracking?.is_picked == false;
+    selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
+    selectedClaim?.pickup_tracking?.is_picked == false;
 
   const isShipmentInitiated =
     selectedClaim?.is_tvs_claim &&
@@ -154,7 +155,7 @@ const ShipmentDetailsSection: React.FC<
                         selectedClaim?.shipping_info
                           ?.shipment_inbound_label_data || ""
                       }
-                      download="shipping-receipt.jpg"
+                      download={`delivery-shipping-receipt${selectedClaim?.id}.jpg`}
                       className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                       data-tip="Download Shipping Receipt"
                     >
@@ -203,7 +204,7 @@ const ShipmentDetailsSection: React.FC<
                     selectedClaim?.shipping_info?.shipment_inbound_label_data ||
                     ""
                   }
-                  download="shipping-receipt.jpg"
+                  download={`delivery-shipping-receipt${selectedClaim?.id}.jpg`}
                   className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                   data-tip="Download Shipping Receipt"
                 >

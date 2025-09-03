@@ -163,14 +163,12 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
 
                 {data?.shipping_info?.shipment_outbound_label_data && (
                   <div>
-                    <h4 className="text-xs text-gray-500 mb-2">
-                      Shipment Receipt
-                    </h4>
+                    <h4 className="text-xs text-gray-500 mb-2">AWB Pdf</h4>
                     <a
                       href={
                         data?.shipping_info?.shipment_outbound_label_data || ""
                       }
-                      download="shipping-receipt.jpg"
+                      download={`pickup-shipping-receipt${data?.shipping_info?.shipment_claim_id}.jpg`}
                       className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                       data-tip="Download Shipping Receipt"
                     >
@@ -265,14 +263,12 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                   </div>
                   {data?.shipping_info?.shipment_inbound_label_data && (
                     <div>
-                      <h4 className="text-xs text-gray-500 mb-2">
-                        Shipment Receipt
-                      </h4>
+                      <h4 className="text-xs text-gray-500 mb-2">AWB Pdf</h4>
                       <a
                         href={
                           data?.shipping_info?.shipment_inbound_label_data || ""
                         }
-                        download="shipping-receipt.jpg"
+                        download={`delivery-shipping-receipt${data?.shipping_info?.shipment_claim_id}.jpg`}
                         className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                         data-tip="Download Shipping Receipt"
                       >
