@@ -104,7 +104,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
   }, [selectedClaim, setEstimateDetailsState, claimRevised]);
 
-  // ✅ Handle Replacement Confirmation
+  // ✅ Handle Replacement Confirmatio
   const handleReplacementSelection = (value: boolean) => {
     setPendingReplacementValue(value);
     setShowReplacementConfirmation(true);
