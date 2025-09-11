@@ -135,27 +135,32 @@ export async function externalApiRequest<T>(
   baseUrl: string,
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  body?: Record<string, unknown>,
+  body?: Record<string, unknown> | FormData,
   extraHeaders: HeadersInit = {}
 ): Promise<ApiResponse<T>> {
   try {
     const token = await getCookie("token");
+    const isForm = body instanceof FormData;
 
     const headers: HeadersInit = {
       ...(token && { Authorization: `Bearer ${token}` }),
-      ...(body && { "Content-Type": "application/json" }),
+      ...(!isForm && body ? { "Content-Type": "application/json" } : {}), // only JSON if not FormData
       ...extraHeaders,
     };
 
-    const url = `${baseUrl}/${endpoint}`;
+    const url = `${baseUrl.replace(/\/$/, "")}/${endpoint}`;
 
     const response = await fetch(url, {
       method,
       headers,
-      body: method !== "GET" && body ? JSON.stringify(body) : undefined,
+      body:
+        method !== "GET" && body
+          ? isForm
+            ? body
+            : JSON.stringify(body)
+          : undefined,
     });
 
-    // Ensure the response is valid JSON
     const rawData = await response.json();
 
     if (!response.ok) {
@@ -166,7 +171,6 @@ export async function externalApiRequest<T>(
       };
     }
 
-    // Explicitly cast rawData to type T after successful response
     return { success: true, data: rawData as T };
   } catch (error) {
     console.error("External API request error:", error);

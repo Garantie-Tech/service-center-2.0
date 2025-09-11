@@ -386,3 +386,10 @@ export interface PolicyApiResponse {
 }
 
 export type StateMap = Record<string, string> | undefined;
+
+export type ImeiApi = {
+  imeis?: string[];
+  is_image_valid?: boolean;
+  status?: string;
+  message?: string;
+};

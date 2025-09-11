@@ -17,7 +17,10 @@ import {
 } from "@/globalConstant";
 import { urlToFile, fileToBase64 } from "@/helpers/fileHelper";
 import { compressImage } from "@/utils/compressImage";
-import { validateEstimateDocument } from "@/services/claimService";
+import {
+  validateEstimateDocument,
+  validateImeiFromImage,
+} from "@/services/claimService";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -33,6 +36,15 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const [estimateDocumentError, setEstimateDocumentError] = useState<
     string | null
   >("");
+
+  const [showImeiImageUpload, setShowImeiImageUpload] = useState<boolean>(true);
+  const [isValidatingDamageImei, setIsValidatingDamageImei] =
+    useState<boolean>(false);
+  const [imeiDamageImageError, setImeiDamageImageError] = useState<
+    string | null
+  >("");
+  const [damageImeiValidationMessage, setDamageImeiValidationMessage] =
+    useState<string | null>("");
 
   const {
     selectedClaim,
@@ -204,6 +216,63 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     }
   };
 
+  const handleImeiDamagePhotoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files) {
+      setIsValidatingDamageImei(true);
+      const newFiles = Array.from(event.target.files);
+      setShowDamageMobImageError(false);
+
+      try {
+        // Compress all files
+        const compressedFiles = await Promise.all(
+          newFiles.map((file) => compressImage(file))
+        );
+
+        const updatedPhotos = [...damagePhotos, ...compressedFiles];
+
+        // Show error if still below minimum after adding
+        if (updatedPhotos.length < 1) {
+          setDamagePhotosError(`Please upload Minimum 1 image.`);
+        } else {
+          setDamagePhotosError(null);
+        }
+
+        event.target.value = "";
+        const validationResponse = await validateImeiFromImage(
+          Number(selectedClaim?.id),
+          updatedPhotos[0]
+        );
+
+        if (validationResponse.is_image_valid) {
+          setEstimateDetailsState({
+            damagePhotos: updatedPhotos,
+          });
+          setImeiDamageImageError(null);
+          if (validationResponse.message) {
+            setDamageImeiValidationMessage("Imei Found in Image");
+            setTimeout(() => setDamageImeiValidationMessage(null), 5000);
+          }
+          setShowImeiImageUpload(false);
+        } else {
+          setEstimateDetailsState({
+            damagePhotos: [],
+          });
+          setImeiDamageImageError("Damage Image Imei validation failed.");
+          setDamageImeiValidationMessage(null);
+          setShowImeiImageUpload(true);
+          setIsValidatingDamageImei(false);
+        }
+      } catch (err) {
+        console.error("Image compression failed:", err);
+        setDamagePhotosError("Failed to process images. Please try again.");
+        setShowImeiImageUpload(true);
+        setIsValidatingDamageImei(false);
+      }
+    }
+  };
+
   const handleEstimateDocumentUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -265,6 +334,10 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const handleRemoveDamagePhoto = (index: number) => {
     const updatedPhotos = damagePhotos.filter((_, i) => i !== index);
+    if (updatedPhotos?.length == 0) {
+      setShowImeiImageUpload(true);
+      setIsValidatingDamageImei(false);
+    }
     setEstimateDetailsState({ damagePhotos: updatedPhotos });
     if (updatedPhotos?.length < MIN_DAMAGE_IMAGES) {
       setDamagePhotosError(
@@ -670,25 +743,56 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             Damage Mobile Photo (Upload at least 5 images)
           </label>
           <div className="mb-4">
-            {!isFormDisabled && damageImageStatus == false && (
-              <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleDamagePhotoUpload}
-                  className="hidden"
-                  disabled={damagePhotos.length >= MAX_DAMAGE_IMAGES}
-                />
-                <span className="text-grayFont text-sm">Add Photo</span>
-                <Image
-                  src="/images/upload-icon.svg"
-                  alt="Upload"
-                  width={20}
-                  height={20}
-                />
-              </label>
-            )}
+            {!isFormDisabled &&
+              damageImageStatus == false &&
+              showImeiImageUpload == false && (
+                <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleDamagePhotoUpload}
+                    className="hidden"
+                    disabled={damagePhotos.length >= MAX_DAMAGE_IMAGES}
+                  />
+                  <span className="text-grayFont text-sm">Add Photo</span>
+                  <Image
+                    src="/images/upload-icon.svg"
+                    alt="Upload"
+                    width={20}
+                    height={20}
+                  />
+                </label>
+              )}
+
+            {!isFormDisabled &&
+              damageImageStatus == false &&
+              showImeiImageUpload == true && (
+                <div className="space-y-2">
+                  <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImeiDamagePhotoUpload}
+                      className="hidden"
+                      disabled={damagePhotos.length >= 1}
+                    />
+                    <span className="text-grayFont text-sm">Add Photo</span>
+                    <Image
+                      src="/images/upload-icon.svg"
+                      alt="Upload"
+                      width={20}
+                      height={20}
+                    />
+                  </label>
+                  {isValidatingDamageImei && (
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                      <span>Validating Image...</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
             {damagePhotos && (
               <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
@@ -697,6 +801,38 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   onRemoveImage={handleRemoveDamagePhoto}
                   allowRemoval={!isFormDisabled && damageImageStatus != true}
                 />
+              </div>
+            )}
+
+            {imeiDamageImageError && (
+              <div className="mt-2">
+                <ErrorAlert
+                  message={imeiDamageImageError}
+                  onClose={() => setImeiDamageImageError(null)}
+                />
+              </div>
+            )}
+
+            {damageImeiValidationMessage && (
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-2 h-2 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-green-800 font-medium">
+                    {damageImeiValidationMessage}
+                  </span>
+                </div>
               </div>
             )}
 
@@ -1025,23 +1161,52 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             Damage Mobile Photo (Upload at least 5 images)
           </label>
           <div className="mb-4">
-            <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleDamagePhotoUpload}
-                className="hidden"
-                disabled={damagePhotos.length >= MAX_DAMAGE_IMAGES}
-              />
-              <span className="text-grayFont text-sm">Add Photo</span>
-              <Image
-                src="/images/upload-icon.svg"
-                alt="Upload"
-                width={20}
-                height={20}
-              />
-            </label>
+            {showImeiImageUpload == false && (
+              <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleDamagePhotoUpload}
+                  className="hidden"
+                  disabled={damagePhotos.length >= MAX_DAMAGE_IMAGES}
+                />
+                <span className="text-grayFont text-sm">Add Photo</span>
+                <Image
+                  src="/images/upload-icon.svg"
+                  alt="Upload"
+                  width={20}
+                  height={20}
+                />
+              </label>
+            )}
+
+            {showImeiImageUpload == true && (
+              <div className="space-y-2">
+                <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImeiDamagePhotoUpload}
+                    className="hidden"
+                    disabled={damagePhotos.length >= 1}
+                  />
+                  <span className="text-grayFont text-sm">Add Photo</span>
+                  <Image
+                    src="/images/upload-icon.svg"
+                    alt="Upload"
+                    width={20}
+                    height={20}
+                  />
+                </label>
+                {isValidatingDamageImei && (
+                  <div className="flex items-center gap-2 text-sm text-blue-600">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                    <span>Validating Image...</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {damagePhotos && (
               <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
@@ -1050,6 +1215,38 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   onRemoveImage={handleRemoveDamagePhoto}
                   allowRemoval={true}
                 />
+              </div>
+            )}
+
+            {imeiDamageImageError && (
+              <div className="mt-2">
+                <ErrorAlert
+                  message={imeiDamageImageError}
+                  onClose={() => setImeiDamageImageError(null)}
+                />
+              </div>
+            )}
+
+            {damageImeiValidationMessage && (
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-2 h-2 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-green-800 font-medium">
+                    {damageImeiValidationMessage}
+                  </span>
+                </div>
               </div>
             )}
 
