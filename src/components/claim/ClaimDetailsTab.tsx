@@ -163,7 +163,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
 
                 {data?.shipping_info?.shipment_outbound_label_data && (
                   <div>
-                    <h4 className="text-xs text-gray-500 mb-2">AWB Pdf</h4>
+                    <h4 className="text-xs text-gray-500 mb-2">Shipment Receipt</h4>
                     <a
                       href={
                         data?.shipping_info?.shipment_outbound_label_data || ""
@@ -190,7 +190,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
           {data?.shipping_info?.shipment_inbound_awb_number && (
             <div className="p-[25px] pb-[50px]">
               <div>
-                <h2 className="text-md font-semibold mb-4">Delivery Details</h2>
+                <h2 className="text-md font-semibold mb-4">Drop-off Details</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-8">
@@ -263,7 +263,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                   </div>
                   {data?.shipping_info?.shipment_inbound_label_data && (
                     <div>
-                      <h4 className="text-xs text-gray-500 mb-2">AWB Pdf</h4>
+                      <h4 className="text-xs text-gray-500 mb-2">Shipment Receipt</h4>
                       <a
                         href={
                           data?.shipping_info?.shipment_inbound_label_data || ""

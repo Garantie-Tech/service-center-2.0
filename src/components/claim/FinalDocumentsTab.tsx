@@ -97,9 +97,10 @@ const FinalDocumentsTab: React.FC = () => {
   const isMinThreeRepairImageRequired =
     !!selectedClaim?.is_tvs_claim && !!selectedClaim?.customer_pickup_details;
 
-  const showReadyforPickupSection = selectedClaim?.is_tvs_claim &&
-            selectedClaim?.customer_pickup_details != null &&
-            selectedClaim?.final_documents == "valid";
+  const showReadyforPickupSection =
+    selectedClaim?.is_tvs_claim &&
+    selectedClaim?.customer_pickup_details != null &&
+    selectedClaim?.final_documents == "valid";
 
   return isEditable || showReadyforPickupSection ? (
     <div>
@@ -142,13 +143,14 @@ const FinalDocumentsTab: React.FC = () => {
           />
           <div className="w-1/2">
             {/* shipment details  */}
-            {selectedClaim?.is_tvs_claim && (
-              <ShipmentDetailsSection
-                isValidRepairMobilePhoto={isValidRepairMobilePhoto}
-                repairedMobilePhotos={repairedMobilePhotos}
-                isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
-              />
-            )}
+            {selectedClaim?.is_tvs_claim &&
+              selectedClaim?.customer_pickup_details != null && (
+                <ShipmentDetailsSection
+                  isValidRepairMobilePhoto={isValidRepairMobilePhoto}
+                  repairedMobilePhotos={repairedMobilePhotos}
+                  isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
+                />
+              )}
           </div>
         </div>
       </div>
