@@ -232,6 +232,10 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
         const updatedPhotos = [...damagePhotos, ...compressedFiles];
 
+        setEstimateDetailsState({
+          damagePhotos: updatedPhotos,
+        });
+
         // Show error if still below minimum after adding
         if (updatedPhotos.length < 1) {
           setDamagePhotosError(`Please upload Minimum 1 image.`);
@@ -246,22 +250,20 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         );
 
         if (validationResponse.is_image_valid) {
-          setEstimateDetailsState({
-            damagePhotos: updatedPhotos,
-          });
           setImeiDamageImageError(null);
           if (validationResponse.message) {
-            setDamageImeiValidationMessage("Imei Found in Image");
+            setDamageImeiValidationMessage(
+              validationResponse.message ?? "Imei Found in Image"
+            );
             setTimeout(() => setDamageImeiValidationMessage(null), 5000);
           }
           setShowImeiImageUpload(false);
         } else {
-          setEstimateDetailsState({
-            damagePhotos: [],
-          });
-          setImeiDamageImageError("Damage Image Imei validation failed.");
+          setImeiDamageImageError(
+            validationResponse.message ?? "Damage Image Imei validation failed."
+          );
           setDamageImeiValidationMessage(null);
-          setShowImeiImageUpload(true);
+          setShowImeiImageUpload(false);
           setIsValidatingDamageImei(false);
         }
       } catch (err) {
@@ -740,7 +742,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
           {/* Upload damage images */}
           <label className="block text-xs font-medium mb-2">
-            Damage Mobile Photo (Upload at least 5 images)
+            {showImeiImageUpload
+              ? "Damage Mobile Imei Image"
+              : "Damage Mobile Photo (Upload at least 5 images)"}
           </label>
           <div className="mb-4">
             {!isFormDisabled &&
