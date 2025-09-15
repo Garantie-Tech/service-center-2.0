@@ -7,12 +7,9 @@ import FinalDocumentsSection from "@/components/claim/FinalDocumentsSection";
 import DocumentErrorAlerts from "@/components/claim/DocumentErrorAlerts";
 import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
 import { useFinalDocuments } from "@/hooks/useFinalDocuments";
-import { useNotification } from "@/context/NotificationProvider";
-import { handlePickupTrackingStatus } from "@/services/claimService";
 
 const FinalDocumentsTab: React.FC = () => {
-  const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
-  const { notifySuccess, notifyError } = useNotification();
+  const { selectedClaim } = useGlobalStore();
 
   const {
     // State
@@ -78,35 +75,6 @@ const FinalDocumentsTab: React.FC = () => {
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
 
-  const handlePickupTracking = async (pickup_type: string) => {
-    if (pickup_type == "ready") {
-      if (!repairedMobilePhotos || repairedMobilePhotos.length === 0) {
-        notifyError(
-          "Please upload repaired mobile image before marking as ready for pickup."
-        );
-        return;
-      }
-      try {
-        setIsLoading(true);
-        const response = await handlePickupTrackingStatus(
-          Number(selectedClaim?.id),
-          String(pickup_type)
-        );
-
-        if (!response.success) {
-          notifyError("Failed to mark ready for pickup !");
-        } else {
-          triggerClaimRefresh();
-          notifySuccess("Marked as ready for pickup ");
-        }
-      } catch (error) {
-        notifyError(`Failed to mark ready for pickup ! ${error}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   // const readyToPickupStatus =
   //   selectedClaim?.is_tvs_claim &&
   //   isApprovedStatus &&
@@ -129,7 +97,12 @@ const FinalDocumentsTab: React.FC = () => {
   const isMinThreeRepairImageRequired =
     !!selectedClaim?.is_tvs_claim && !!selectedClaim?.customer_pickup_details;
 
-  return isEditable ? (
+  const showReadyforPickupSection =
+    selectedClaim?.is_tvs_claim &&
+    selectedClaim?.customer_pickup_details != null &&
+    selectedClaim?.final_documents == "valid";
+
+  return isEditable || showReadyforPickupSection ? (
     <div>
       <div>
         <h2 className="text-lg font-semibold mb-4">Repair Mobile Images</h2>
@@ -166,17 +139,18 @@ const FinalDocumentsTab: React.FC = () => {
             isInvalidRepairMobilePhotoReason={isInvalidRepairMobilePhotoReason}
             isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
             finalDocuments={finalDocuments}
-            handlePickupTracking={handlePickupTracking}
             isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
           />
           <div className="w-1/2">
             {/* shipment details  */}
-            {selectedClaim?.is_tvs_claim && (
-              <ShipmentDetailsSection
-                isValidRepairMobilePhoto={isValidRepairMobilePhoto}
-                repairedMobilePhotos={repairedMobilePhotos}
-              />
-            )}
+            {selectedClaim?.is_tvs_claim &&
+              selectedClaim?.customer_pickup_details != null && (
+                <ShipmentDetailsSection
+                  isValidRepairMobilePhoto={isValidRepairMobilePhoto}
+                  repairedMobilePhotos={repairedMobilePhotos}
+                  isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
+                />
+              )}
           </div>
         </div>
       </div>

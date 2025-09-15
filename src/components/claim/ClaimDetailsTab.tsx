@@ -4,6 +4,7 @@ import { ClaimDetailsProps } from "@/interfaces/ClaimInterface";
 import GalleryPopup from "../ui/GalleryPopup";
 import { useState } from "react";
 import TrackPopup from "../TrackPopup";
+import Image from "next/image";
 
 const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
   const [showTrackingPopup, setShowTrackingPopup] = useState(false);
@@ -107,6 +108,13 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                       : "N/A"}
                   </p>
                 </div>
+                {/* AWB number */}
+                <div>
+                  <h4 className="text-xs text-gray-500">AWB Number</h4>
+                  <p className="text-sm font-semibold">
+                    {data?.shipping_info?.shipment_outbound_awb_number ?? "N/A"}
+                  </p>
+                </div>
 
                 {/* tracking button */}
                 {data?.shipping_info?.shipment_outbound_awb_number && (
@@ -152,6 +160,28 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                     <p className="text-sm font-semibold">{"N/A"}</p>
                   )}
                 </div>
+
+                {data?.shipping_info?.shipment_outbound_label_data && (
+                  <div>
+                    <h4 className="text-xs text-gray-500 mb-2">Shipment Receipt</h4>
+                    <a
+                      href={
+                        data?.shipping_info?.shipment_outbound_label_data || ""
+                      }
+                      download={`pickup-shipping-receipt${data?.shipping_info?.shipment_claim_id}.jpg`}
+                      className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
+                      data-tip="Download Shipping Receipt"
+                    >
+                      <Image
+                        src="/images/pdf-icon.svg"
+                        alt="Estimate Upload"
+                        width={30}
+                        height={50}
+                        className="h-[100%]"
+                      />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -160,7 +190,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
           {data?.shipping_info?.shipment_inbound_awb_number && (
             <div className="p-[25px] pb-[50px]">
               <div>
-                <h2 className="text-md font-semibold mb-4">Delivery Details</h2>
+                <h2 className="text-md font-semibold mb-4">Drop-off Details</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-8">
@@ -180,6 +210,14 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                     <h4 className="text-xs text-gray-500">Pincode</h4>
                     <p className="text-sm font-semibold">
                       {data?.shipping_info?.shipment_delivery_pincode ?? "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs text-gray-500">AWB Number</h4>
+                    <p className="text-sm font-semibold">
+                      {data?.shipping_info?.shipment_inbound_awb_number ??
+                        "N/A"}
                     </p>
                   </div>
 
@@ -223,6 +261,27 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                         : "N/A"}
                     </p>
                   </div>
+                  {data?.shipping_info?.shipment_inbound_label_data && (
+                    <div>
+                      <h4 className="text-xs text-gray-500 mb-2">Shipment Receipt</h4>
+                      <a
+                        href={
+                          data?.shipping_info?.shipment_inbound_label_data || ""
+                        }
+                        download={`delivery-shipping-receipt${data?.shipping_info?.shipment_claim_id}.jpg`}
+                        className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
+                        data-tip="Download Shipping Receipt"
+                      >
+                        <Image
+                          src="/images/pdf-icon.svg"
+                          alt="Estimate Upload"
+                          width={30}
+                          height={50}
+                          className="h-[100%]"
+                        />
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
