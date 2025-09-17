@@ -15,7 +15,7 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
     <>
       {!finalDocuments.repairInvoiceImage &&
       (!isImeiChanged ||
-        (isImeiChanged && !finalDocuments.replacementReceiptImage && !isFinalDocValid)) ? (
+        (isImeiChanged && !isFinalDocValid)) ? (
         <button
           className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
           onClick={handleSubmit}
