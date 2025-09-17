@@ -220,6 +220,7 @@ export interface DocumentActionButtonsProps {
   isImeiChanged: boolean;
   setReuploadFinalDocs: (value: boolean) => void;
   handleSubmit: () => void;
+  isFinalDocValid?: boolean;
 }
 
 export interface FinalDocumentsViewProps {

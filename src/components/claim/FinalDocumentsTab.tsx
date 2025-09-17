@@ -192,6 +192,7 @@ const FinalDocumentsTab: React.FC = () => {
             isImeiChanged={isImeiChanged}
             setReuploadFinalDocs={setReuploadFinalDocs}
             handleSubmit={handleSubmit}
+            isFinalDocValid = {selectedClaim?.final_documents == "valid" ? true : false}
           />
         </div>
       )}
