@@ -9,12 +9,13 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
   isImeiChanged,
   setReuploadFinalDocs,
   handleSubmit,
+  isFinalDocValid
 }) => {
   return (
     <>
       {!finalDocuments.repairInvoiceImage &&
       (!isImeiChanged ||
-        (isImeiChanged && !finalDocuments.replacementReceiptImage)) ? (
+        (isImeiChanged && !finalDocuments.replacementReceiptImage && !isFinalDocValid)) ? (
         <button
           className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
           onClick={handleSubmit}
