@@ -257,6 +257,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
         if (validationResponse.is_image_valid) {
           setImeiDamageImageError(null);
+          setIsValidatingDamageImei(false);
           if (validationResponse.message) {
             setDamageImeiValidationMessage(
               validationResponse.message ?? "Imei Found in Image"
