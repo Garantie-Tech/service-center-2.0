@@ -822,83 +822,83 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           </div>
 
           {/* damage mobile imei image */}
-          {(claimStatus === "Claim Initiated" && damageImageStatus == false) ||
-            (!isFormDisabled && (
-              <>
-                <label className="block text-xs font-medium mb-2">
-                  Damage Mobile Imei Image
-                </label>
-                <div className="mb-4">
-                  {!isFormDisabled && damageImageStatus == false && (
-                    <div className="space-y-2">
-                      <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImeiDamagePhotoUpload}
-                          className="hidden"
-                        />
-                        <span className="text-grayFont text-sm">Add Photo</span>
-                        <Image
-                          src="/images/upload-icon.svg"
-                          alt="Upload"
-                          width={20}
-                          height={20}
-                        />
-                      </label>
-                      {isValidatingDamageImei && (
-                        <div className="flex items-center gap-2 text-sm text-blue-600">
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-                          <span>Validating Image...</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {damageMobileImeiImage && (
-                    <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
-                      <GalleryPopup
-                        images={[damageMobileImeiImage]}
-                        onRemoveImage={handleRemoveDamageMobileImeiPhoto}
-                        allowRemoval={true}
-                      />
-                    </div>
-                  )}
-
-                  {imeiDamageImageError && (
-                    <div className="mt-2">
-                      <WarningAlert
-                        message={imeiDamageImageError}
-                        onClose={() => setImeiDamageImageError(null)}
-                      />
-                    </div>
-                  )}
-
-                  {damageImeiValidationMessage && (
-                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-2 h-2 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-sm text-green-800 font-medium">
-                          {damageImeiValidationMessage}
-                        </span>
-                      </div>
+          {claimStatus == "Claim Initiated" ||
+          (damageImageStatus == false && !isFormDisabled) ? (
+            <>
+              <label className="block text-xs font-medium mb-2">
+                Damage Mobile Imei Image
+              </label>
+              <div className="mb-4">
+                <div className="space-y-2">
+                  <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImeiDamagePhotoUpload}
+                      className="hidden"
+                    />
+                    <span className="text-grayFont text-sm">Add Photo</span>
+                    <Image
+                      src="/images/upload-icon.svg"
+                      alt="Upload"
+                      width={20}
+                      height={20}
+                    />
+                  </label>
+                  {isValidatingDamageImei && (
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                      <span>Validating Image...</span>
                     </div>
                   )}
                 </div>
-              </>
-            ))}
+
+                {damageMobileImeiImage && (
+                  <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
+                    <GalleryPopup
+                      images={[damageMobileImeiImage]}
+                      onRemoveImage={handleRemoveDamageMobileImeiPhoto}
+                      allowRemoval={true}
+                    />
+                  </div>
+                )}
+
+                {imeiDamageImageError && (
+                  <div className="mt-2">
+                    <WarningAlert
+                      message={imeiDamageImageError}
+                      onClose={() => setImeiDamageImageError(null)}
+                    />
+                  </div>
+                )}
+
+                {damageImeiValidationMessage && (
+                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-2 h-2 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-sm text-green-800 font-medium">
+                        {damageImeiValidationMessage}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
 
