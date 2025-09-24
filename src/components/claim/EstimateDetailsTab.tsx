@@ -432,6 +432,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
     if (isInvalidImages == true) {
       updates.damagePhotos = [];
+      setDamageMobileImeiImage("");
     }
 
     if (isInvalidDocument == true) {
@@ -801,25 +802,6 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 onClose={() => setDamagePhotosError(null)}
               />
             )}
-
-            {isInvalidImages && showDamageMobImageError ? (
-              <span className="text-[#EB5757] text-xxs font-semibold">
-                Invalid Images : {invalidImagesReason}
-              </span>
-            ) : (claimStatus === "Claim Submitted" ||
-                claimStatus === "Estimate Revised") &&
-              damageImageStatus == false ? (
-              <span className="text-[#FF9548] text-xxs font-semibold">
-                Under Review
-              </span>
-            ) : claimStatus === "Documents Verified" ||
-              damageImageStatus == true ? (
-              <span className="text-[#19AD61] text-xxs font-semibold">
-                Valid
-              </span>
-            ) : (
-              <></>
-            )}
           </div>
 
           {/* damage mobile imei image */}
@@ -894,6 +876,25 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                       </span>
                     </div>
                   </div>
+                )}
+
+                {isInvalidImages && showDamageMobImageError ? (
+                  <span className="text-[#EB5757] text-xxs font-semibold">
+                    Invalid Images : {invalidImagesReason}
+                  </span>
+                ) : (claimStatus === "Claim Submitted" ||
+                    claimStatus === "Estimate Revised") &&
+                  damageImageStatus == false ? (
+                  <span className="text-[#FF9548] text-xxs font-semibold">
+                    Under Review
+                  </span>
+                ) : claimStatus === "Documents Verified" ||
+                  damageImageStatus == true ? (
+                  <span className="text-[#19AD61] text-xxs font-semibold">
+                    Valid
+                  </span>
+                ) : (
+                  <></>
                 )}
               </div>
             </>
