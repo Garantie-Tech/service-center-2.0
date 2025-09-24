@@ -82,6 +82,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         claimStatus === "Invalid Documents" ||
         claimStatus === "Estimate Revised"
     );
+    setDamageMobileImeiImage("");
   }, [claimStatus, selectedClaim]);
 
   useEffect(() => {
@@ -805,43 +806,44 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           </div>
 
           {/* damage mobile imei image */}
-          {claimStatus == "Claim Initiated" ||
-          (damageImageStatus == false && !isFormDisabled) ? (
+          {claimStatus == "Claim Initiated" || damageImageStatus == false ? (
             <>
               <label className="block text-xs font-medium mb-2">
                 Damage Mobile Imei Image
               </label>
               <div className="mb-4">
-                <div className="space-y-2">
-                  <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImeiDamagePhotoUpload}
-                      className="hidden"
-                    />
-                    <span className="text-grayFont text-sm">Add Photo</span>
-                    <Image
-                      src="/images/upload-icon.svg"
-                      alt="Upload"
-                      width={20}
-                      height={20}
-                    />
-                  </label>
-                  {isValidatingDamageImei && (
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-                      <span>Validating Image...</span>
-                    </div>
-                  )}
-                </div>
+                {!isFormDisabled && damageImageStatus == false && (
+                  <div className="space-y-2">
+                    <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImeiDamagePhotoUpload}
+                        className="hidden"
+                      />
+                      <span className="text-grayFont text-sm">Add Photo</span>
+                      <Image
+                        src="/images/upload-icon.svg"
+                        alt="Upload"
+                        width={20}
+                        height={20}
+                      />
+                    </label>
+                    {isValidatingDamageImei && (
+                      <div className="flex items-center gap-2 text-sm text-blue-600">
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                        <span>Validating Image...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {damageMobileImeiImage && (
                   <div className="flex justify-start align-center w-4/5 flex flex-wrap gap-2">
                     <GalleryPopup
                       images={[damageMobileImeiImage]}
                       onRemoveImage={handleRemoveDamageMobileImeiPhoto}
-                      allowRemoval={true}
+                      allowRemoval={!isFormDisabled && damageImageStatus != true}
                     />
                   </div>
                 )}
