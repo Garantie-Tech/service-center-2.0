@@ -10,11 +10,12 @@ import { ShipmentDetailsSectionProps } from "@/interfaces/ClaimInterface";
 interface RepairedMobileSectionPropsWithPickup
   extends ShipmentDetailsSectionProps {
   isMinThreeRepairImageRequired: boolean;
+  isInvalidRepairMobilePhotoStatus: boolean | null;
 }
 
 const ShipmentDetailsSection: React.FC<
   RepairedMobileSectionPropsWithPickup
-> = ({ isValidRepairMobilePhoto }) => {
+> = ({ isValidRepairMobilePhoto, isInvalidRepairMobilePhotoStatus }) => {
   const { selectedClaim, setIsLoading, triggerClaimRefresh, claimStatus } =
     useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -32,7 +33,7 @@ const ShipmentDetailsSection: React.FC<
   ];
   const isApprovedStatus =
     approvedStatuses.includes(claimStatus) &&
-    selectedClaim?.final_documents == "valid";
+    isInvalidRepairMobilePhotoStatus == true;
 
   const handlePickupTracking = async (pickup_type: string) => {
     if (pickup_type == "ready") {
@@ -129,7 +130,7 @@ const ShipmentDetailsSection: React.FC<
           {/* ready for pickup */}
           {selectedClaim?.is_tvs_claim &&
             selectedClaim?.customer_pickup_details != null &&
-            selectedClaim?.final_documents == "valid" &&
+            isInvalidRepairMobilePhotoStatus == true &&
             selectedClaim?.pickup_tracking?.is_readyfor_pickup != true && (
               <div className="pb-[10px] w-[45%]">
                 <button
@@ -144,7 +145,7 @@ const ShipmentDetailsSection: React.FC<
             )}
 
           {/* pickup initiated */}
-          {isShipmentInitiated && selectedClaim?.final_documents == "valid" && (
+          {isShipmentInitiated && isInvalidRepairMobilePhotoStatus == true && (
             <div className="pb-[10px] w-[45%]">
               <h3 className="text-sm font-medium mb-2">Action</h3>
               <div className="flex items-center gap-4 mt-4">
