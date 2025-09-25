@@ -149,6 +149,7 @@ const FinalDocumentsTab: React.FC = () => {
                   isValidRepairMobilePhoto={isValidRepairMobilePhoto}
                   repairedMobilePhotos={repairedMobilePhotos}
                   isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
+                  isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
                 />
               )}
           </div>
