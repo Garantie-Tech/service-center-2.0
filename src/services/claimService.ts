@@ -6,6 +6,7 @@ import {
   ClaimTimeline,
   GenerateLinkPaymentBody,
   GeneratePaymentLink,
+  ImeiApi,
   PickupTrackingResponse,
   PolicyApiResponse,
   RemarkPayload,
@@ -193,7 +194,8 @@ export const validateEstimateDocument = async (
   try {
     const { externalApiRequest } = await import("@/utils/api");
 
-    const EXTERNAL_API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL_PY || "https://pyqa.garantie.in/api";
+    const EXTERNAL_API_BASE_URL =
+      process.env.NEXT_PUBLIC_BACKEND_URL_PY || "https://pyqa.garantie.in/api";
 
     const response = await externalApiRequest<{
       success: boolean;
@@ -249,5 +251,55 @@ export const handlePickupTrackingStatus = async (
   } catch (error) {
     console.error("Error marking ready for pickup:", error);
     throw error;
+  }
+};
+
+export const validateImeiFromImage = async (claimId: number, file: File | string) => {
+  try {
+    const { externalApiRequest } = await import("@/utils/api");
+
+    const EXTERNAL_API_BASE_URL =
+      process.env.NEXT_PUBLIC_BACKEND_URL_PY || "https://pyqa.garantie.in/api";
+
+    const formData = new FormData();
+    formData.append("claim_id", String(claimId));
+    formData.append("damage_image", file);
+
+    const response = await externalApiRequest<ImeiApi>(
+      EXTERNAL_API_BASE_URL,
+      "aws-fetch-imei-damage-image",
+      "POST",
+      formData
+    );
+
+    if (!response.success) {
+      return {
+        success: false,
+        message: response.error || "Document validation failed",
+        status: "error",
+        imeis: [],
+        is_image_valid: false,
+      };
+    }
+
+    const res = response.data;
+    const { imeis, is_image_valid, status, message } = res || {};
+
+    return {
+      success: status === "success" && is_image_valid === true,
+      message: message || "Document validation failed",
+      status: status || "error",
+      imeis: imeis || [],
+      is_image_valid: is_image_valid ?? false,
+    };
+  } catch (error) {
+    console.error("Error validating document:", error);
+    return {
+      success: false,
+      message: "Error validating document",
+      status: "error",
+      imeis: [],
+      is_image_valid: false,
+    };
   }
 };
