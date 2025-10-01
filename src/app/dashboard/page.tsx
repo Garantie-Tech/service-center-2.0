@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useGlobalStore } from "@/store/store";
-// import NoticeMarquee from "@/components/NoticeMarquee";
+import NoticeMarquee from "@/components/NoticeMarquee";
 
 // Dynamically import components for performance optimization
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header onLogout={handleLogout} />
       <SearchSection />
-      {/* <NoticeMarquee message="📢 Holiday Notice: Closed on 15th & 16th Aug for Independence Day 🇮🇳 & Janmashtami 🌸. We will resume regular operations on 18th August 2025. Wishing you a Happy Independence Day & a Joyous Janmashtami!" /> */}
+      <NoticeMarquee message="📢 Holiday Notice: We will be closed on 2nd October 2025 for Dussehra 🎉 and resume regular operations on 3rd October 2025 — Wishing you a Joyous and Prosperous Dussehra! ✨" />
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh)]">
