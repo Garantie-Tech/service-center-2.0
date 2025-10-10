@@ -264,6 +264,7 @@ export const validateImeiFromImage = async (claimId: number, file: File | string
     const formData = new FormData();
     formData.append("claim_id", String(claimId));
     formData.append("damage_image", file);
+    formData.append("flag", 'DAMAGE_IMAGE');
 
     const response = await externalApiRequest<ImeiApi>(
       EXTERNAL_API_BASE_URL,
