@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header onLogout={handleLogout} />
       <SearchSection />
-      <NoticeMarquee message="📢 Holiday Notice: We will be closed on 20th, 21st and 23rd October 2025 on account of Diwali & Bhai Dooj 🎉 and resume regular operations on 24th October 2025 — Wishing you and your family a Joyous and Prosperous Diwali! ✨" />
+      <NoticeMarquee message="📢 Holiday Notice: We will be closed on 20th, 21st and 23rd October 2025 on account of Diwali & Bhai Dooj 🎉 Wishing you and your family a Joyous and Prosperous Diwali! ✨" />
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh)]">
