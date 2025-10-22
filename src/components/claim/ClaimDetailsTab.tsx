@@ -223,6 +223,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                       download={`pickup-shipping-receipt${data?.shipping_info?.shipment_claim_id}.jpg`}
                       className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                       data-tip="Download Shipping Receipt"
+                      target="_blank"
                     >
                       <Image
                         src="/images/pdf-icon.svg"
@@ -325,6 +326,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                         download={`delivery-shipping-receipt${data?.shipping_info?.shipment_claim_id}.jpg`}
                         className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                         data-tip="Download Shipping Receipt"
+                        target="_blank"
                       >
                         <Image
                           src="/images/pdf-icon.svg"
