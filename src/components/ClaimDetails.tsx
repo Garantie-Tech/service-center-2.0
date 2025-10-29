@@ -92,7 +92,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
       pickup_video: selectedClaim?.pickup_video,
     },
     shipping_info: selectedClaim?.shipping_info,
-    device_purchase_invoice: selectedClaim?.documents?.[82] ?? null,
+    device_invoice: selectedClaim?.device_invoice ?? null,
   };
 
   const handleEstimateSubmit = async (formData: FormData) => {

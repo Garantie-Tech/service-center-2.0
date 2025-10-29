@@ -92,13 +92,13 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
           </div>
 
           {/* Device purchase invoice */}
-          {data?.device_purchase_invoice?.url && (
+          {data?.device_invoice && (
             <div>
               <h4 className="text-xs text-gray-500">Device Purchase Invoice</h4>
               <p className="text-sm font-semibold">
                 <button
                   onClick={() =>
-                    handleDownload(data?.device_purchase_invoice?.url ?? "")
+                    handleDownload(data?.device_invoice ?? "")
                   }
                   className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                   data-tip="Download Device Purchase Invoice"
