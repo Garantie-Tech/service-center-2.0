@@ -76,29 +76,29 @@ const FinalDocumentsTab: React.FC = () => {
   }, [selectedClaim]);
 
   // const readyToPickupStatus =
-  //   selectedClaim?.is_tvs_claim &&
+  //   selectedClaim?.available_for_pickup &&
   //   isApprovedStatus &&
   //   selectedClaim?.customer_pickup_details != null &&
   //   selectedClaim?.pickup_tracking?.is_readyfor_pickup != true;
 
   // const isShipmentInitiated =
-  //   selectedClaim?.is_tvs_claim &&
+  //   selectedClaim?.available_for_pickup &&
   //   isApprovedStatus &&
   //   selectedClaim?.customer_pickup_details != null &&
   //   selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
   //   selectedClaim?.pickup_tracking?.is_picked != true;
 
   // const isShipmentCompleted =
-  //   selectedClaim?.is_tvs_claim &&
+  //   selectedClaim?.available_for_pickup &&
   //   isApprovedStatus &&
   //   selectedClaim?.pickup_tracking != null &&
   //   selectedClaim?.pickup_tracking?.is_picked == true &&
   //   selectedClaim?.shipping_receipt != null;
   const isMinThreeRepairImageRequired =
-    !!selectedClaim?.is_tvs_claim && !!selectedClaim?.customer_pickup_details;
+    !!selectedClaim?.available_for_pickup && !!selectedClaim?.customer_pickup_details;
 
   const showReadyforPickupSection =
-    selectedClaim?.is_tvs_claim &&
+    selectedClaim?.available_for_pickup &&
     selectedClaim?.customer_pickup_details != null &&
     selectedClaim?.final_documents == "valid";
 
@@ -143,7 +143,7 @@ const FinalDocumentsTab: React.FC = () => {
           />
           <div className="w-1/2">
             {/* shipment details  */}
-            {selectedClaim?.is_tvs_claim &&
+            {selectedClaim?.available_for_pickup &&
               selectedClaim?.customer_pickup_details != null && (
                 <ShipmentDetailsSection
                   isValidRepairMobilePhoto={isValidRepairMobilePhoto}
