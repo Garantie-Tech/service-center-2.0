@@ -84,6 +84,7 @@ export default interface Claim {
   repaired_mobile_images?: string[] | null;
   shipping_info?: ShippingInfo | null;
   final_documents?: string;
+  available_for_pickup?: boolean;
 }
 
 export interface ClaimDetailsProps {
@@ -104,6 +105,7 @@ export interface ClaimDetailsProps {
       pickup_video: string | null;
     };
     shipping_info?: ShippingInfo | null;
+    available_for_pickup?: boolean;
   };
 }
 

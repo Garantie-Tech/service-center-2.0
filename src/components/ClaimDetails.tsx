@@ -91,7 +91,8 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
       pickup_photos: selectedClaim?.pickup_photos,
       pickup_video: selectedClaim?.pickup_video,
     },
-    shipping_info:selectedClaim?.shipping_info
+    shipping_info:selectedClaim?.shipping_info,
+    available_for_pickup: selectedClaim?.available_for_pickup
   };
 
   const handleEstimateSubmit = async (formData: FormData) => {

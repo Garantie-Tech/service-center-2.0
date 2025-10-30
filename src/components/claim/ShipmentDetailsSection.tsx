@@ -86,27 +86,27 @@ const ShipmentDetailsSection: React.FC<
   };
 
   const readyToPickupStatus =
-    selectedClaim?.is_tvs_claim &&
+    selectedClaim?.available_for_pickup &&
     isApprovedStatus &&
     selectedClaim?.customer_pickup_details != null &&
     selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
     selectedClaim?.pickup_tracking?.is_picked == false;
 
   const isShipmentInitiated =
-    selectedClaim?.is_tvs_claim &&
+    selectedClaim?.available_for_pickup &&
     isApprovedStatus &&
     selectedClaim?.customer_pickup_details != null &&
     selectedClaim?.pickup_tracking?.is_readyfor_pickup == true &&
     selectedClaim?.pickup_tracking?.is_picked != true;
 
   const isShipmentCompleted =
-    selectedClaim?.is_tvs_claim &&
+    selectedClaim?.available_for_pickup &&
     isApprovedStatus &&
     selectedClaim?.pickup_tracking != null &&
     selectedClaim?.pickup_tracking?.is_picked == true &&
     selectedClaim?.shipping_info?.shipment_inbound_label_data != null;
 
-  if (!selectedClaim?.is_tvs_claim) return null;
+  if (!selectedClaim?.available_for_pickup) return null;
 
   return (
     <div className="text-[#515151]">
@@ -128,7 +128,7 @@ const ShipmentDetailsSection: React.FC<
           </div>
 
           {/* ready for pickup */}
-          {selectedClaim?.is_tvs_claim &&
+          {selectedClaim?.available_for_pickup &&
             selectedClaim?.customer_pickup_details != null &&
             isInvalidRepairMobilePhotoStatus == true &&
             selectedClaim?.pickup_tracking?.is_readyfor_pickup != true && (

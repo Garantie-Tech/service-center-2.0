@@ -11,7 +11,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
   const [trackingAwb, setTrackingAwb] = useState<string | null>(null);
 
   const showPickupDetailsSection =
-    data?.pickup_details?.is_tvs_claim == true &&
+    data?.available_for_pickup == true &&
     data?.pickup_details?.customer_pickup_details != null &&
     data?.shipping_info?.shipment_outbound_awb_number;
 
