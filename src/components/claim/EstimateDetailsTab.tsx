@@ -103,6 +103,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           ];
         setDamageMobileImeiImage(lastImage);
       }
+      if (claimRevised) {
+        setDamageMobileImeiImage("");
+      }
       setEstimateDetailsState({
         estimateAmount:
           selectedClaim?.claimed_amount && !claimRevised
@@ -121,7 +124,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           selectedClaim?.mobile_damage_photos &&
           !claimRevised &&
           claimStatus != "Claim Initiated"
-            ? (selectedClaim?.documents?.["73"]?.status == 1 ? selectedClaim?.mobile_damage_photos : selectedClaim?.mobile_damage_photos.slice(0, -1))
+            ? selectedClaim?.documents?.["73"]?.status == 1
+              ? selectedClaim?.mobile_damage_photos
+              : selectedClaim?.mobile_damage_photos.slice(0, -1)
             : [],
         estimateDocument:
           selectedClaim?.documents?.["15"]?.url && !claimRevised
@@ -843,7 +848,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                     <GalleryPopup
                       images={[damageMobileImeiImage]}
                       onRemoveImage={handleRemoveDamageMobileImeiPhoto}
-                      allowRemoval={!isFormDisabled && damageImageStatus != true}
+                      allowRemoval={
+                        !isFormDisabled && damageImageStatus != true
+                      }
                     />
                   </div>
                 )}
