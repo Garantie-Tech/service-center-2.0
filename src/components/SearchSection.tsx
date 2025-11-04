@@ -60,23 +60,24 @@ const SearchSection: React.FC = () => {
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
 
-      // ✅ Build query string (convert numbers → strings for TypeScript)
-      const params = new URLSearchParams({
-        page: String(1),
-        pageSize: String(25),
+      const exportUrl = `${API_BASE_URL}/service-centre/export-claims`;
+
+      // ✅ Prepare POST body
+      const body = {
+        page: 1,
+        pageSize: 25,
         search: searchTerm || "",
         status: filterStatus || "",
-      }).toString();
+      };
 
-      // ✅ Build full export URL
-      const exportUrl = `${API_BASE_URL}/service-centre/export-claims?${params}`;
-
-      // ✅ Fetch streamed CSV directly
+      // ✅ Fetch streamed CSV (POST)
       const response = await fetch(exportUrl, {
-        method: "GET",
+        method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token") || ""}`, // if auth protected
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`, // if protected
         },
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -89,7 +90,7 @@ const SearchSection: React.FC = () => {
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = "claims_export.csv"; // Filename
+      link.download = "claims_export.csv";
       document.body.appendChild(link);
       link.click();
       link.remove();
