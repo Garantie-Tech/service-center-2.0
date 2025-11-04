@@ -57,7 +57,10 @@ const SearchSection: React.FC = () => {
     try {
       setIsLoading(true);
 
-      // ✅ Convert all query params to strings
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
+
+      // ✅ Build query string (convert numbers → strings for TypeScript)
       const params = new URLSearchParams({
         page: String(1),
         pageSize: String(25),
@@ -65,10 +68,14 @@ const SearchSection: React.FC = () => {
         status: filterStatus || "",
       }).toString();
 
-      const response = await fetch(`/api/export-claims?${params}`, {
+      // ✅ Build full export URL
+      const exportUrl = `${API_BASE_URL}/service-centre/export-claims?${params}`;
+
+      // ✅ Fetch streamed CSV directly
+      const response = await fetch(exportUrl, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token") || ""}`, // if protected
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`, // if auth protected
         },
       });
 
@@ -77,12 +84,12 @@ const SearchSection: React.FC = () => {
         return;
       }
 
-      // ✅ Convert to Blob and trigger download
+      // ✅ Convert to Blob and trigger browser download
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = "claims_export.csv";
+      link.download = "claims_export.csv"; // Filename
       document.body.appendChild(link);
       link.click();
       link.remove();
