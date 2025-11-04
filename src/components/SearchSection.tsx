@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
-import { fetchExportData } from "@/services/exportService";
-import { exportToCSV } from "@/utils/exportCsv";
+// import { fetchExportData } from "@/services/exportService";
+// import { exportToCSV } from "@/utils/exportCsv";
 import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
@@ -25,29 +25,72 @@ const SearchSection: React.FC = () => {
 
   const { notifySuccess, notifyError } = useNotification();
 
+  // const handleExport = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const requestParams = {
+  //       page: 1,
+  //       pageSize: 25,
+  //       search: searchTerm,
+  //       status: filterStatus,
+  //     };
+  //     const response = await fetchExportData(requestParams);
+
+  //     if (response?.success) {
+  //       if (!response?.data?.data || response.data.data.length === 0) {
+  //         notifyError("No data to export.");
+  //         return;
+  //       }
+  //       exportToCSV(response.data.data, "claims_export.csv");
+  //       notifySuccess("Data exported successfully !");
+  //     } else {
+  //       notifyError("Failed to export data.");
+  //     }
+  //   } catch (e) {
+  //     notifyError(`Failed to export data. Something went wrong ${e}`);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleExport = async () => {
     try {
       setIsLoading(true);
-      const requestParams = {
-        page: 1,
-        pageSize: 25,
-        search: searchTerm,
-        status: filterStatus,
-      };
-      const response = await fetchExportData(requestParams);
 
-      if (response?.success) {
-        if (!response?.data?.data || response.data.data.length === 0) {
-          notifyError("No data to export.");
-          return;
-        }
-        exportToCSV(response.data.data, "claims_export.csv");
-        notifySuccess("Data exported successfully !");
-      } else {
+      // ✅ Convert all query params to strings
+      const params = new URLSearchParams({
+        page: String(1),
+        pageSize: String(25),
+        search: searchTerm || "",
+        status: filterStatus || "",
+      }).toString();
+
+      const response = await fetch(`/api/export-claims?${params}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`, // if protected
+        },
+      });
+
+      if (!response.ok) {
         notifyError("Failed to export data.");
+        return;
       }
+
+      // ✅ Convert to Blob and trigger download
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = "claims_export.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      notifySuccess("Data exported successfully!");
     } catch (e) {
-      notifyError(`Failed to export data. Something went wrong ${e}`);
+      notifyError(`Failed to export data. Something went wrong: ${e}`);
     } finally {
       setIsLoading(false);
     }
