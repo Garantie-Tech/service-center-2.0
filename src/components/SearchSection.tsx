@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
-// import { fetchExportData } from "@/services/exportService";
-// import { exportToCSV } from "@/utils/exportCsv";
+import { fetchExportData } from "@/services/exportService";
+import { exportToCSV } from "@/utils/exportCsv";
 import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
@@ -25,80 +25,29 @@ const SearchSection: React.FC = () => {
 
   const { notifySuccess, notifyError } = useNotification();
 
-  // const handleExport = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const requestParams = {
-  //       page: 1,
-  //       pageSize: 25,
-  //       search: searchTerm,
-  //       status: filterStatus,
-  //     };
-  //     const response = await fetchExportData(requestParams);
-
-  //     if (response?.success) {
-  //       if (!response?.data?.data || response.data.data.length === 0) {
-  //         notifyError("No data to export.");
-  //         return;
-  //       }
-  //       exportToCSV(response.data.data, "claims_export.csv");
-  //       notifySuccess("Data exported successfully !");
-  //     } else {
-  //       notifyError("Failed to export data.");
-  //     }
-  //   } catch (e) {
-  //     notifyError(`Failed to export data. Something went wrong ${e}`);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handleExport = async () => {
     try {
       setIsLoading(true);
-
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
-
-      const exportUrl = `${API_BASE_URL}/service-centre/export-claims`;
-
-      // ✅ Prepare POST body
-      const body = {
+      const requestParams = {
         page: 1,
         pageSize: 25,
-        search: searchTerm || "",
-        status: filterStatus || "",
+        search: searchTerm,
+        status: filterStatus,
       };
+      const response = await fetchExportData(requestParams);
 
-      // ✅ Fetch streamed CSV (POST)
-      const response = await fetch(exportUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token") || ""}`, // if protected
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
+      if (response?.success) {
+        if (!response?.data?.data || response.data.data.length === 0) {
+          notifyError("No data to export.");
+          return;
+        }
+        exportToCSV(response.data.data, "claims_export.csv");
+        notifySuccess("Data exported successfully !");
+      } else {
         notifyError("Failed to export data.");
-        return;
       }
-
-      // ✅ Convert to Blob and trigger browser download
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = "claims_export.csv";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-
-      notifySuccess("Data exported successfully!");
     } catch (e) {
-      notifyError(`Failed to export data. Something went wrong: ${e}`);
+      notifyError(`Failed to export data. Something went wrong ${e}`);
     } finally {
       setIsLoading(false);
     }
