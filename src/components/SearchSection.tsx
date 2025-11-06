@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useGlobalStore } from "@/store/store";
-import { fetchExportData } from "@/services/exportService";
-import { exportToCSV } from "@/utils/exportCsv";
+// import { fetchExportData } from "@/services/exportService";
+// import { exportToCSV } from "@/utils/exportCsv";
 import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
@@ -21,34 +21,106 @@ const SearchSection: React.FC = () => {
     claimCount,
     stateOptions,
     setStateOptions,
+    appliedFilters,
   } = useGlobalStore();
 
   const { notifySuccess, notifyError } = useNotification();
 
+  // const handleExport = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const requestParams = {
+  //       page: 1,
+  //       pageSize: 25,
+  //       search: searchTerm,
+  //       status: filterStatus,
+  //     };
+  //     const response = await fetchExportData(requestParams);
+
+  //     if (response?.success) {
+  //       if (!response?.data?.data || response.data.data.length === 0) {
+  //         notifyError("No data to export.");
+  //         return;
+  //       }
+  //       exportToCSV(response.data.data, "claims_export.csv");
+  //       notifySuccess("Data exported successfully !");
+  //     } else {
+  //       notifyError("Failed to export data.");
+  //     }
+  //   } catch (e) {
+  //     notifyError(`Failed to export data. Something went wrong ${e}`);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleExport = async () => {
     try {
-      setIsLoading(true);
-      const requestParams = {
-        page: 1,
-        pageSize: 25,
-        search: searchTerm,
-        status: filterStatus,
-      };
-      const response = await fetchExportData(requestParams);
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
 
-      if (response?.success) {
-        if (!response?.data?.data || response.data.data.length === 0) {
-          notifyError("No data to export.");
-          return;
-        }
-        exportToCSV(response.data.data, "claims_export.csv");
-        notifySuccess("Data exported successfully !");
-      } else {
-        notifyError("Failed to export data.");
+      // Same params you used in Postman
+      const paramsObj: Record<string, string> = {
+        page: "1",
+        pageSize: "25",
+        search: searchTerm || "",
+        status: filterStatus || "",
+      };
+
+      // ✅ Add date filters if applied
+      if (appliedFilters?.fromDate && appliedFilters?.toDate) {
+        paramsObj.duration = "custom";
+        paramsObj.startDate = appliedFilters.fromDate;
+        paramsObj.endDate = appliedFilters.toDate;
       }
-    } catch (e) {
-      notifyError(`Failed to export data. Something went wrong ${e}`);
-    } finally {
+
+      const params = new URLSearchParams(paramsObj).toString();
+
+      const exportUrl = `${API_BASE_URL}/service-centre/claims/export-claims?${params}`;
+
+      // 🔒 Include token if endpoint is protected
+      setIsLoading(true);
+      const response = await fetch(exportUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          Accept: "text/csv",
+        },
+      });
+
+      if (!response.ok) {
+        notifyError(`Failed to export data. Something went wrong`);
+      }
+
+      // 🧩 Convert stream to blob
+      const blob = await response.blob();
+
+      // 🏷 Try to extract filename from headers
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = "claims_export.csv";
+      if (contentDisposition && contentDisposition.includes("filename=")) {
+        filename = contentDisposition
+          .split("filename=")[1]
+          .replace(/"/g, "")
+          .trim();
+      }
+
+      // 💾 Create downloadable link
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      notifySuccess("Data exported successfully !");
+
+      // 🧹 Cleanup
+      window.URL.revokeObjectURL(downloadUrl);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Export error:", error);
+      notifyError(`Failed to export data. Something went wrong ${error}`);
       setIsLoading(false);
     }
   };
