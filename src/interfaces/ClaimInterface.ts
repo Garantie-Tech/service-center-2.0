@@ -84,6 +84,7 @@ export default interface Claim {
   repaired_mobile_images?: string[] | null;
   shipping_info?: ShippingInfo | null;
   final_documents?: string;
+  special_case?: boolean;
 }
 
 export interface ClaimDetailsProps {
