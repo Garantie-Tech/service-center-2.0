@@ -86,6 +86,7 @@ export default interface Claim {
   shipping_info?: ShippingInfo | null;
   final_documents?: string;
   device_invoice?: string | null;
+  available_for_pickup?: boolean;
 }
 
 export interface ClaimDetailsProps {
@@ -107,6 +108,7 @@ export interface ClaimDetailsProps {
     };
     shipping_info?: ShippingInfo | null;
     device_invoice?: string | null;
+    available_for_pickup?: boolean;
   };
 }
 
