@@ -15,30 +15,38 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
     data?.pickup_details?.customer_pickup_details != null &&
     data?.shipping_info?.shipment_outbound_awb_number;
 
-  const handleDownload = async (fileUrl: string): Promise<void> => {
-    try {
-      const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error("Failed to fetch file");
+  // const handleDownload = async (fileUrl: string): Promise<void> => {
+  //   try {
+  //     const response = await fetch(fileUrl);
+  //     if (!response.ok) throw new Error("Failed to fetch file");
 
-      const blob = await response.blob();
-      const parts = fileUrl.split(".");
-      const lastPart = parts.pop();
-      const ext = lastPart ? lastPart.split("?")[0] : "pdf";
+  //     const blob = await response.blob();
+  //     const parts = fileUrl.split(".");
+  //     const lastPart = parts.pop();
+  //     const ext = lastPart ? lastPart.split("?")[0] : "pdf";
 
-      const fileName = `device_purchase_invoice.${ext}`;
+  //     const fileName = `device_purchase_invoice.${ext}`;
 
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Download failed:", error);
-      alert("Unable to download file. Please try again later.");
-    }
+  //     const blobUrl = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.href = blobUrl;
+  //     link.download = fileName;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     link.remove();
+  //     window.URL.revokeObjectURL(blobUrl);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //     alert("Unable to download file. Please try again later.");
+  //   }
+  // };
+
+  const handleDownload = (fileUrl: string) => {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = ""; // browser auto-detects filename
+    link.target = "_blank"; // optional
+    link.click();
   };
 
   return (
@@ -97,9 +105,7 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
               <h4 className="text-xs text-gray-500">Device Purchase Invoice</h4>
               <p className="text-sm font-semibold">
                 <button
-                  onClick={() =>
-                    handleDownload(data?.device_invoice ?? "")
-                  }
+                  onClick={() => handleDownload(data?.device_invoice ?? "")}
                   className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
                   data-tip="Download Device Purchase Invoice"
                 >
