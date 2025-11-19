@@ -15,6 +15,32 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
     data?.pickup_details?.customer_pickup_details != null &&
     data?.shipping_info?.shipment_outbound_awb_number;
 
+  const handleDownload = async (fileUrl: string): Promise<void> => {
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Failed to fetch file");
+
+      const blob = await response.blob();
+      const parts = fileUrl.split(".");
+      const lastPart = parts.pop();
+      const ext = lastPart ? lastPart.split("?")[0] : "pdf";
+
+      const fileName = `device_purchase_invoice.${ext}`;
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Unable to download file. Please try again later.");
+    }
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -64,6 +90,30 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
             <h4 className="text-xs text-gray-500">Service Centre Name</h4>
             <p className="text-sm font-semibold">{data.service_centre_name} </p>
           </div>
+
+          {/* Device purchase invoice */}
+          {data?.device_invoice && (
+            <div>
+              <h4 className="text-xs text-gray-500">Device Purchase Invoice</h4>
+              <p className="text-sm font-semibold">
+                <button
+                  onClick={() =>
+                    handleDownload(data?.device_invoice ?? "")
+                  }
+                  className="tooltip tooltip-bottom bg-inputBg border border-[#EEEEEE] p-[5px]"
+                  data-tip="Download Device Purchase Invoice"
+                >
+                  <Image
+                    src="/images/pdf-icon.svg"
+                    alt="Device Purchase Invoice"
+                    width={30}
+                    height={50}
+                    className="h-[100%]"
+                  />
+                </button>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -163,7 +213,9 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
 
                 {data?.shipping_info?.shipment_outbound_label_data && (
                   <div>
-                    <h4 className="text-xs text-gray-500 mb-2">Shipment Receipt</h4>
+                    <h4 className="text-xs text-gray-500 mb-2">
+                      Shipment Receipt
+                    </h4>
                     <a
                       href={
                         data?.shipping_info?.shipment_outbound_label_data || ""
@@ -264,7 +316,9 @@ const ClaimDetailsTab: React.FC<ClaimDetailsProps> = ({ data }) => {
                   </div>
                   {data?.shipping_info?.shipment_inbound_label_data && (
                     <div>
-                      <h4 className="text-xs text-gray-500 mb-2">Shipment Receipt</h4>
+                      <h4 className="text-xs text-gray-500 mb-2">
+                        Shipment Receipt
+                      </h4>
                       <a
                         href={
                           data?.shipping_info?.shipment_inbound_label_data || ""

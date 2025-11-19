@@ -45,6 +45,7 @@ export default interface Claim {
     "76"?: DocumentItem;
     "77"?: DocumentItem;
     "78"?: DocumentItem;
+    "82"?: DocumentItem;
   };
   approved_amount?: string;
   approval_date?: string;
@@ -84,6 +85,7 @@ export default interface Claim {
   repaired_mobile_images?: string[] | null;
   shipping_info?: ShippingInfo | null;
   final_documents?: string;
+  device_invoice?: string | null;
 }
 
 export interface ClaimDetailsProps {
@@ -104,6 +106,7 @@ export interface ClaimDetailsProps {
       pickup_video: string | null;
     };
     shipping_info?: ShippingInfo | null;
+    device_invoice?: string | null;
   };
 }
 
@@ -163,7 +166,7 @@ export interface RepairedMobileSectionProps {
   finalDocuments: {
     repairMobilePhoto: string[] | null;
   };
-  isMinThreeRepairImageRequired:boolean;
+  isMinThreeRepairImageRequired: boolean;
 }
 
 export interface FinalDocumentsSectionProps {
@@ -296,5 +299,3 @@ export interface ShippingInfo {
 
   pickup_photos: string[];
 }
-
-
