@@ -90,6 +90,12 @@ const AdditionalDetailsModal: React.FC<AdditionalDetailsModalProps> = ({
                 ₹ {selectedClaim?.model_price}
               </p>
             </div>
+
+            {/* Financier */}
+            <div>
+              <p className="text-gray-500 text-xs">Financier</p>
+              <p className="font-bold text-sm">{selectedClaim?.pos}</p>
+            </div>
           </div>
         </div>
       </div>
