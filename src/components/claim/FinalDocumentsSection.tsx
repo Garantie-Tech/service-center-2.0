@@ -36,7 +36,7 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
             pdfs={repairInvoice || []}
             setPdfs={handleRepairInvoiceUpload}
           />
-        ) : finalDocuments.repairInvoiceImage.endsWith(".pdf") ? (
+        ) : finalDocuments.repairInvoiceImage.toLowerCase().includes(".pdf") ? (
           <>
             <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
             <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
@@ -93,7 +93,9 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
                 pdfs={replacementReceipt}
                 setPdfs={handleReplacementReceiptUpload}
               />
-            ) : finalDocuments.replacementReceiptImage.endsWith(".pdf") ? (
+            ) : finalDocuments.replacementReceiptImage
+                .toLowerCase()
+                .includes(".pdf") ? (
               <>
                 <h3 className="text-sm font-medium mb-2">
                   Replacement Receipt

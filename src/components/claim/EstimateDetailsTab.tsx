@@ -656,7 +656,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
                 {estimateDocument ? (
                   typeof estimateDocument === "string" ? (
-                    estimateDocument.endsWith(".pdf") ? (
+                    estimateDocument.toLowerCase().includes('.pdf') ? (
                       <a
                         href={estimateDocument}
                         target="_blank"
@@ -1114,7 +1114,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
                 {estimateDocument ? (
                   typeof estimateDocument === "string" ? (
-                    estimateDocument.endsWith(".pdf") ? (
+                    estimateDocument.toLowerCase().includes('.pdf') ? (
                       <a
                         href={estimateDocument}
                         target="_blank"
