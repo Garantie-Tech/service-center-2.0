@@ -52,7 +52,7 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE]">
                 {estimateDetailsState?.estimateDocument ? (
                   typeof estimateDetailsState?.estimateDocument === "string" ? (
-                    estimateDetailsState?.estimateDocument.endsWith(".pdf") ? (
+                    estimateDetailsState?.estimateDocument.toLowerCase().includes('.pdf') ? (
                       <a
                         href={estimateDetailsState?.estimateDocument}
                         target="_blank"

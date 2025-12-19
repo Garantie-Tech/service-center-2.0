@@ -8,7 +8,7 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
   finalDocuments,
 }) => {
   // Function to check if a file is a PDF
-  const isPdf = (url: string) => url.endsWith(".pdf");
+  const isPdf = (url: string) => url.toLowerCase().includes('.pdf');
 
   return (
     <div>
