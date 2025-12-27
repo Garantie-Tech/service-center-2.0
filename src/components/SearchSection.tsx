@@ -76,7 +76,7 @@ const SearchSection: React.FC = () => {
 
       const params = new URLSearchParams(paramsObj).toString();
 
-      const exportUrl = `${API_BASE_URL}/service-centre/claims/export-claims?${params}`;
+      const exportUrl = `${API_BASE_URL}/service/claims/export-claims?${params}`;
 
       // 🔒 Include token if endpoint is protected
       setIsLoading(true);

@@ -116,8 +116,7 @@ export interface ClaimDetailsProps {
 
 export interface ClaimResponse {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: {
     claims: Claim[];

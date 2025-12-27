@@ -188,21 +188,22 @@ const ProfileDetails = () => {
                     ***********
                   </p>
                 </div>
-                {showResetPasswordSection ? (
-                  <button
-                    className="text-xs text-blue-600 font-medium hover:underline"
-                    onClick={() => setShowResetPasswordSection(false)}
-                  >
-                    Hide
-                  </button>
-                ) : (
-                  <button
-                    className="text-xs text-blue-600 font-medium hover:underline"
-                    onClick={() => setShowResetPasswordSection(true)}
-                  >
-                    Reset Password
-                  </button>
-                )}
+                {profile?.user?.[0]?.type !== "service_head" &&
+                  (showResetPasswordSection ? (
+                    <button
+                      className="text-xs text-blue-600 font-medium hover:underline"
+                      onClick={() => setShowResetPasswordSection(false)}
+                    >
+                      Hide
+                    </button>
+                  ) : (
+                    <button
+                      className="text-xs text-blue-600 font-medium hover:underline"
+                      onClick={() => setShowResetPasswordSection(true)}
+                    >
+                      Reset Password
+                    </button>
+                  ))}
               </div>
               <div>
                 <p className="text-xs text-[#757575]">Active</p>
