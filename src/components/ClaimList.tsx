@@ -222,30 +222,13 @@ const ClaimList: React.FC = () => {
     setPage(0);
     setHasMore(true);
     fetchClaimsData(0, true);
+    isFetching.current = false;
   }, [appliedFilters, filterStatus, globalSearch, sortOrder, filterState]);
 
   // Background refresh effect
   useEffect(() => {
     refreshClaimsInBackground();
   }, [refreshClaimsTrigger]);
-
-  // Infinite scrolling observer
-  useEffect(() => {
-    if (!lastClaimRef.current || !hasMore || loading) return;
-
-    observer.current = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          fetchClaimsData(page);
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    observer.current.observe(lastClaimRef.current);
-
-    return () => observer.current?.disconnect();
-  }, [page, hasMore, loading]);
 
   useEffect(() => {
     if (!selectedClaim) {
@@ -309,6 +292,34 @@ const ClaimList: React.FC = () => {
       );
     }
   };
+
+  // scroll observer
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+
+      if (target.isIntersecting && hasMore && !loading && !isFetching.current) {
+        fetchClaimsData(page);
+      }
+    },
+    [hasMore, loading, page, fetchClaimsData]
+  );
+
+  useEffect(() => {
+    if (!lastClaimRef.current) return;
+
+    observer.current?.disconnect();
+
+    observer.current = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0.1,
+    });
+
+    observer.current.observe(lastClaimRef.current);
+
+    return () => observer.current?.disconnect();
+  }, [handleObserver]);
 
   return (
     <div className="w-full max-w-lg mx-auto">

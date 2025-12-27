@@ -26,7 +26,7 @@ interface RawTrackingResponse {
 
 export async function fetchTrackingDetails(awb: string): Promise<TrackingData> {
   const resp = await getRequest<RawTrackingResponse>(
-    `v1/track-order?awb_number=${awb}`
+    `shipment/track-order?awb_number=${awb}`
   );
 
   if (!resp.success) {

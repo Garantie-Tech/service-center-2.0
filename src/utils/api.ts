@@ -57,7 +57,7 @@ export async function apiRequest<T>(
       ...extraHeaders,
     };
 
-    const url = `${API_BASE_URL}/${endpoint}${
+    const url = `${API_BASE_URL}/service/${endpoint}${
       method === "GET" && params ? formatQueryParams(params) : ""
     }`;
 
