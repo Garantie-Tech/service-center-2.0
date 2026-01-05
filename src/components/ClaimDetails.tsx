@@ -93,7 +93,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     },
     shipping_info: selectedClaim?.shipping_info,
     device_invoice: selectedClaim?.device_invoice ?? null,
-    available_for_pickup: selectedClaim?.available_for_pickup
+    available_for_pickup: selectedClaim?.available_for_pickup,
   };
 
   const handleEstimateSubmit = async (formData: FormData) => {
@@ -103,6 +103,8 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
 
       if (!response.success) {
         notifyError("Failed to submit estimate!");
+      } else if (!response?.data?.success) {
+        notifyError(response?.data?.message || "Failed to submit estimate!");
       } else {
         notifySuccess("Estimate Submitted Successfully!");
         triggerClaimRefresh();
