@@ -7,6 +7,46 @@ import Image from "next/image";
 const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
   estimateDetailsState
 ) => {
+  const documents = estimateDetailsState?.documents;
+
+  type DocumentStatusResult = "valid" | "invalid" | "";
+
+  const getDocumentStatus = (
+    document?: {
+      status?: number | string | boolean | null;
+      status_reason_id?: number | string | null;
+    } | null
+  ): DocumentStatusResult => {
+    if (!document) return "";
+
+    const { status, status_reason_id } = document;
+
+    // VALID
+    if (status === 1 || status === "1" || status === true) {
+      return "valid";
+    }
+
+    // EMPTY
+    if (status === null || typeof status === "undefined") {
+      return "";
+    }
+
+    // INVALID
+    if (
+      status !== 1 &&
+      status !== "1" &&
+      status_reason_id !== null &&
+      typeof status_reason_id !== "undefined"
+    ) {
+      return "invalid";
+    }
+
+    return "";
+  };
+
+  const estimateDocStatus = getDocumentStatus(documents?.[15]);
+  const damagePhotoStatus = getDocumentStatus(documents?.[73]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Left Column */}
@@ -52,7 +92,9 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE]">
                 {estimateDetailsState?.estimateDocument ? (
                   typeof estimateDetailsState?.estimateDocument === "string" ? (
-                    estimateDetailsState?.estimateDocument.toLowerCase().includes('.pdf') ? (
+                    estimateDetailsState?.estimateDocument
+                      .toLowerCase()
+                      .includes(".pdf") ? (
                       <a
                         href={estimateDetailsState?.estimateDocument}
                         target="_blank"
@@ -96,17 +138,49 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
                 )}
               </div>
             )}
-            <span className="text-[#19AD61] text-xxs font-semibold">Valid</span>
+            {estimateDocStatus && (
+              <span
+                className={`text-xxs font-semibold ${
+                  estimateDocStatus === "valid"
+                    ? "text-[#19AD61]"
+                    : estimateDocStatus === "invalid"
+                    ? "text-[#E02424]"
+                    : ""
+                }`}
+              >
+                {estimateDocStatus === "valid"
+                  ? "Valid"
+                  : estimateDocStatus === "invalid"
+                  ? "Invalid"
+                  : ""}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Damage Mobile Photo */}
         <div>
-          <h4 className="text-xs text-gray-500">Damage Mobile Photo</h4>
+          <h4 className="text-xs text-gray-500">
+            Damaged Mobile & IMEI Photos
+          </h4>
           <GalleryPopup images={estimateDetailsState?.damagePhotos} />
-          <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
-            Valid
-          </span>
+          {damagePhotoStatus && (
+            <span
+              className={`p-2 text-xxs font-semibold ${
+                damagePhotoStatus === "valid"
+                  ? "text-[#19AD61]"
+                  : damagePhotoStatus === "invalid"
+                  ? "text-[#E02424]"
+                  : ""
+              }`}
+            >
+              {damagePhotoStatus === "valid"
+                ? "Valid"
+                : damagePhotoStatus === "invalid"
+                ? "Invalid"
+                : ""}
+            </span>
+          )}
         </div>
       </div>
     </div>

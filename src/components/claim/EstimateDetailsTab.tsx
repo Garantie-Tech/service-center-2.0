@@ -132,6 +132,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           selectedClaim?.documents?.["15"]?.url && !claimRevised
             ? selectedClaim?.documents?.["15"]?.url
             : null,
+        documents:selectedClaim?.documents
       });
       setIsReplacementConfirmed(false);
     }

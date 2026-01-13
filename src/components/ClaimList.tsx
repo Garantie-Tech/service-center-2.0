@@ -261,6 +261,7 @@ const ClaimList: React.FC = () => {
         replacementConfirmed: currentClaim?.imei_changed,
         damagePhotos: currentClaim?.mobile_damage_photos || [],
         estimateDocument: currentClaim?.documents?.["15"]?.url || null,
+        documents: currentClaim?.documents || undefined,
       });
       setApprovalDetails({
         estimateAmount: Number(currentClaim?.claimed_amount),
