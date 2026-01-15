@@ -153,6 +153,13 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     payment_amount: selectedClaim?.payment_amount
       ? selectedClaim?.payment_amount
       : "N/A",
+    tds: selectedClaim?.tds ? Number(selectedClaim?.tds) : 0,
+    approved_amount: selectedClaim?.approved_amount
+      ? Number(selectedClaim?.approved_amount)
+      : 0,
+    repair_amount: selectedClaim?.repair_amount
+      ? Number(selectedClaim?.repair_amount)
+      : 0,
   };
 
   return (

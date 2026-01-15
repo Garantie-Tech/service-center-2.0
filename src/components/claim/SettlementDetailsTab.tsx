@@ -5,7 +5,7 @@ import { SettlementDetailsProps } from "@/interfaces/ClaimInterface";
 const SettlementDetailsTab: React.FC<{ data: SettlementDetailsProps }> = ({
   data,
 }) => {
-  const { utr_number, payment_date, payment_amount } = data;
+  const { utr_number, payment_date, payment_amount, tds, approved_amount, repair_amount } = data;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -22,10 +22,22 @@ const SettlementDetailsTab: React.FC<{ data: SettlementDetailsProps }> = ({
           <h4 className="text-xs text-gray-500">UTR Number</h4>
           <p className="text-sm font-semibold">{utr_number || "N/A"}</p>
         </div>
+
+        {/* TDS */}
+        <div>
+          <h4 className="text-xs text-gray-500">TDS Amount</h4>
+          <p className="text-sm font-semibold">₹ {tds.toFixed(2) || "N/A"}</p>
+        </div>
       </div>
 
       {/* Right Column */}
       <div className="space-y-8">
+        {/* Approved Amount */}
+        <div>
+          <h4 className="text-xs text-gray-500">Approved Amount</h4>
+          <p className="text-sm font-semibold">₹ {(approved_amount + repair_amount).toFixed(2) || "N/A"}</p>
+        </div>
+
         {/* Payment Amount */}
         <div>
           <h4 className="text-xs text-gray-500">Payment Amount</h4>

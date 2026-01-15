@@ -50,6 +50,7 @@ export default interface Claim {
   approved_amount?: string;
   approval_date?: string;
   repair_amount?: number;
+  tds?: number;
   repair_payment_successful?: boolean;
   repair_payment_link?: string;
   repair_razorpay_order_id?: string;
@@ -142,6 +143,9 @@ export interface SettlementDetailsProps {
   utr_number: string;
   payment_date: string;
   payment_amount: string;
+  tds: number;
+  approved_amount: number;
+  repair_amount: number;
 }
 
 export interface CustomerPickupDetails {
