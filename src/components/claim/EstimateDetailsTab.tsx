@@ -132,7 +132,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           selectedClaim?.documents?.["15"]?.url && !claimRevised
             ? selectedClaim?.documents?.["15"]?.url
             : null,
-        documents:selectedClaim?.documents
+        documents: selectedClaim?.documents,
       });
       setIsReplacementConfirmed(false);
     }
@@ -657,7 +657,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
                 {estimateDocument ? (
                   typeof estimateDocument === "string" ? (
-                    estimateDocument.toLowerCase().includes('.pdf') ? (
+                    estimateDocument.toLowerCase().includes(".pdf") ? (
                       <a
                         href={estimateDocument}
                         target="_blank"
@@ -908,6 +908,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                 )}
               </div>
             </>
+          ) : damageImageStatus == true ? (
+            <span className="text-[#19AD61] text-xxs font-semibold block -mt-[15px] ml-[8px]">Valid</span>
           ) : (
             <></>
           )}
@@ -1115,7 +1117,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE] mt-2">
                 {estimateDocument ? (
                   typeof estimateDocument === "string" ? (
-                    estimateDocument.toLowerCase().includes('.pdf') ? (
+                    estimateDocument.toLowerCase().includes(".pdf") ? (
                       <a
                         href={estimateDocument}
                         target="_blank"
