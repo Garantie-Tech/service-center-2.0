@@ -49,6 +49,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const [damageMobileImeiImage, setDamageMobileImeiImage] = useState<
     string | File
   >("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     selectedClaim,
@@ -390,6 +391,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     damageMobileImeiImage == "";
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append("claimed_amount", estimateAmount);
     formData.append("estimate_details", estimateDetails);
@@ -430,6 +433,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
     setImeiDamageImageError(null);
     setClaimRevised(false);
+    setIsSubmitting(false);
   };
 
   const handleEditButtonClick = () => {
@@ -603,7 +607,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               disabled={isSubmitDisabled}
               onClick={handleSubmit}
             >
-              {getEstimateButtonLabel(claimStatus)}
+              {isSubmitting ? "Processing..." : getEstimateButtonLabel(claimStatus)}
             </button>
           )}
         </div>
@@ -1066,7 +1070,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             disabled={isSubmitDisabled}
             onClick={handleSubmit}
           >
-            Revise Estimate
+            {isSubmitting ? "Processing..." : "Revise Estimate"}
           </button>
         </div>
 
