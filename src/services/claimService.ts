@@ -26,14 +26,11 @@ interface ClaimCancelReasonResponse {
 export const fetchClaims = async (
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload
 ) => {
-  return await getRequest<ClaimResponse>(
-    "partners/service-center-claim",
-    _params
-  );
+  return await getRequest<ClaimResponse>("claims", _params);
 };
 
 export const submitEstimate = async (claimID: number, body: FormData) => {
-  const endpoint = `service-center/submit/estimate/${claimID}`;
+  const endpoint = `estimate/submit/${claimID}`;
   return await postRequest<SubmitEstimate>(endpoint, body);
 };
 
@@ -42,7 +39,7 @@ export const handleBerDecision = async (
   berDecision: string,
   newDeviceAmount?: string
 ) => {
-  const endpoint = `claim/update/${claimID}`;
+  const endpoint = `claim/${claimID}/ber-decision`;
   const body: Record<string, string> = {
     update_type: "ber_decision",
     ber_decision: berDecision,
@@ -64,7 +61,7 @@ export const handleBerDecision = async (
 export const fetchClaimCancelReason =
   async (): Promise<ClaimCancelReasonResponse> => {
     try {
-      const response = await getRequest("claims/reasons");
+      const response = await getRequest("claims/cancel-reasons");
 
       if (response && response.success) {
         return response as ClaimCancelReasonResponse; // Explicitly cast response
@@ -78,12 +75,12 @@ export const fetchClaimCancelReason =
   };
 
 export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
-  const endpoint = `service-claim/document/submit/${claimID}`;
+  const endpoint = `final-document/submit/${claimID}`;
   return await postRequest<UploadFinalDocuments>(endpoint, body);
 };
 
 export const handleCancelClaim = async (claimID: number, reason: string) => {
-  const endpoint = `claim/update/${claimID}`;
+  const endpoint = `claim/${claimID}/cancel`;
   const body: Record<string, string> = {
     cancellation_reason: reason,
     cancelled_by: "Service Centre",
@@ -104,7 +101,7 @@ export const generatePaymentLink = async (
   paymentType: string,
   type: string
 ) => {
-  const endpoint = `payments/link`;
+  const endpoint = `repair/payments/link`;
   const body: GenerateLinkPaymentBody = {
     entity_id: claimID,
     payment_type: paymentType,
@@ -127,14 +124,14 @@ export const fetchTimeline = async (
   claimId: string | number,
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload
 ) => {
-  return await getRequest<ClaimTimeline>(`timeline/${claimId}`, _params);
+  return await getRequest<ClaimTimeline>(`claims/${claimId}/timeline`, _params);
 };
 
 export const uploadCustomerDocuments = async (
   claimID: number,
   body: FormData
 ) => {
-  const endpoint = `submit/customer/documents/${claimID}`;
+  const endpoint = `customer-documents/submit/${claimID}`;
   return await postRequest<UploadCustomerDocuments>(endpoint, body);
 };
 
@@ -172,9 +169,7 @@ export const addRemark = async (
 };
 
 export const getServiceCenterProfileData = async () => {
-  return await getRequest<ServiceCenterProfileResponse>(
-    "service_centres/detail"
-  );
+  return await getRequest<ServiceCenterProfileResponse>("detail");
 };
 
 export const fetchPlans = async (
@@ -183,7 +178,7 @@ export const fetchPlans = async (
     | ClaimFetchPayload
     | { string: "search_plan" }
 ) => {
-  return await getRequest<PolicyApiResponse>(`v2/orders/`, _params);
+  return await getRequest<PolicyApiResponse>(`orders`, _params);
 };
 
 // New function to validate estimate document
@@ -240,7 +235,7 @@ export const handlePickupTrackingStatus = async (
   claimID: number,
   pickup_status: string
 ) => {
-  const endpoint = `service-center/handle-pickup/${claimID}`;
+  const endpoint = `handle-pickup/${claimID}`;
   const body: Record<string, string> = {
     pickup_status: pickup_status,
   };
@@ -254,7 +249,10 @@ export const handlePickupTrackingStatus = async (
   }
 };
 
-export const validateImeiFromImage = async (claimId: number, file: File | string) => {
+export const validateImeiFromImage = async (
+  claimId: number,
+  file: File | string
+) => {
   try {
     const { externalApiRequest } = await import("@/utils/api");
 
@@ -264,7 +262,7 @@ export const validateImeiFromImage = async (claimId: number, file: File | string
     const formData = new FormData();
     formData.append("claim_id", String(claimId));
     formData.append("damage_image", file);
-    formData.append("flag", 'DAMAGE_IMAGE');
+    formData.append("flag", "DAMAGE_IMAGE");
 
     const response = await externalApiRequest<ImeiApi>(
       EXTERNAL_API_BASE_URL,

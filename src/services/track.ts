@@ -19,22 +19,24 @@ export interface TrackingData {
 }
 
 interface RawTrackingResponse {
-  result: string; // "1" | "0"
+  success: boolean; // "1" | "0"
   message: string;
   data?: TrackingData;
 }
 
 export async function fetchTrackingDetails(awb: string): Promise<TrackingData> {
   const resp = await getRequest<RawTrackingResponse>(
-    `v1/track-order?awb_number=${awb}`
+    `shipment/track-order?awb_number=${awb}`
   );
+
+  console.log(resp);
 
   if (!resp.success) {
     throw new Error(resp.message ?? "Failed to fetch tracking details.");
   }
 
   const inner = resp.data; // RawTrackingResponse
-  if (!inner || inner.result !== "1") {
+  if (!inner || inner.success !== true) {
     throw new Error(inner?.message || "Tracking details not available.");
   }
 

@@ -29,8 +29,7 @@ export interface ExportData {
 
 export interface ExportResponse {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: ExportData[];
 }
@@ -52,8 +51,7 @@ export type TabStatus = "success" | "error" | "empty";
 
 export interface SubmitEstimate {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: {
     message: string;
@@ -119,8 +117,7 @@ export interface Documents {
 
 export interface BerDecision {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data?: {
     claimID: number;
@@ -131,8 +128,7 @@ export interface BerDecision {
 
 export interface CancelClaim {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data?: {
     cancellation_reason: string;
@@ -143,8 +139,7 @@ export interface CancelClaim {
 
 export interface PickupTrackingResponse {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data?: {
     message: string;
@@ -171,8 +166,7 @@ export interface ClaimFetchPayload {
 
 export interface UploadFinalDocuments {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: {
     documentId: number;
@@ -184,8 +178,7 @@ export interface UploadFinalDocuments {
 
 export interface GeneratePaymentLink {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data?: {
     entity_id: number;
@@ -213,16 +206,14 @@ export interface TimelineEvent {
 
 export interface ClaimTimeline {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data?: TimelineEvent[];
 }
 
 export interface UploadCustomerDocuments {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: {
     claimID: number;
@@ -254,8 +245,7 @@ export interface Remark {
 
 export interface RemarksApiResponse {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: {
     items: Remark[];
@@ -269,8 +259,7 @@ export interface RemarkPayload {
 
 export interface ServiceCenterProfileResponse {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data?: ServiceCenterProfile;
 }
@@ -379,8 +368,7 @@ export interface PolicyResponseData {
 
 export interface PolicyApiResponse {
   success: boolean;
-  code: number;
-  locale: string;
+  status_code: number;
   message: string;
   data: PolicyResponseData;
 }
