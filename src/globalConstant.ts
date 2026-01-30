@@ -13,4 +13,6 @@ export const ALLOWED_ISSUERS = [
   "https://prod-platform.garantie.in/",
   "https://pyqa.garantie.in/",
   "https://py.garantie.in/",
+  "https://prod-garantie-cdn.s3.ap-south-1.amazonaws.com/",
+  "https://qa-garantie-cdn.s3.ap-south-1.amazonaws.com/"
 ];
