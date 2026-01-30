@@ -258,7 +258,7 @@ export const isIMEIFormat = (imei: string): boolean => {
   return /^\d{15}$/.test(imei);
 };
 
-export const decodeJWT = (token: string): any => {
+export const decodeJWT = (token: string) => {
   if (!token) return null;
 
   const payloadBase64 = token.split(".")[1];
