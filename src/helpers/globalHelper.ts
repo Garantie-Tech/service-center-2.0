@@ -257,3 +257,32 @@ export const getDocumentInfo = (
 export const isIMEIFormat = (imei: string): boolean => {
   return /^\d{15}$/.test(imei);
 };
+
+export const decodeJWT = (token: string) => {
+  if (!token) return null;
+
+  const payloadBase64 = token.split(".")[1];
+  if (!payloadBase64) return null;
+
+  // Base64URL → Base64
+  const base64 = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+
+  // Decode & parse JSON
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+};
+
+export const logoutUser = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    document.cookie = "token=; path=/; max-age=0; secure; samesite=strict";
+    window.location.href = "/login";
+  }
+};
