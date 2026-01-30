@@ -1,3 +1,5 @@
+import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { addCookie, getCookie } from "@/utils/cookieManager";
 
@@ -89,6 +91,10 @@ export async function resetPassword(
   credentials: ResetPasswordPayload
 ): Promise<ResetPasswordResponse> {
   const token = await getCookie("token");
+  const getTokenValue = decodeJWT(token || "");
+  if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+    logoutUser();
+  }
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/service/reset-password`,

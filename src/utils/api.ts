@@ -1,3 +1,5 @@
+import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import {
   ClaimFetchPayload,
   GenerateLinkPaymentBody,
@@ -49,6 +51,10 @@ export async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const token = await getCookie("token");
+    const getTokenValue = decodeJWT(token || "");
+    if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+      logoutUser();
+    }
 
     const headers: HeadersInit = {
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -140,6 +146,10 @@ export async function externalApiRequest<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const token = await getCookie("token");
+    const getTokenValue = decodeJWT(token || "");
+    if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+      logoutUser();
+    }
     const isForm = body instanceof FormData;
 
     const headers: HeadersInit = {
