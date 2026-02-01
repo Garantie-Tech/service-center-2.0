@@ -1,3 +1,5 @@
+import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { addCookie, getCookie } from "@/utils/cookieManager";
 
@@ -28,7 +30,6 @@ export type ResetPasswordPayload = {
 export type ResetPasswordResponse = {
   success: boolean;
   code?: string;
-  locale: string;
   message: string;
   data?: {
     status: string;
@@ -40,7 +41,7 @@ export async function loginService(
   credentials: LoginCredentials
 ): Promise<LoginResponse> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/login`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/service/login`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -58,6 +59,9 @@ export async function loginService(
   }
 
   const data = await response.json();
+  if (!data?.success) {
+    throw new Error(data?.message || "Invalid credentials");
+  }
 
   // Save necessary data in localStorage
   if (typeof window !== "undefined") {
@@ -87,6 +91,10 @@ export async function resetPassword(
   credentials: ResetPasswordPayload
 ): Promise<ResetPasswordResponse> {
   const token = await getCookie("token");
+  const getTokenValue = decodeJWT(token || "");
+  if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+    logoutUser();
+  }
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/service/reset-password`,
