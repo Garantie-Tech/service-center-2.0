@@ -7,3 +7,10 @@ export const SORT_OPTIONS = [
 export const MIN_DAMAGE_IMAGES = 5;
 export const MAX_DAMAGE_IMAGES = 11;
 export const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
+export const ALLOWED_ISSUERS = [
+  "https://qa-platform.garantie.in/",
+  "https://prod-platform.garantie.in/",
+  "https://pyqa.garantie.in/",
+  "https://py.garantie.in/",
+];

@@ -255,6 +255,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     replacementConfirmed: "no",
     damagePhotos: [],
     estimateDocument: null,
+    documents: undefined
   },
   setEstimateDetailsState: (updatedState) => {
     const currentState = get().estimateDetailsState;
@@ -269,6 +270,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
         replacementConfirmed: null,
         damagePhotos: [],
         estimateDocument: null,
+        documents: undefined
       },
     }),
   // Approval Details State

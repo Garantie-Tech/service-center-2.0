@@ -34,9 +34,9 @@ const RemarksComponent: React.FC<RemarksComponentProps> = ({
         if (
           response.success &&
           response.data &&
-          Array.isArray(response?.data?.data?.items)
+          Array.isArray(response?.data?.data)
         ) {
-          setRemarks(response?.data?.data?.items);
+          setRemarks(response?.data?.data);
         } else {
           setRemarks([]);
         }

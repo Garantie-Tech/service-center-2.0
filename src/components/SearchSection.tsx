@@ -10,6 +10,8 @@ import Link from "next/link";
 import StateMultiSelectDropdown from "./filters/StateMultiSelectDropdown";
 import { useEffect } from "react";
 import { StateMap } from "@/interfaces/GlobalInterface";
+import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
+import { ALLOWED_ISSUERS } from "@/globalConstant";
 
 const SearchSection: React.FC = () => {
   const {
@@ -76,14 +78,19 @@ const SearchSection: React.FC = () => {
 
       const params = new URLSearchParams(paramsObj).toString();
 
-      const exportUrl = `${API_BASE_URL}/service-centre/claims/export-claims?${params}`;
+      const exportUrl = `${API_BASE_URL}/service/claims/export-claims?${params}`;
 
       // 🔒 Include token if endpoint is protected
       setIsLoading(true);
+      const token = localStorage.getItem("token") || "";
+      const getTokenValue = decodeJWT(token || "");
+      if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+        logoutUser();
+      }
       const response = await fetch(exportUrl, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          Authorization: `Bearer ${token || ""}`,
           Accept: "text/csv",
         },
       });
