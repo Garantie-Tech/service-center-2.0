@@ -196,7 +196,10 @@ const ClaimList: React.FC = () => {
             setSelectedClaim(existingSelectedClaim);
             setClaimStatus(existingSelectedClaim.status);
             setActiveTab(
-              getActiveTab(existingSelectedClaim.status) as
+              getActiveTab(
+                existingSelectedClaim.status,
+                existingSelectedClaim
+              ) as
                 | "Claim Details"
                 | "Estimate"
                 | "Approval"
@@ -281,7 +284,7 @@ const ClaimList: React.FC = () => {
           currentClaim?.data?.replacement_payment?.replace_amount,
       });
       setActiveTab(
-        getActiveTab(currentClaim.status) as
+        getActiveTab(currentClaim.status, currentClaim) as
           | "Claim Details"
           | "Estimate"
           | "Approval"

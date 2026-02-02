@@ -25,7 +25,7 @@ export const isEstimateEditable = (claimStatus: string): boolean => {
   return false;
 };
 
-export const getActiveTab = (status: string): string => {
+export const getActiveTab = (status: string, selectedClaim: Claim): string => {
   if (
     status === "Claim Initiated" ||
     status === "Estimate Revised" ||
@@ -65,7 +65,16 @@ export const getActiveTab = (status: string): string => {
   ) {
     return "Settlement Details";
   }
-  if (status === "BER SETTLE") {
+  if (
+    status === "BER SETTLE" &&
+    selectedClaim?.customer_document_required == false
+  ) {
+    return "Approval";
+  }
+  if (
+    status === "BER SETTLE" &&
+    selectedClaim?.customer_document_required == true
+  ) {
     return "Customer Documents";
   }
 
@@ -111,8 +120,15 @@ export const getFilteredTabs = (
     return ["Claim Details", "Estimate"];
   }
 
-  if (["BER SETTLE"].includes(claimStatus)) {
+  if (
+    ["BER SETTLE"].includes(claimStatus) &&
+    selectedClaim?.customer_document_required == true
+  ) {
     return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
+  }
+
+  if (["BER SETTLE"].includes(claimStatus)) {
+    return ["Claim Details", "Estimate", "Approval"];
   }
 
   if (claimStatus === "Rejected") {
@@ -172,6 +188,7 @@ export const getFilteredTabs = (
       "BER Settlement Initiated",
       "BER Settlement Completed",
     ].includes(claimStatus) &&
+    selectedClaim?.customer_document_required == true &&
     selectedClaim?.documents?.["76"]?.status == 1
   ) {
     return [
@@ -181,6 +198,19 @@ export const getFilteredTabs = (
       "Customer Documents",
       "Settlement Details",
     ];
+  }
+
+  if (
+    [
+      "Closed",
+      "Settlement Completed",
+      "Settlement Initiated",
+      "BER Settlement Initiated",
+      "BER Settlement Completed",
+    ].includes(claimStatus) &&
+    selectedClaim?.customer_document_required == false
+  ) {
+    return ["Claim Details", "Estimate", "Approval", "Settlement Details"];
   }
 
   // return ["Claim Details", "Estimate", "Approval", "Final Documents"];

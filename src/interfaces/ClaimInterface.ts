@@ -89,6 +89,7 @@ export default interface Claim {
   available_for_pickup?: boolean;
   special_case?: boolean;
   pos?: string;
+  customer_document_required?: boolean;
 }
 
 export interface ClaimDetailsProps {
