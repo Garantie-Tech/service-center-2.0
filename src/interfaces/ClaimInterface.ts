@@ -88,6 +88,7 @@ export default interface Claim {
   device_invoice?: string | null;
   available_for_pickup?: boolean;
   pos?: string;
+  customer_document_required?: boolean;
 }
 
 export interface ClaimDetailsProps {
