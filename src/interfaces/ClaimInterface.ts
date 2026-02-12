@@ -90,6 +90,26 @@ export default interface Claim {
   special_case?: boolean;
   pos?: string;
   customer_document_required?: boolean;
+  additional_documents?: AdditionalDocumentsBySource;
+}
+
+export interface AdditionalDocumentItem {
+  name: string;
+  code: string | null;
+  custom: string | null;
+  files: string[];
+}
+
+/** Service center API returns only final and customer; estimate is omitted. */
+export interface AdditionalDocumentsBySource {
+  final: AdditionalDocumentItem[];
+  customer: AdditionalDocumentItem[];
+}
+
+export interface AdditionalDocumentSubType {
+  id: number;
+  name: string;
+  code: string;
 }
 
 export interface ClaimDetailsProps {

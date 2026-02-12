@@ -28,9 +28,9 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
   const imageUrls = useMemo(
     () =>
       images.map((img) =>
-        typeof img === "string" ? img : URL.createObjectURL(img)
+        typeof img === "string" ? img : URL.createObjectURL(img),
       ),
-    [images]
+    [images],
   );
 
   // 🔹 Cleanup URLs for File objects when unmounting (Memory Optimization)
@@ -99,68 +99,76 @@ const GalleryPopup: React.FC<GalleryPopupProps> = ({
         ))}
       </div>
 
-      {/* Popup Modal */}
+      {/* Popup Modal - width fits image to avoid left/right white space */}
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 w-full"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-3"
           onClick={closeGallery}
         >
           <div
-            className="relative p-[30px] bg-white rounded-lg shadow-lg"
+            className="relative flex flex-col bg-white rounded-xl shadow-2xl w-max max-w-[96vw] max-h-[96vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
-              className="absolute top-0 right-0 hover:text-gray-700"
+              type="button"
+              className="absolute top-2 right-2 z-10 rounded-lg bg-white/90 hover:bg-gray-100 shadow-sm border border-gray-200 transition-colors cursor-pointer"
               onClick={closeGallery}
+              aria-label="Close gallery"
             >
               <Image
                 src="/images/cross-square.svg"
-                alt="close gallery"
-                width={40}
-                height={40}
-                className="rounded-lg"
+                alt=""
+                width={20}
+                height={20}
+                className="rounded sm:w-8 sm:h-8"
               />
             </button>
 
-            {/* Image Display */}
-            {imageUrls[currentIndex ?? 0] && (
-              <Image
-                src={imageUrls[currentIndex ?? 0]}
-                alt={`Selected Image ${
-                  currentIndex !== null ? currentIndex + 1 : "1"
-                }`}
-                width={400}
-                height={300}
-                className="rounded-lg"
-              />
-            )}
+            {/* Image - native img so popup width = image width (no side gaps) */}
+            <div className="w-max max-w-[90vw] pt-11 sm:pt-12 px-3 sm:px-4 pb-2">
+              {imageUrls[currentIndex ?? 0] && (
+                <img
+                  src={imageUrls[currentIndex ?? 0]}
+                  alt={`Selected Image ${
+                    currentIndex !== null ? currentIndex + 1 : "1"
+                  }`}
+                  className="max-w-[90vw] max-h-[78vh] w-auto h-auto object-contain rounded-lg block"
+                  draggable={false}
+                />
+              )}
+            </div>
 
-            {/* Navigation Buttons */}
+            {/* Bottom bar: counter + navigation */}
             {images.length > 1 && (
-              <div className="flex justify-center gap-4 mt-4 text-xs">
+              <div className="flex items-center justify-center gap-4 sm:gap-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 shrink-0">
                 <button
-                  className={`px-4 py-2 bg-gray-300 rounded-md ${
+                  type="button"
+                  className={`shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     currentIndex === 0
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-gray-400"
+                      ? "opacity-40 cursor-not-allowed bg-gray-200 text-gray-500"
+                      : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                   }`}
                   onClick={prevImage}
                   disabled={currentIndex === 0}
                 >
-                  ◀
+                  ◀ Prev
                 </button>
-
+                <span className="text-sm font-medium text-gray-600 tabular-nums">
+                  {currentIndex !== null ? currentIndex + 1 : 1} /{" "}
+                  {images.length}
+                </span>
                 <button
-                  className={`px-4 py-2 bg-gray-300 rounded-md ${
+                  type="button"
+                  className={`shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     currentIndex === images.length - 1
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-gray-400"
+                      ? "opacity-40 cursor-not-allowed bg-gray-200 text-gray-500"
+                      : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                   }`}
                   onClick={nextImage}
                   disabled={currentIndex === images.length - 1}
                 >
-                  ▶
+                  Next ▶
                 </button>
               </div>
             )}
