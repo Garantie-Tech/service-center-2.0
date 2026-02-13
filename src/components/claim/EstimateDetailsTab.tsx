@@ -31,7 +31,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   onSubmit,
 }) => {
   const [damagePhotosError, setDamagePhotosError] = useState<string | null>(
-    null
+    null,
   );
 
   const [estimateDocumentError, setEstimateDocumentError] = useState<
@@ -81,7 +81,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     setIsFormDisabled(
       claimStatus === "Claim Submitted" ||
         claimStatus === "Invalid Documents" ||
-        claimStatus === "Estimate Revised"
+        claimStatus === "Estimate Revised",
     );
     setDamageMobileImeiImage("");
   }, [claimStatus, selectedClaim]);
@@ -191,13 +191,13 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const handleInputChange = <K extends keyof typeof estimateDetailsState>(
     key: K,
-    value: (typeof estimateDetailsState)[K]
+    value: (typeof estimateDetailsState)[K],
   ) => {
     setEstimateDetailsState({ [key]: value });
   };
 
   const handleDamagePhotoUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files);
@@ -205,7 +205,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
       if (damagePhotos.length + newFiles.length > MAX_DAMAGE_IMAGES - 1) {
         setDamagePhotosError(
-          `You can upload a maximum of ${MAX_DAMAGE_IMAGES - 1} images.`
+          `You can upload a maximum of ${MAX_DAMAGE_IMAGES - 1} images.`,
         );
         return;
       }
@@ -213,7 +213,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       try {
         // Compress all files
         const compressedFiles = await Promise.all(
-          newFiles.map((file) => compressImage(file))
+          newFiles.map((file) => compressImage(file)),
         );
 
         const updatedPhotos = [...damagePhotos, ...compressedFiles];
@@ -225,7 +225,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         // Show error if still below minimum after adding
         if (updatedPhotos.length < MIN_DAMAGE_IMAGES - 1) {
           setDamagePhotosError(
-            `Please upload Minimum ${MIN_DAMAGE_IMAGES - 1} images.`
+            `Please upload Minimum ${MIN_DAMAGE_IMAGES - 1} images.`,
           );
         } else {
           setDamagePhotosError(null);
@@ -240,7 +240,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   };
 
   const handleImeiDamagePhotoUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (event.target.files) {
       setIsValidatingDamageImei(true);
@@ -250,7 +250,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       try {
         // Compress file
         const compressedFiles = await Promise.all(
-          newFiles.map((file) => compressImage(file))
+          newFiles.map((file) => compressImage(file)),
         );
 
         const updatedPhotos = compressedFiles[0];
@@ -260,7 +260,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         event.target.value = "";
         const validationResponse = await validateImeiFromImage(
           Number(selectedClaim?.id),
-          updatedPhotos
+          updatedPhotos,
         );
 
         if (validationResponse.is_image_valid) {
@@ -268,13 +268,14 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           setIsValidatingDamageImei(false);
           if (validationResponse.message) {
             setDamageImeiValidationMessage(
-              validationResponse.message ?? "Imei Found in Image"
+              validationResponse.message ?? "Imei Found in Image",
             );
             setTimeout(() => setDamageImeiValidationMessage(null), 5000);
           }
         } else {
           setImeiDamageImageError(
-            validationResponse.message ?? "Damage Image Imei validation failed."
+            validationResponse.message ??
+              "Damage Image Imei validation failed.",
           );
           setDamageImeiValidationMessage(null);
           setIsValidatingDamageImei(false);
@@ -288,7 +289,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   };
 
   const handleEstimateDocumentUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
@@ -318,7 +319,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
       // Validate document with API
       const validationResponse = await validateEstimateDocument(
         Number(selectedClaim?.id),
-        base64Pdf
+        base64Pdf,
       );
 
       if (validationResponse.success) {
@@ -335,7 +336,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
         // Document validation failed
         setEstimateDetailsState({ estimateDocument: null });
         setEstimateDocumentError(
-          validationResponse.message || "Document validation failed."
+          validationResponse.message || "Document validation failed.",
         );
         setDocumentValidationMessage(null);
       }
@@ -354,7 +355,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     setEstimateDetailsState({ damagePhotos: updatedPhotos });
     if (updatedPhotos?.length < MIN_DAMAGE_IMAGES - 1) {
       setDamagePhotosError(
-        `Please upload Minimum ${MIN_DAMAGE_IMAGES - 1} images.`
+        `Please upload Minimum ${MIN_DAMAGE_IMAGES - 1} images.`,
       );
       return;
     }
@@ -399,7 +400,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     formData.append("job_sheet_number", jobSheetNumber);
     formData.append(
       "replacement_confirmed",
-      replacementConfirmed === true ? "yes" : "no"
+      replacementConfirmed === true ? "yes" : "no",
     );
 
     if (estimateDocument) {
@@ -531,8 +532,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   isFormDisabled
                     ? "bg-[#c9c9c9]"
                     : replacementConfirmed === true
-                    ? "bg-checkboxCheckedBg"
-                    : "bg-inputBg"
+                      ? "bg-checkboxCheckedBg"
+                      : "bg-inputBg"
                 }`}
                 onClick={() => handleReplacementSelection(true)}
                 disabled={isFormDisabled}
@@ -563,8 +564,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
                   isFormDisabled
                     ? "bg-[#c9c9c9]"
                     : replacementConfirmed === false
-                    ? "bg-checkboxCheckedBg"
-                    : "bg-inputBg"
+                      ? "bg-checkboxCheckedBg"
+                      : "bg-inputBg"
                 }`}
                 onClick={() => handleReplacementSelection(false)}
                 disabled={isFormDisabled}
@@ -607,7 +608,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               disabled={isSubmitDisabled}
               onClick={handleSubmit}
             >
-              {isSubmitting ? "Processing..." : getEstimateButtonLabel(claimStatus)}
+              {isSubmitting
+                ? "Processing..."
+                : getEstimateButtonLabel(claimStatus)}
             </button>
           )}
         </div>
@@ -913,7 +916,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
               </div>
             </>
           ) : damageImageStatus == true ? (
-            <span className="text-[#19AD61] text-xxs font-semibold block -mt-[15px] ml-[8px]">Valid</span>
+            <span className="text-[#19AD61] text-xxs font-semibold block -mt-[15px] ml-[8px]">
+              Valid
+            </span>
           ) : (
             <></>
           )}

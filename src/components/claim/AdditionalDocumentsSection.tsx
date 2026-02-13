@@ -7,6 +7,7 @@ import { uploadAdditionalDocuments } from "@/services/claimService";
 import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
 import GalleryPopup from "@/components/ui/GalleryPopup";
+import { getFileSizeError } from "@/utils/fileSizeValidation";
 
 function isPdfUrl(url: string): boolean {
   try {
@@ -46,6 +47,7 @@ export default function AdditionalDocumentsSection({
   const { notifySuccess, notifyError } = useNotification();
   const [selectedSubTypeId, setSelectedSubTypeId] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
+  const [fileSizeError, setFileSizeError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(false);
 
@@ -55,16 +57,25 @@ export default function AdditionalDocumentsSection({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const chosen = e.target.files ? Array.from(e.target.files) : [];
+    e.target.value = "";
+    setFileSizeError("");
+
+    const sizeError = getFileSizeError(chosen);
+    if (sizeError) {
+      setFileSizeError(sizeError);
+      return;
+    }
+
     const combined = [...files, ...chosen].slice(0, MAX_FILES);
     if (combined.length > MAX_FILES) {
       notifyError(`Maximum ${MAX_FILES} files allowed.`);
     }
     setFiles(combined);
-    e.target.value = "";
   };
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFileSizeError("");
   };
 
   const handleUpload = async () => {
@@ -250,6 +261,11 @@ export default function AdditionalDocumentsSection({
               <label className="block text-xs font-medium text-gray-600 mb-1.5">
                 Files (max {MAX_FILES}, PDF or image)
               </label>
+              {fileSizeError && (
+                <div className="mb-2 p-2 text-red-500 text-xs bg-red-50 border border-red-200 rounded">
+                  {fileSizeError}
+                </div>
+              )}
               <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                 <Image
                   src="/images/upload-icon.svg"
