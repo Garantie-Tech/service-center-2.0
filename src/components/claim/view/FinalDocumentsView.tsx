@@ -8,7 +8,7 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
   finalDocuments,
 }) => {
   // Function to check if a file is a PDF
-  const isPdf = (url: string) => url.toLowerCase().includes('.pdf');
+  const isPdf = (url: string) => url.toLowerCase().includes(".pdf");
 
   return (
     <div>
@@ -55,6 +55,21 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Device replacement (view) */}
+        {finalDocuments?.isImeiChanged && (
+          <div className="w-[45%]">
+            <div className="mt-4">
+              <h3 className="text-sm font-medium mb-2">Device replaced</h3>
+              <p className="text-sm text-[#374151]">Yes</p>
+              {finalDocuments?.newImei && (
+                <p className="text-sm text-[#6b7280] mt-1">
+                  New IMEI: {finalDocuments.newImei}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* replacement receipt */}
         <div className="w-[45%]">

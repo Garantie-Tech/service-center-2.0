@@ -23,6 +23,7 @@ export default interface Claim {
       date_of_damage?: string;
       damage_date?: string;
     };
+    replacement_imei?: string;
     replacement_payment?: {
       replace_payment_successful: boolean;
       replace_razorpay_order_id: string;
@@ -35,6 +36,8 @@ export default interface Claim {
   claimed_amount?: string;
   job_sheet_number?: string;
   imei_changed?: boolean;
+  is_imei_updated?: boolean;
+  new_imei_number?: string | null;
   mobile_damage_photos?: File[];
   documents?: {
     "15"?: DocumentItem;
@@ -91,6 +94,7 @@ export default interface Claim {
   pos?: string;
   customer_document_required?: boolean;
   additional_documents?: AdditionalDocumentsBySource;
+  show_device_replacement_section?: boolean;
 }
 
 export interface AdditionalDocumentItem {
@@ -191,6 +195,8 @@ export interface RepairedMobileSectionProps {
     repairMobilePhoto: string[] | null;
   };
   isMinThreeRepairImageRequired: boolean;
+  isSubmitDisabledByDeviceReplacement?: boolean;
+  deviceReplacement?: { is_imei_updated: boolean; new_imei_number?: string };
 }
 
 export interface FinalDocumentsSectionProps {
@@ -207,7 +213,8 @@ export interface FinalDocumentsSectionProps {
   isInvalidReplacementReceiptReason: string;
   isInvalidReplacementReceiptStatus: boolean | null;
   isValidReplacementReceipt: boolean;
-  isImeiChanged: boolean;
+  isImeiChanged?: boolean;
+  showReplacementReceiptSection?: boolean;
   finalDocuments: {
     repairInvoiceImage: string;
     replacementReceiptImage: string;
@@ -248,6 +255,8 @@ export interface DocumentActionButtonsProps {
   setReuploadFinalDocs: (value: boolean) => void;
   handleSubmit: () => void;
   isFinalDocValid?: boolean;
+  /** When true, Submit is disabled (e.g. device replaced Yes but New IMEI missing/invalid) */
+  isSubmitDisabledByDeviceReplacement?: boolean;
 }
 
 export interface FinalDocumentsViewProps {
@@ -256,6 +265,7 @@ export interface FinalDocumentsViewProps {
     repairMobilePhoto: string[] | null;
     replacementReceiptImage: string;
     isImeiChanged: boolean;
+    newImei?: string;
     shipmentReceipt?: string;
   };
 }

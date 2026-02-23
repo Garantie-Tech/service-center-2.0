@@ -75,9 +75,31 @@ export const fetchClaimCancelReason =
     }
   };
 
+/** Device replacement details sent with final-document/submit API */
+export interface DeviceReplacementForSubmit {
+  is_imei_updated: boolean;
+  new_imei_number?: string;
+}
+
 export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
   const endpoint = `final-document/submit/${claimID}`;
   return await postRequest<UploadFinalDocuments>(endpoint, body);
+};
+
+export interface DeviceReplacementPayload {
+  imei_changed: boolean;
+  new_imei_number?: string;
+}
+
+export const submitDeviceReplacement = async (
+  claimID: number,
+  body: DeviceReplacementPayload,
+) => {
+  const endpoint = `final-document/device-replacement/${claimID}`;
+  return await postRequest<{
+    success: boolean;
+    data?: { imei_changed: boolean; new_imei_number: string | null };
+  }>(endpoint, body);
 };
 
 export const handleCancelClaim = async (claimID: number, reason: string) => {

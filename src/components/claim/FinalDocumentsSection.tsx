@@ -18,11 +18,13 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   isInvalidReplacementReceiptReason,
   isInvalidReplacementReceiptStatus,
   isValidReplacementReceipt,
-  isImeiChanged,
+  showReplacementReceiptSection,
   finalDocuments,
   repairInvoiceError,
   replacementReceiptError,
 }) => {
+  // Use only server-driven prop so the Device replacement toggle (local state) never affects this section
+  const showReplacement = showReplacementReceiptSection === true;
   return (
     <div className="flex gap-8">
       {/* Repair Invoice PDF */}
@@ -79,9 +81,9 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
         )}
       </div>
 
-      {/* Replacement Receipt PDF */}
+      {/* Replacement Receipt PDF - visibility from server (showReplacementReceiptSection), not the Device replacement toggle */}
       <div className="w-1/2">
-        {isImeiChanged && (
+        {showReplacement && (
           <div className="">
             {/* Always show input for replacement receipt if reuploadFinalDocs is true and receipt is invalid or under review */}
             {(reuploadFinalDocs &&
@@ -132,7 +134,7 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               </span>
             ) : isInvalidReplacementReceiptStatus == null &&
               finalDocuments?.replacementReceiptImage &&
-              finalDocuments?.isImeiChanged ? (
+              showReplacement ? (
               <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
                 Uploaded (Under Review)
               </span>
