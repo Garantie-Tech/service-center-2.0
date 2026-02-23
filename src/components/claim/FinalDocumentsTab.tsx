@@ -31,6 +31,12 @@ const FinalDocumentsTab: React.FC = () => {
     setShowRepairMobilePhotoError,
     showReplacementReceiptError,
     setShowReplacementReceiptError,
+    isDeviceReplaced,
+    setIsDeviceReplaced,
+    newImei,
+    setNewImei,
+    newImeiError,
+    setNewImeiError,
 
     // Document info
     isImeiChanged,
@@ -49,11 +55,13 @@ const FinalDocumentsTab: React.FC = () => {
     isEditable,
     showReuploadButton,
     finalDocuments,
+    isImeiChangedFromServer,
 
     // Handlers
     handleSubmit,
     handleRepairInvoiceUpload,
     handleReplacementReceiptUpload,
+    isSubmitDisabledByDeviceReplacement,
     repairMobilePhotoInfo,
   } = useFinalDocuments();
 
@@ -95,23 +103,106 @@ const FinalDocumentsTab: React.FC = () => {
   //   selectedClaim?.pickup_tracking?.is_picked == true &&
   //   selectedClaim?.shipping_receipt != null;
   const isMinThreeRepairImageRequired =
-    !!selectedClaim?.available_for_pickup && !!selectedClaim?.customer_pickup_details;
+    !!selectedClaim?.available_for_pickup &&
+    !!selectedClaim?.customer_pickup_details;
 
   const showReadyforPickupSection =
     selectedClaim?.available_for_pickup &&
     selectedClaim?.customer_pickup_details != null &&
     selectedClaim?.final_documents == "valid";
 
+  const showDeviceReplacementSection =
+    selectedClaim?.show_device_replacement_section === true;
+
   return isEditable || showReadyforPickupSection ? (
     <div>
       <div>
+        {/* Device replacement - only when API says show_device_replacement_section (is_benefit_value_available && remaining_benefit_value > 0) */}
+        {showDeviceReplacementSection && (
+          <div className="mb-4 flex flex-wrap items-end gap-x-6 gap-y-3 rounded-lg border border-[#e5e7eb] bg-[#fafbfc] px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-[#374151] whitespace-nowrap">
+                Device replaced?
+              </span>
+              <div className="inline-flex rounded-full bg-[#e5e7eb] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDeviceReplaced(false);
+                    setNewImeiError(null);
+                  }}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    !isDeviceReplaced
+                      ? "bg-white text-[#181D27] shadow-sm"
+                      : "text-[#6b7280] hover:text-[#374151]"
+                  }`}
+                >
+                  No
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDeviceReplaced(true)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    isDeviceReplaced
+                      ? "bg-primaryBlue text-white shadow-sm"
+                      : "text-[#6b7280] hover:text-[#374151]"
+                  }`}
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+            {isDeviceReplaced && (
+              <div className="flex items-center gap-2 animate-in fade-in duration-200">
+                <label className="text-xs font-medium text-[#374151] whitespace-nowrap">
+                  New IMEI <span className="text-[#dc2626]">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={15}
+                  placeholder="15 digits"
+                  value={newImei}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, "");
+                    setNewImei(v);
+                    setNewImeiError(null);
+                  }}
+                  className={`min-w-[12rem] w-52 rounded-md border bg-white px-2.5 py-1.5 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
+                    newImeiError
+                      ? "border-[#dc2626] focus:border-[#dc2626]"
+                      : "border-[#e5e7eb] focus:border-primaryBlue"
+                  }`}
+                />
+                {newImei && (
+                  <span className="text-[10px] text-[#6b7280] tabular-nums">
+                    {newImei.length}/15
+                  </span>
+                )}
+                {newImeiError && (
+                  <span className="text-xs text-[#dc2626] font-medium max-w-[140px]">
+                    {newImeiError}
+                  </span>
+                )}
+              </div>
+            )}
+            {isDeviceReplaced && (
+              <p className="text-[11px] text-[#6b7280] w-full mt-0.5">
+                {isSubmitDisabledByDeviceReplacement
+                  ? "Enter valid 15-digit New IMEI to enable Submit."
+                  : "Replacement receipt required with final documents below."}
+              </p>
+            )}
+          </div>
+        )}
+
         <h2 className="text-lg font-semibold mb-4">Repair Mobile Images</h2>
 
         <DocumentErrorAlerts
           isInvalidRepairInvoice={isInvalidRepairInvoice}
           isInvalidRepairMobilePhoto={isInvalidRepairMobilePhoto}
           isInvalidReplacementReceipt={isInvalidReplacementReceipt}
-          isImeiChanged={isImeiChanged}
+          isImeiChanged={isImeiChangedFromServer || isImeiChanged}
           showRepairInvoiceError={showRepairInvoiceError}
           showRepairMobilePhotoError={showRepairMobilePhotoError}
           showReplacementReceiptError={showReplacementReceiptError}
@@ -140,6 +231,20 @@ const FinalDocumentsTab: React.FC = () => {
             isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
             finalDocuments={finalDocuments}
             isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
+            isSubmitDisabledByDeviceReplacement={
+              isSubmitDisabledByDeviceReplacement
+            }
+            deviceReplacement={
+              showDeviceReplacementSection
+                ? {
+                    is_imei_updated: isDeviceReplaced,
+                    new_imei_number:
+                      isDeviceReplaced && newImei.trim()
+                        ? newImei.trim()
+                        : undefined,
+                  }
+                : undefined
+            }
           />
           <div className="w-1/2">
             {/* shipment details  */}
@@ -149,7 +254,9 @@ const FinalDocumentsTab: React.FC = () => {
                   isValidRepairMobilePhoto={isValidRepairMobilePhoto}
                   repairedMobilePhotos={repairedMobilePhotos}
                   isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
-                  isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
+                  isInvalidRepairMobilePhotoStatus={
+                    isInvalidRepairMobilePhotoStatus
+                  }
                 />
               )}
           </div>
@@ -179,7 +286,10 @@ const FinalDocumentsTab: React.FC = () => {
               isInvalidReplacementReceiptStatus
             }
             isValidReplacementReceipt={isValidReplacementReceipt}
-            isImeiChanged={isImeiChanged}
+            isImeiChanged={isImeiChangedFromServer}
+            showReplacementReceiptSection={
+              isImeiChanged || isImeiChangedFromServer
+            }
             finalDocuments={finalDocuments}
             repairInvoiceError={repairInvoiceError}
             replacementReceiptError={replacementReceiptError}
@@ -190,10 +300,15 @@ const FinalDocumentsTab: React.FC = () => {
             reuploadFinalDocs={reuploadFinalDocs}
             showReuploadButton={showReuploadButton}
             finalDocuments={finalDocuments}
-            isImeiChanged={isImeiChanged}
+            isImeiChanged={isImeiChangedFromServer}
             setReuploadFinalDocs={setReuploadFinalDocs}
             handleSubmit={handleSubmit}
-            isFinalDocValid = {selectedClaim?.final_documents == "valid" ? true : false}
+            isFinalDocValid={
+              selectedClaim?.final_documents == "valid" ? true : false
+            }
+            isSubmitDisabledByDeviceReplacement={
+              isSubmitDisabledByDeviceReplacement
+            }
           />
         </div>
       )}

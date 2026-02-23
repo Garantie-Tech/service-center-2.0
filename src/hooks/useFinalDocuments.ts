@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
 import { uploadFinalDocuments } from "@/services/claimService";
-import { getDocumentInfo } from "@/helpers/globalHelper";
+import { getDocumentInfo, isIMEIFormat } from "@/helpers/globalHelper";
 
 export const useFinalDocuments = () => {
   const [repairInvoice, setRepairInvoice] = useState<File[] | undefined>(
-    undefined
+    undefined,
   );
   const [replacementReceipt, setReplacementReceipt] = useState<File[]>([]);
   const [repairedMobilePhotos, setRepairedMobilePhotos] = useState<File[]>([]);
@@ -20,11 +20,27 @@ export const useFinalDocuments = () => {
     useState(true);
   const [showReplacementReceiptError, setShowReplacementReceiptError] =
     useState(true);
+  const [isDeviceReplaced, setIsDeviceReplaced] = useState(false);
+  const [newImei, setNewImei] = useState("");
+  const [newImeiError, setNewImeiError] = useState<string | null>(null);
 
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
 
-  const isImeiChanged = selectedClaim?.imei_changed ? true : false;
+  const showDeviceReplacementSection =
+    selectedClaim?.show_device_replacement_section === true;
+  const isImeiChanged = showDeviceReplacementSection && isDeviceReplaced;
+  const isImeiChangedFromServer = !!(
+    selectedClaim?.is_imei_updated || selectedClaim?.imei_changed
+  );
+
+  const hasValidNewImei =
+    showDeviceReplacementSection &&
+    isDeviceReplaced &&
+    newImei.trim().length === 15 &&
+    isIMEIFormat(newImei.trim());
+  const isSubmitDisabledByDeviceReplacement =
+    showDeviceReplacementSection && isDeviceReplaced && !hasValidNewImei;
 
   // Get document info for each type
   const repairInvoiceInfo = getDocumentInfo(selectedClaim, "16");
@@ -49,10 +65,11 @@ export const useFinalDocuments = () => {
   const isValidRepairMobilePhoto = repairMobilePhotoInfo.isValid;
   const isValidReplacementReceipt = replacementReceiptInfo.isValid;
 
+  const replacementReceiptApplicable = isImeiChangedFromServer || isImeiChanged;
   const isEditable =
     isInvalidRepairInvoice ||
     isInvalidRepairMobilePhoto ||
-    (isImeiChanged && isInvalidReplacementReceipt) ||
+    (replacementReceiptApplicable && isInvalidReplacementReceipt) ||
     repairInvoiceInfo.statusValue === null ||
     repairMobilePhotoInfo.statusValue === null ||
     replacementReceiptInfo.statusValue === null;
@@ -60,7 +77,7 @@ export const useFinalDocuments = () => {
   const showReuploadButton =
     isInvalidRepairInvoice ||
     isInvalidRepairMobilePhoto ||
-    (isImeiChanged && isInvalidReplacementReceipt) ||
+    (replacementReceiptApplicable && isInvalidReplacementReceipt) ||
     repairInvoiceInfo.hasInvalidStatus ||
     repairMobilePhotoInfo.hasInvalidStatus ||
     replacementReceiptInfo.hasInvalidStatus;
@@ -70,14 +87,22 @@ export const useFinalDocuments = () => {
     repairInvoiceImage: selectedClaim?.documents?.["16"]?.url ?? "",
     repairMobilePhoto: selectedClaim?.repaired_mobile_images ?? [],
     replacementReceiptImage: selectedClaim?.documents?.["75"]?.url ?? "",
-    isImeiChanged: isImeiChanged,
+    isImeiChanged: isImeiChangedFromServer || isImeiChanged,
+    new_imei_number: isImeiChanged
+      ? ((newImei ||
+          selectedClaim?.new_imei_number ||
+          selectedClaim?.data?.replacement_imei) ??
+        "")
+      : "",
     shipmentReceipt: selectedClaim?.shipping_receipt ?? undefined,
   };
 
   const showSubmitButton =
-    repairInvoiceInfo.statusValue != true ||
-    repairMobilePhotoInfo.statusValue != true ||
-    (replacementReceiptInfo.statusValue != true && isImeiChanged);
+    (repairInvoiceInfo.statusValue != true ||
+      repairMobilePhotoInfo.statusValue != true ||
+      (replacementReceiptInfo.statusValue != true &&
+        replacementReceiptApplicable)) &&
+    !isSubmitDisabledByDeviceReplacement;
 
   const handleSubmit = async () => {
     const formData = new FormData();
@@ -101,7 +126,7 @@ export const useFinalDocuments = () => {
       }
 
       if (
-        selectedClaim?.imei_changed &&
+        replacementReceiptApplicable &&
         isValidRepairMobilePhoto &&
         (!replacementReceipt || replacementReceipt.length === 0) &&
         !selectedClaim?.documents?.["75"]?.url
@@ -109,12 +134,28 @@ export const useFinalDocuments = () => {
         notifyError("Please Upload Replacement Receipt");
         return;
       }
+
+      if (showDeviceReplacementSection && isDeviceReplaced) {
+        const trimmedImei = newImei.trim();
+        if (!trimmedImei) {
+          setNewImeiError("Please enter the new IMEI number");
+          notifyError("Please enter the New IMEI when device is replaced.");
+          return;
+        }
+        if (!isIMEIFormat(trimmedImei)) {
+          setNewImeiError("IMEI must be exactly 15 digits");
+          notifyError("Please enter a valid 15-digit IMEI number.");
+          return;
+        }
+        setNewImeiError(null);
+      }
+
       setIsLoading(true);
 
       // Helper function to append files in required format
       const appendFiles = (
         files: File[] | undefined,
-        documentTypeId: number
+        documentTypeId: number,
       ) => {
         if (!files) return;
         files.forEach((file) => {
@@ -122,7 +163,7 @@ export const useFinalDocuments = () => {
           formData.append(`${documentTypeId}[document]`, file);
           formData.append(
             `${documentTypeId}[document_type_id]`,
-            documentTypeId.toString()
+            documentTypeId.toString(),
           );
         });
       };
@@ -133,11 +174,18 @@ export const useFinalDocuments = () => {
       if (repairedMobilePhotos) {
         appendFiles(repairedMobilePhotos, 74);
       }
-      if (selectedClaim?.imei_changed) {
+      if (replacementReceiptApplicable) {
         appendFiles(replacementReceipt, 75);
       }
 
-      // Send formData to API
+      // Device replacement: only when section is visible and user chose Yes
+      if (showDeviceReplacementSection) {
+        formData.append("is_imei_updated", isDeviceReplaced ? "1" : "0");
+        if (isDeviceReplaced && newImei.trim()) {
+          formData.append("new_imei_number", newImei.trim());
+        }
+      }
+
       const response = await uploadFinalDocuments(
         Number(selectedClaim?.id),
         formData
@@ -172,6 +220,34 @@ export const useFinalDocuments = () => {
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
 
+  useEffect(() => {
+    if (selectedClaim) {
+      const showSection =
+        selectedClaim.show_device_replacement_section === true;
+      if (!showSection) {
+        setIsDeviceReplaced(false);
+        setNewImei("");
+        setNewImeiError(null);
+      } else {
+        setIsDeviceReplaced(
+          !!(selectedClaim.is_imei_updated || selectedClaim.imei_changed),
+        );
+        setNewImei(
+          (selectedClaim.new_imei_number ||
+            selectedClaim.data?.replacement_imei) ??
+            "",
+        );
+      }
+    }
+  }, [
+    selectedClaim?.id,
+    selectedClaim?.show_device_replacement_section,
+    selectedClaim?.is_imei_updated,
+    selectedClaim?.imei_changed,
+    selectedClaim?.new_imei_number,
+    selectedClaim?.data?.replacement_imei,
+  ]);
+
   return {
     // State
     repairInvoice,
@@ -194,6 +270,12 @@ export const useFinalDocuments = () => {
     setShowRepairMobilePhotoError,
     showReplacementReceiptError,
     setShowReplacementReceiptError,
+    isDeviceReplaced,
+    setIsDeviceReplaced,
+    newImei,
+    setNewImei,
+    newImeiError,
+    setNewImeiError,
 
     // Document info
     isImeiChanged,
@@ -213,6 +295,8 @@ export const useFinalDocuments = () => {
     showReuploadButton,
     finalDocuments,
     showSubmitButton,
+    isImeiChangedFromServer,
+    isSubmitDisabledByDeviceReplacement,
 
     // Handlers
     handleSubmit,

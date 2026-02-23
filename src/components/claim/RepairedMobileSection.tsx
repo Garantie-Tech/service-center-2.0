@@ -19,6 +19,8 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
   isInvalidRepairMobilePhotoStatus,
   finalDocuments,
   isMinThreeRepairImageRequired,
+  isSubmitDisabledByDeviceReplacement = false,
+  deviceReplacement,
 }) => {
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -51,6 +53,16 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
         }
       }
       formData.append(`74[document][]`, fileToUpload);
+    }
+
+    if (deviceReplacement) {
+      formData.append(
+        "is_imei_updated",
+        deviceReplacement.is_imei_updated ? "1" : "0",
+      );
+      if (deviceReplacement.new_imei_number) {
+        formData.append("new_imei_number", deviceReplacement.new_imei_number);
+      }
     }
 
     const uploadResponse = await uploadFinalDocuments(
@@ -96,16 +108,18 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
               {repairedMobilePhotos.length > 5
                 ? `You have selected ${repairedMobilePhotos.length}. Maximum 5 images allowed.`
                 : isMinThreeRepairImageRequired &&
-                  repairedMobilePhotos.length < 3
-                ? `You have selected ${repairedMobilePhotos.length}. Please select at least 3 images.`
-                : `You have selected ${repairedMobilePhotos.length} images.`}
+                    repairedMobilePhotos.length < 3
+                  ? `You have selected ${repairedMobilePhotos.length}. Please select at least 3 images.`
+                  : `You have selected ${repairedMobilePhotos.length} images.`}
             </div>
           )}
 
           <button
-            className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
+            type="button"
+            className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             onClick={handleMobilePhotoUpload}
             disabled={
+              isSubmitDisabledByDeviceReplacement ||
               repairedMobilePhotos.length > 5 ||
               (isMinThreeRepairImageRequired && repairedMobilePhotos.length < 3)
             }

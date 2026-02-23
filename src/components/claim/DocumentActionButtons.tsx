@@ -9,21 +9,25 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
   isImeiChanged,
   setReuploadFinalDocs,
   handleSubmit,
-  isFinalDocValid
+  isFinalDocValid,
+  isSubmitDisabledByDeviceReplacement = false,
 }) => {
+  const submitDisabled = isSubmitDisabledByDeviceReplacement;
   return (
     <>
       {!finalDocuments.repairInvoiceImage &&
-      (!isImeiChanged ||
-        (isImeiChanged && !isFinalDocValid)) ? (
+      (!isImeiChanged || (isImeiChanged && !isFinalDocValid)) ? (
         <button
-          className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
+          type="button"
+          className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={handleSubmit}
+          disabled={submitDisabled}
         >
           Submit
         </button>
       ) : !reuploadFinalDocs && showReuploadButton ? (
         <button
+          type="button"
           className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
           onClick={() => setReuploadFinalDocs(true)}
         >
@@ -31,8 +35,10 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
         </button>
       ) : reuploadFinalDocs ? (
         <button
-          className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
+          type="button"
+          className="btn w-1/4 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={handleSubmit}
+          disabled={submitDisabled}
         >
           Submit
         </button>
