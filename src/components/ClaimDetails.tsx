@@ -50,7 +50,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
       const response = await addRemark(
         Number(selectedClaim?.id),
         "Service Centre",
-        remark
+        remark,
       );
 
       if (!response) {
@@ -238,7 +238,10 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
         {activeTab === "Approval" && <ApprovalDetailsTab />}
         {activeTab === "Final Documents" && <FinalDocumentsTab />}
         {activeTab === "Customer Documents" && (
-          <CustomerDocumentsTab documents={customerDocuments} />
+          <CustomerDocumentsTab
+            documents={customerDocuments}
+            accessoryOnly={selectedClaim?.customer_document_required === false}
+          />
         )}
         {activeTab === "Cancelled" && <CancelledClaim data={cancelledData} />}
         {activeTab === "Rejected" && <RejectedClaim data={rejectedData} />}
