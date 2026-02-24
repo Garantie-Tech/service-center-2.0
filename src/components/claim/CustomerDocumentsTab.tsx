@@ -6,13 +6,17 @@ import { useEffect, useState } from "react";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { useNotification } from "@/context/NotificationProvider";
 import { useGlobalStore } from "@/store/store";
-import { uploadCustomerDocuments } from "@/services/claimService";
+import {
+  uploadCustomerDocuments,
+  saveAccessoryProvided,
+} from "@/services/claimService";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import { handleFileUploadWithCompression } from "@/utils/handleFileUploadWithCompression";
 
 const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   documents,
+  accessoryOnly = false,
 }) => {
   const { notifySuccess, notifyError } = useNotification();
   const {
@@ -29,7 +33,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const [bankDetailImage, setBankDetailImage] = useState<File[]>([]);
   const [panCardImage, setPanCardImage] = useState<File[]>([]);
   const [accessoriesProvided, setAccessoriesProvided] = useState<string | null>(
-    ""
+    "",
   );
   const [reupload, setReupload] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
@@ -45,19 +49,19 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   // Utility function to get document status
   const getDocumentStatus = (
     status?: number | string | null,
-    url?: string | null
+    url?: string | null,
   ) => {
     return status == 1 && url
       ? "valid"
       : status == 0 && url
-      ? "invalid"
-      : "pending";
+        ? "invalid"
+        : "pending";
   };
 
   // Utility function to check if a document is valid
   const isValidDocument = (
     status?: number | string | null,
-    url?: string | null
+    url?: string | null,
   ) => status == 1 && !!url;
 
   // Utility function to get invalid reason
@@ -73,23 +77,23 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   // Validate Documents
   const isValidAadharFrontImage = isValidDocument(
     aadharDocuments?.[76]?.status,
-    aadharFrontImageUrl
+    aadharFrontImageUrl,
   );
   const isValidAadharBackImage = isValidDocument(
     aadharDocuments?.[76]?.status,
-    aadharBackImageUrl
+    aadharBackImageUrl,
   );
   const isValidBankDetail = isValidDocument(
     bankDetails?.status,
-    bankDetailImageUrl
+    bankDetailImageUrl,
   );
 
   // Get Invalid Reasons
   const invalidAadharFrontImageReason = getInvalidReason(
-    aadharDocuments?.[76]?.status_reason
+    aadharDocuments?.[76]?.status_reason,
   );
   const invalidAadharBackImageReason = getInvalidReason(
-    aadharDocuments?.[76]?.status_reason
+    aadharDocuments?.[76]?.status_reason,
   );
   const invalidBankDetailReason = getInvalidReason(bankDetails?.status_reason);
   const invalidPancardReason = getInvalidReason(panCard?.status_reason);
@@ -97,15 +101,15 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   // Get Document Status
   const aadharFrontImageStatus = getDocumentStatus(
     aadharDocuments?.[76]?.status,
-    aadharFrontImageUrl
+    aadharFrontImageUrl,
   );
   const aadharBackImageStatus = getDocumentStatus(
     aadharDocuments?.[76]?.status,
-    aadharBackImageUrl
+    aadharBackImageUrl,
   );
   const bankDetailsStatus = getDocumentStatus(
     bankDetails?.status,
-    bankDetailImageUrl
+    bankDetailImageUrl,
   );
   const panCardStatus = getDocumentStatus(panCard?.status, pancardImageUrl);
 
@@ -122,74 +126,76 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     files: File[],
     documentTypeId: number | string,
     formData: FormData,
-    subTypes?: string[]
+    subTypes?: string[],
   ) => {
     files.forEach((file, index) => {
       if (subTypes) {
         // ✅ Properly index front & back with `index`
         formData.append(
           `documents[${documentTypeId}][${index}][document_type_id]`,
-          `${documentTypeId}_${subTypes[index]}`
+          `${documentTypeId}_${subTypes[index]}`,
         );
         formData.append(`documents[${documentTypeId}][${index}][file]`, file);
       } else {
         // ✅ Single document case
         formData.append(
           `documents[${documentTypeId}][document_type_id]`,
-          documentTypeId.toString()
+          documentTypeId.toString(),
         );
         formData.append(`documents[${documentTypeId}][file]`, file);
       }
     });
   };
 
-  // Handle form submission
+  // Handle form submission (full documents or accessory-only)
   const handleSubmit = async () => {
+    const value =
+      accessoriesProvided === "yes" || accessoriesProvided === "no"
+        ? accessoriesProvided
+        : "no";
     try {
       setIsLoading(true);
+      if (accessoryOnly) {
+        const response = await saveAccessoryProvided(
+          Number(selectedClaim?.id),
+          value as "yes" | "no",
+        );
+        if (response.success) {
+          notifySuccess("Accessory provided saved successfully!");
+          triggerClaimRefresh();
+        } else {
+          notifyError(response.error || "Failed to save.");
+        }
+        return;
+      }
       const formData = new FormData();
-
-      // ✅ Ensure claim_id is valid
       if (selectedClaim?.id) {
         formData.append("claim_id", String(selectedClaim.id));
       }
-
-      // ✅ Append Aadhar Front & Back with correct indices
       const aadharImages: File[] = [];
       const aadharSubTypes: string[] = [];
-
       if (aadharFrontSideImage.length > 0) {
         aadharImages.push(aadharFrontSideImage[0]);
         aadharSubTypes.push("front");
       }
-
       if (aadharBackSideImage.length > 0) {
         aadharImages.push(aadharBackSideImage[0]);
         aadharSubTypes.push("back");
       }
-
       if (aadharImages.length > 0) {
         appendFiles(aadharImages, 76, formData, aadharSubTypes);
       }
-
-      // ✅ Append Bank Details
       if (bankDetailImage) {
         appendFiles(bankDetailImage, 77, formData);
       }
-
-      // ✅ Append PAN Card if available
       if (panCardImage.length > 0) {
         appendFiles(panCardImage, 78, formData);
       }
-
-      // ✅ Append Accessories Provided
-      formData.append("accessory_provided", accessoriesProvided || "no");
-
+      formData.append("accessory_provided", value);
       const response = await uploadCustomerDocuments(
         Number(selectedClaim?.id),
-        formData
+        formData,
       );
-
       if (response.success) {
         notifySuccess("Documents uploaded successfully!");
         triggerClaimRefresh();
@@ -197,8 +203,17 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
         notifyError("Failed to upload documents.");
       }
     } catch (error) {
-      console.error("Error uploading documents:", error);
-      notifyError("An error occurred while uploading documents.");
+      console.error(
+        accessoryOnly
+          ? "Error saving accessory provided:"
+          : "Error uploading documents:",
+        error,
+      );
+      notifyError(
+        accessoryOnly
+          ? "An error occurred while saving."
+          : "An error occurred while uploading documents.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -221,19 +236,21 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const isFormEditable = true;
 
   useEffect(() => {
+    const accessoriesSelected =
+      accessoriesProvided === "yes" || accessoriesProvided === "no";
+    if (accessoryOnly) {
+      setIsSubmitDisabled(!accessoriesSelected);
+      return;
+    }
     const allMandatoryUploaded =
       (aadharFrontSideImage?.length > 0 ||
         aadharFrontImageStatus === "valid") &&
       (aadharBackSideImage?.length > 0 || aadharBackImageStatus === "valid") &&
       (bankDetailImage?.length > 0 || bankDetailsStatus === "valid");
-
-    const accessoriesSelected =
-      accessoriesProvided === "yes" || accessoriesProvided === "no";
-
     const shouldDisableSubmit = !allMandatoryUploaded || !accessoriesSelected;
-
     setIsSubmitDisabled(shouldDisableSubmit);
   }, [
+    accessoryOnly,
     aadharFrontSideImage,
     aadharBackSideImage,
     bankDetailImage,
@@ -267,6 +284,65 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const handlePanCardUpload = async (files: File[]) => {
     await handleFileUploadWithCompression(files, setPanCardImage);
   };
+
+  const accessoryAlreadySaved =
+    documents?.accessoriesProvided === "yes" ||
+    documents?.accessoriesProvided === "no";
+
+  if (accessoryOnly) {
+    return (
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Customer Documents</h2>
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded">
+          <p className="font-medium">
+            Documents are not required for this claim.
+          </p>
+        </div>
+        <div className="mt-6">
+          <h3 className="text-sm font-medium mb-2 text-primaryDark">
+            Accessories Provided:
+          </h3>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="accessoriesProvided"
+                value="yes"
+                className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
+                checked={accessoriesProvided === "yes"}
+                onChange={() => handleAccessoriesClick("yes")}
+              />
+              <span>Yes</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="accessoriesProvided"
+                value="no"
+                className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
+                checked={accessoriesProvided === "no"}
+                onChange={() => handleAccessoriesClick("no")}
+              />
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+        {!accessoryAlreadySaved && (
+          <button
+            className={`btn mt-6 px-6 py-2 rounded-md ${
+              isSubmitDisabled
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-primaryBlue text-white hover:bg-blue-700"
+            }`}
+            disabled={isSubmitDisabled || isLoading}
+            onClick={handleSubmit}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -25,7 +25,7 @@ export const isEstimateEditable = (claimStatus: string): boolean => {
   return false;
 };
 
-export const getActiveTab = (status: string, selectedClaim: Claim): string => {
+export const getActiveTab = (status: string): string => {
   if (
     status === "Claim Initiated" ||
     status === "Estimate Revised" ||
@@ -65,16 +65,7 @@ export const getActiveTab = (status: string, selectedClaim: Claim): string => {
   ) {
     return "Settlement Details";
   }
-  if (
-    status === "BER SETTLE" &&
-    selectedClaim?.customer_document_required == false
-  ) {
-    return "Approval";
-  }
-  if (
-    status === "BER SETTLE" &&
-    selectedClaim?.customer_document_required == true
-  ) {
+  if (status === "BER SETTLE") {
     return "Customer Documents";
   }
 
@@ -86,7 +77,7 @@ export const getActiveTab = (status: string, selectedClaim: Claim): string => {
 
 export const getFilteredTabs = (
   claimStatus: string,
-  selectedClaim: Claim
+  selectedClaim: Claim,
 ): Tab[] => {
   if (["Claim Initiated", "Claim Submitted"].includes(claimStatus)) {
     return ["Claim Details", "Estimate"];
@@ -120,15 +111,8 @@ export const getFilteredTabs = (
     return ["Claim Details", "Estimate"];
   }
 
-  if (
-    ["BER SETTLE"].includes(claimStatus) &&
-    selectedClaim?.customer_document_required == true
-  ) {
-    return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
-  }
-
   if (["BER SETTLE"].includes(claimStatus)) {
-    return ["Claim Details", "Estimate", "Approval"];
+    return ["Claim Details", "Estimate", "Approval", "Customer Documents"];
   }
 
   if (claimStatus === "Rejected") {
@@ -207,10 +191,15 @@ export const getFilteredTabs = (
       "Settlement Initiated",
       "BER Settlement Initiated",
       "BER Settlement Completed",
-    ].includes(claimStatus) &&
-    selectedClaim?.customer_document_required == false
+    ].includes(claimStatus)
   ) {
-    return ["Claim Details", "Estimate", "Approval", "Settlement Details"];
+    return [
+      "Claim Details",
+      "Estimate",
+      "Approval",
+      "Customer Documents",
+      "Settlement Details",
+    ];
   }
 
   // return ["Claim Details", "Estimate", "Approval", "Final Documents"];
@@ -219,7 +208,7 @@ export const getFilteredTabs = (
 
 export const getTabStatus = (
   tab: Tab,
-  selectedClaim: Claim | null
+  selectedClaim: Claim | null,
 ): TabStatus => {
   if (!selectedClaim) return "empty";
 
@@ -259,7 +248,7 @@ export const getStatusIcon = (status: TabStatus): string | null => {
 
 export const getDocumentInfo = (
   selectedClaim: Claim | null,
-  docKey: "16" | "74" | "75"
+  docKey: "16" | "74" | "75",
 ) => {
   const doc = selectedClaim?.documents?.[docKey];
   const status = doc?.status;
@@ -302,7 +291,7 @@ export const decodeJWT = (token: string) => {
     atob(base64)
       .split("")
       .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join("")
+      .join(""),
   );
 
   return JSON.parse(jsonPayload);
