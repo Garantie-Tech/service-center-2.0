@@ -6,6 +6,7 @@ import RepairedMobileSection from "@/components/claim/RepairedMobileSection";
 import FinalDocumentsSection from "@/components/claim/FinalDocumentsSection";
 import DocumentErrorAlerts from "@/components/claim/DocumentErrorAlerts";
 import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
+import AdditionalDocumentsSection from "@/components/claim/AdditionalDocumentsSection";
 import { useFinalDocuments } from "@/hooks/useFinalDocuments";
 
 const FinalDocumentsTab: React.FC = () => {
@@ -95,7 +96,8 @@ const FinalDocumentsTab: React.FC = () => {
   //   selectedClaim?.pickup_tracking?.is_picked == true &&
   //   selectedClaim?.shipping_receipt != null;
   const isMinThreeRepairImageRequired =
-    !!selectedClaim?.available_for_pickup && !!selectedClaim?.customer_pickup_details;
+    !!selectedClaim?.available_for_pickup &&
+    !!selectedClaim?.customer_pickup_details;
 
   const showReadyforPickupSection =
     selectedClaim?.available_for_pickup &&
@@ -149,7 +151,9 @@ const FinalDocumentsTab: React.FC = () => {
                   isValidRepairMobilePhoto={isValidRepairMobilePhoto}
                   repairedMobilePhotos={repairedMobilePhotos}
                   isMinThreeRepairImageRequired={isMinThreeRepairImageRequired}
-                  isInvalidRepairMobilePhotoStatus={isInvalidRepairMobilePhotoStatus}
+                  isInvalidRepairMobilePhotoStatus={
+                    isInvalidRepairMobilePhotoStatus
+                  }
                 />
               )}
           </div>
@@ -193,7 +197,14 @@ const FinalDocumentsTab: React.FC = () => {
             isImeiChanged={isImeiChanged}
             setReuploadFinalDocs={setReuploadFinalDocs}
             handleSubmit={handleSubmit}
-            isFinalDocValid = {selectedClaim?.final_documents == "valid" ? true : false}
+            isFinalDocValid={
+              selectedClaim?.final_documents == "valid" ? true : false
+            }
+          />
+
+          <AdditionalDocumentsSection
+            source="final"
+            documents={selectedClaim?.additional_documents?.final ?? []}
           />
         </div>
       )}

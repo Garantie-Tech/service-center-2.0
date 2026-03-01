@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import Claim from "@/interfaces/ClaimInterface";
+import Claim, { AdditionalDocumentSubType } from "@/interfaces/ClaimInterface";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
 import {
   ApprovalState,
@@ -32,12 +32,12 @@ interface StoreType {
 
   filteredClaims: Claim[];
   setFilteredClaims: (
-    claims: Claim[] | ((prevClaims: Claim[]) => Claim[])
+    claims: Claim[] | ((prevClaims: Claim[]) => Claim[]),
   ) => void;
 
   selectedClaim: Claim | null;
   setSelectedClaim: (
-    claim: Claim | null | ((prevClaim: Claim | null) => Claim | null)
+    claim: Claim | null | ((prevClaim: Claim | null) => Claim | null),
   ) => void;
 
   claimStatus: string;
@@ -103,13 +103,13 @@ interface StoreType {
   setActiveTab: (tab: Tab) => void;
   estimateDetailsState: EstimateDetailsState;
   setEstimateDetailsState: (
-    updatedState: Partial<EstimateDetailsState>
+    updatedState: Partial<EstimateDetailsState>,
   ) => void;
   resetEstimateDetailsState: () => void;
   // Approval Details State
   approvalDetails: ApprovalState["approvalDetails"];
   setApprovalDetails: (
-    updatedDetails: Partial<ApprovalState["approvalDetails"]>
+    updatedDetails: Partial<ApprovalState["approvalDetails"]>,
   ) => void;
   refreshClaimsTrigger: number;
   triggerClaimRefresh: () => void;
@@ -120,6 +120,9 @@ interface StoreType {
   stateOptions: StateMap;
   setStateOptions: (states: StateMap) => void;
   getStateDropdownList: () => { id: string; name: string }[];
+  additionalDocumentSubTypes: AdditionalDocumentSubType[];
+  additionalDocumentSubTypesLoading: boolean;
+  loadAdditionalDocumentSubTypes: () => Promise<void>;
 }
 
 export const useGlobalStore = create<StoreType>((set, get) => ({
@@ -212,8 +215,8 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     } else {
       setFilteredClaims(
         claims.filter(
-          (claim) => claim.status.toLowerCase() === filter.toLowerCase()
-        )
+          (claim) => claim.status.toLowerCase() === filter.toLowerCase(),
+        ),
       );
     }
   },
@@ -255,7 +258,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     replacementConfirmed: "no",
     damagePhotos: [],
     estimateDocument: null,
-    documents: undefined
+    documents: undefined,
   },
   setEstimateDetailsState: (updatedState) => {
     const currentState = get().estimateDetailsState;
@@ -270,7 +273,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
         replacementConfirmed: null,
         damagePhotos: [],
         estimateDocument: null,
-        documents: undefined
+        documents: undefined,
       },
     }),
   // Approval Details State
@@ -316,5 +319,29 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
       id,
       name: name as string,
     }));
+  },
+  additionalDocumentSubTypes: [],
+  additionalDocumentSubTypesLoading: false,
+  loadAdditionalDocumentSubTypes: async () => {
+    const state = get();
+    if (state.additionalDocumentSubTypes.length > 0) return;
+    if (state.additionalDocumentSubTypesLoading) return;
+    set({ additionalDocumentSubTypesLoading: true });
+    try {
+      const { fetchAdditionalDocumentSubTypes } =
+        await import("@/services/claimService");
+      const res = await fetchAdditionalDocumentSubTypes();
+      const data = (
+        res as {
+          data?: {
+            data?: { sub_document_types?: AdditionalDocumentSubType[] };
+          };
+        }
+      )?.data?.data;
+      const list = data?.sub_document_types ?? [];
+      set({ additionalDocumentSubTypes: list });
+    } finally {
+      set({ additionalDocumentSubTypesLoading: false });
+    }
   },
 }));

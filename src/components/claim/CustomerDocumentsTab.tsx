@@ -9,6 +9,7 @@ import { useGlobalStore } from "@/store/store";
 import { uploadCustomerDocuments } from "@/services/claimService";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import ErrorAlert from "@/components/ui/ErrorAlert";
+import AdditionalDocumentsSection from "@/components/claim/AdditionalDocumentsSection";
 import { handleFileUploadWithCompression } from "@/utils/handleFileUploadWithCompression";
 
 const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
@@ -29,7 +30,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const [bankDetailImage, setBankDetailImage] = useState<File[]>([]);
   const [panCardImage, setPanCardImage] = useState<File[]>([]);
   const [accessoriesProvided, setAccessoriesProvided] = useState<string | null>(
-    ""
+    "",
   );
   const [reupload, setReupload] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
@@ -45,19 +46,19 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   // Utility function to get document status
   const getDocumentStatus = (
     status?: number | string | null,
-    url?: string | null
+    url?: string | null,
   ) => {
     return status == 1 && url
       ? "valid"
       : status == 0 && url
-      ? "invalid"
-      : "pending";
+        ? "invalid"
+        : "pending";
   };
 
   // Utility function to check if a document is valid
   const isValidDocument = (
     status?: number | string | null,
-    url?: string | null
+    url?: string | null,
   ) => status == 1 && !!url;
 
   // Utility function to get invalid reason
@@ -73,23 +74,23 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   // Validate Documents
   const isValidAadharFrontImage = isValidDocument(
     aadharDocuments?.[76]?.status,
-    aadharFrontImageUrl
+    aadharFrontImageUrl,
   );
   const isValidAadharBackImage = isValidDocument(
     aadharDocuments?.[76]?.status,
-    aadharBackImageUrl
+    aadharBackImageUrl,
   );
   const isValidBankDetail = isValidDocument(
     bankDetails?.status,
-    bankDetailImageUrl
+    bankDetailImageUrl,
   );
 
   // Get Invalid Reasons
   const invalidAadharFrontImageReason = getInvalidReason(
-    aadharDocuments?.[76]?.status_reason
+    aadharDocuments?.[76]?.status_reason,
   );
   const invalidAadharBackImageReason = getInvalidReason(
-    aadharDocuments?.[76]?.status_reason
+    aadharDocuments?.[76]?.status_reason,
   );
   const invalidBankDetailReason = getInvalidReason(bankDetails?.status_reason);
   const invalidPancardReason = getInvalidReason(panCard?.status_reason);
@@ -97,15 +98,15 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   // Get Document Status
   const aadharFrontImageStatus = getDocumentStatus(
     aadharDocuments?.[76]?.status,
-    aadharFrontImageUrl
+    aadharFrontImageUrl,
   );
   const aadharBackImageStatus = getDocumentStatus(
     aadharDocuments?.[76]?.status,
-    aadharBackImageUrl
+    aadharBackImageUrl,
   );
   const bankDetailsStatus = getDocumentStatus(
     bankDetails?.status,
-    bankDetailImageUrl
+    bankDetailImageUrl,
   );
   const panCardStatus = getDocumentStatus(panCard?.status, pancardImageUrl);
 
@@ -122,21 +123,21 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     files: File[],
     documentTypeId: number | string,
     formData: FormData,
-    subTypes?: string[]
+    subTypes?: string[],
   ) => {
     files.forEach((file, index) => {
       if (subTypes) {
         // ✅ Properly index front & back with `index`
         formData.append(
           `documents[${documentTypeId}][${index}][document_type_id]`,
-          `${documentTypeId}_${subTypes[index]}`
+          `${documentTypeId}_${subTypes[index]}`,
         );
         formData.append(`documents[${documentTypeId}][${index}][file]`, file);
       } else {
         // ✅ Single document case
         formData.append(
           `documents[${documentTypeId}][document_type_id]`,
-          documentTypeId.toString()
+          documentTypeId.toString(),
         );
         formData.append(`documents[${documentTypeId}][file]`, file);
       }
@@ -187,7 +188,7 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
 
       const response = await uploadCustomerDocuments(
         Number(selectedClaim?.id),
-        formData
+        formData,
       );
 
       if (response.success) {
@@ -529,6 +530,11 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
           )}
         </>
       )}
+
+      <AdditionalDocumentsSection
+        source="customer"
+        documents={selectedClaim?.additional_documents?.customer ?? []}
+      />
     </div>
   );
 };
