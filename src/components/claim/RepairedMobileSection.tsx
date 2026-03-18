@@ -63,6 +63,9 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
       if (deviceReplacement.new_imei_number) {
         formData.append("new_imei_number", deviceReplacement.new_imei_number);
       }
+      if (deviceReplacement.imei_update_reason) {
+        formData.append("imei_update_reason", deviceReplacement.imei_update_reason);
+      }
     }
 
     const uploadResponse = await uploadFinalDocuments(
@@ -70,8 +73,29 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
       formData
     );
     setIsLoading(false);
-    if (!uploadResponse.data) {
-      notifyError("Failed to upload repaired mobile images. Please try again.");
+    const apiPayload = uploadResponse.data as
+      | undefined
+      | {
+          success?: boolean;
+          message?: string;
+          data?: {
+            error_msg?: Record<string, string[]>;
+          };
+        };
+
+    const backendSuccess =
+      !!apiPayload && (apiPayload.success === undefined || apiPayload.success === true);
+
+    if (!uploadResponse.data || !backendSuccess) {
+      const fieldMsg =
+        apiPayload?.data?.error_msg?.new_imei_number?.[0] ||
+        apiPayload?.data?.error_msg?.imei_update_reason?.[0];
+      const msg =
+        fieldMsg ||
+        apiPayload?.message ||
+        uploadResponse.error ||
+        "Failed to upload repaired mobile images. Please try again.";
+      notifyError(msg);
     } else {
       triggerClaimRefresh();
       setReuploadMobile(false);

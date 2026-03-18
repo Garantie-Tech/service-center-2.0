@@ -23,29 +23,47 @@ export const useFinalDocuments = () => {
   const [isDeviceReplaced, setIsDeviceReplaced] = useState(false);
   const [newImei, setNewImei] = useState("");
   const [newImeiError, setNewImeiError] = useState<string | null>(null);
+  const [imeiUpdateReason, setImeiUpdateReason] = useState("");
+  const [imeiUpdateReasonError, setImeiUpdateReasonError] = useState<
+    string | null
+  >(null);
 
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
 
+  // If estimate flow already marked motherboard/phone replaced (imei_changed=true),
+  // do not show/submit the Final Documents "Device replaced?" section.
   const showDeviceReplacementSection =
-    selectedClaim?.show_device_replacement_section === true;
+    selectedClaim?.show_device_replacement_section === true &&
+    selectedClaim?.imei_changed !== true;
   const isImeiChanged = showDeviceReplacementSection && isDeviceReplaced;
   const isImeiChangedFromServer = !!(
     selectedClaim?.is_imei_updated || selectedClaim?.imei_changed
   );
 
-  const hasValidNewImei =
-    showDeviceReplacementSection &&
-    isDeviceReplaced &&
-    newImei.trim().length === 15 &&
-    isIMEIFormat(newImei.trim());
-  const isSubmitDisabledByDeviceReplacement =
-    showDeviceReplacementSection && isDeviceReplaced && !hasValidNewImei;
-
-  // Get document info for each type
+  // Get document info for each type (needed early for hasRepairMobileImagesOnServer)
   const repairInvoiceInfo = getDocumentInfo(selectedClaim, "16");
   const repairMobilePhotoInfo = getDocumentInfo(selectedClaim, "74");
   const replacementReceiptInfo = getDocumentInfo(selectedClaim, "75");
+
+  // const hasValidNewImei =
+  //   showDeviceReplacementSection &&
+  //   isDeviceReplaced &&
+  //   newImei.trim().length === 15 &&
+  //   isIMEIFormat(newImei.trim());
+
+  const hasRepairMobileImagesOnServer =
+    repairMobilePhotoInfo.isValid === true ||
+    (Array.isArray(selectedClaim?.repaired_mobile_images) &&
+      selectedClaim.repaired_mobile_images.length > 0);
+
+  const isSubmitDisabledByDeviceReplacement =
+    showDeviceReplacementSection &&
+    isDeviceReplaced &&
+    (!newImei ||
+      newImei.length !== 15 ||
+      !imeiUpdateReason ||
+      (repairedMobilePhotos.length === 0 && !hasRepairMobileImagesOnServer));
 
   // Assign values
   const isInvalidRepairInvoice = repairInvoiceInfo.isInvalid;
@@ -135,8 +153,20 @@ export const useFinalDocuments = () => {
         return;
       }
 
-      if (showDeviceReplacementSection && isDeviceReplaced) {
+      const canSubmitDeviceReplacementUpdate =
+        showDeviceReplacementSection && !isValidRepairMobilePhoto;
+
+      const deviceReplacementFromServer =
+        !!(
+          selectedClaim?.is_imei_updated ||
+          selectedClaim?.imei_changed ||
+          selectedClaim?.new_imei_number ||
+          selectedClaim?.data?.replacement_imei
+        );
+
+      if (canSubmitDeviceReplacementUpdate && isDeviceReplaced) {
         const trimmedImei = newImei.trim();
+        const claimImei = (selectedClaim?.imei_number || "").trim();
         if (!trimmedImei) {
           setNewImeiError("Please enter the new IMEI number");
           notifyError("Please enter the New IMEI when device is replaced.");
@@ -147,7 +177,18 @@ export const useFinalDocuments = () => {
           notifyError("Please enter a valid 15-digit IMEI number.");
           return;
         }
+        if (claimImei && trimmedImei === claimImei) {
+          setNewImeiError("New IMEI cannot be same as current IMEI");
+          notifyError("New IMEI cannot be same as current IMEI.");
+          return;
+        }
+        if (!imeiUpdateReason) {
+          setImeiUpdateReasonError("Please select a reason");
+          notifyError("Please select the reason for IMEI update.");
+          return;
+        }
         setNewImeiError(null);
+        setImeiUpdateReasonError(null);
       }
 
       setIsLoading(true);
@@ -178,21 +219,58 @@ export const useFinalDocuments = () => {
         appendFiles(replacementReceipt, 75);
       }
 
-      // Device replacement: only when section is visible and user chose Yes
       if (showDeviceReplacementSection) {
-        formData.append("is_imei_updated", isDeviceReplaced ? "1" : "0");
-        if (isDeviceReplaced && newImei.trim()) {
-          formData.append("new_imei_number", newImei.trim());
+        if (canSubmitDeviceReplacementUpdate) {
+          // Editable: send full device replacement payload
+          formData.append("is_imei_updated", isDeviceReplaced ? "1" : "0");
+          if (isDeviceReplaced && newImei.trim()) {
+            formData.append("new_imei_number", newImei.trim());
+          }
+          if (isDeviceReplaced && imeiUpdateReason) {
+            formData.append("imei_update_reason", imeiUpdateReason);
+          }
+        } else {
+          // View-only: send only the flag, keep existing new IMEI + reason intact
+          formData.append(
+            "is_imei_updated",
+            deviceReplacementFromServer ? "1" : "0",
+          );
         }
       }
 
       const response = await uploadFinalDocuments(
         Number(selectedClaim?.id),
-        formData
+        formData,
       );
 
-      if (!response.data) {
-        notifyError("Failed to upload documents. Please try again.");
+      const apiPayload = response.data as
+        | undefined
+        | {
+            success?: boolean;
+            message?: string;
+            data?: {
+              error_msg?: Record<string, string[]>;
+            };
+          };
+
+      const backendSuccess =
+        !!apiPayload && (apiPayload.success === undefined || apiPayload.success === true);
+
+      if (!response.data || !backendSuccess) {
+        const fieldMsg =
+          apiPayload?.data?.error_msg?.new_imei_number?.[0] ||
+          apiPayload?.data?.error_msg?.imei_update_reason?.[0];
+        const msg =
+          fieldMsg ||
+          apiPayload?.message ||
+          response.error ||
+          "Failed to upload documents. Please try again.";
+
+        if (fieldMsg?.toLowerCase().includes("imei")) {
+          setNewImeiError(fieldMsg);
+        }
+        notifyError(msg);
+        return;
       } else {
         triggerClaimRefresh();
         notifySuccess("Final documents uploaded successfully!");
@@ -222,12 +300,12 @@ export const useFinalDocuments = () => {
 
   useEffect(() => {
     if (selectedClaim) {
-      const showSection =
-        selectedClaim.show_device_replacement_section === true;
-      if (!showSection) {
+      if (!showDeviceReplacementSection) {
         setIsDeviceReplaced(false);
         setNewImei("");
         setNewImeiError(null);
+        setImeiUpdateReason("");
+        setImeiUpdateReasonError(null);
       } else {
         setIsDeviceReplaced(
           !!(selectedClaim.is_imei_updated || selectedClaim.imei_changed),
@@ -237,15 +315,23 @@ export const useFinalDocuments = () => {
             selectedClaim.data?.replacement_imei) ??
             "",
         );
+        setImeiUpdateReason(
+          selectedClaim.imei_update_reason ??
+            selectedClaim.data?.imei_update_reason ??
+            "",
+        );
+        setImeiUpdateReasonError(null);
       }
     }
   }, [
     selectedClaim?.id,
-    selectedClaim?.show_device_replacement_section,
+    showDeviceReplacementSection,
     selectedClaim?.is_imei_updated,
     selectedClaim?.imei_changed,
     selectedClaim?.new_imei_number,
+    selectedClaim?.imei_update_reason,
     selectedClaim?.data?.replacement_imei,
+    selectedClaim?.data?.imei_update_reason,
   ]);
 
   return {
@@ -276,6 +362,10 @@ export const useFinalDocuments = () => {
     setNewImei,
     newImeiError,
     setNewImeiError,
+    imeiUpdateReason,
+    setImeiUpdateReason,
+    imeiUpdateReasonError,
+    setImeiUpdateReasonError,
 
     // Document info
     isImeiChanged,

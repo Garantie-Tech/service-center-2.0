@@ -24,6 +24,7 @@ export default interface Claim {
       damage_date?: string;
     };
     replacement_imei?: string;
+    imei_update_reason?: string;
     replacement_payment?: {
       replace_payment_successful: boolean;
       replace_razorpay_order_id: string;
@@ -38,6 +39,7 @@ export default interface Claim {
   imei_changed?: boolean;
   is_imei_updated?: boolean;
   new_imei_number?: string | null;
+  imei_update_reason?: string | null;
   mobile_damage_photos?: File[];
   documents?: {
     "15"?: DocumentItem;
@@ -176,7 +178,11 @@ export interface RepairedMobileSectionProps {
   };
   isMinThreeRepairImageRequired: boolean;
   isSubmitDisabledByDeviceReplacement?: boolean;
-  deviceReplacement?: { is_imei_updated: boolean; new_imei_number?: string };
+  deviceReplacement?: {
+    is_imei_updated: boolean;
+    new_imei_number?: string;
+    imei_update_reason?: string;
+  };
 }
 
 export interface FinalDocumentsSectionProps {
