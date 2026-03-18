@@ -79,6 +79,7 @@ export const fetchClaimCancelReason =
 export interface DeviceReplacementForSubmit {
   is_imei_updated: boolean;
   new_imei_number?: string;
+  imei_update_reason?: string;
 }
 
 export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
@@ -89,6 +90,7 @@ export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
 export interface DeviceReplacementPayload {
   imei_changed: boolean;
   new_imei_number?: string;
+  imei_update_reason?: string;
 }
 
 export const submitDeviceReplacement = async (
