@@ -156,6 +156,7 @@ export interface CustomerDocuments {
 
 export interface CustomerDocumentsTabProps {
   documents: CustomerDocuments;
+  accessoryOnly?: boolean;
 }
 
 export interface SettlementDetailsProps {
