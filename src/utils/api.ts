@@ -6,6 +6,7 @@ import {
   RemarkPayload,
   RemarksApiResponse,
 } from "@/interfaces/GlobalInterface";
+import { DeviceReplacementPayload } from "@/services/claimService";
 import { getCookie } from "@/utils/cookieManager";
 
 export interface ApiResponse<T> {
@@ -23,13 +24,16 @@ function formatQueryParams(
   params:
     | Record<string, string | number | boolean>
     | ClaimFetchPayload
-    | RemarksApiResponse
+    | RemarksApiResponse,
 ): string {
   const queryString = new URLSearchParams(
-    Object.entries(params).reduce((acc, [key, value]) => {
-      acc[key] = String(value);
-      return acc;
-    }, {} as Record<string, string>)
+    Object.entries(params).reduce(
+      (acc, [key, value]) => {
+        acc[key] = String(value);
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
   ).toString();
   return queryString ? `?${queryString}` : "";
 }
@@ -42,12 +46,13 @@ export async function apiRequest<T>(
     | Record<string, unknown>
     | FormData
     | GenerateLinkPaymentBody
-    | RemarkPayload,
+    | RemarkPayload
+    | DeviceReplacementPayload,
   params?:
     | Record<string, string | number | boolean>
     | ClaimFetchPayload
     | RemarksApiResponse,
-  extraHeaders: HeadersInit = {}
+  extraHeaders: HeadersInit = {},
 ): Promise<ApiResponse<T>> {
   try {
     const token = await getCookie("token");
@@ -67,17 +72,24 @@ export async function apiRequest<T>(
       method === "GET" && params ? formatQueryParams(params) : ""
     }`;
 
-    const response = await fetch(url, {
-      next: { revalidate: 60 }, // Caching strategy
+    const isFormData = body instanceof FormData;
+    const fetchOptions: RequestInit = {
       method,
       headers,
       body:
         method !== "GET" && body
-          ? body instanceof FormData
+          ? isFormData
             ? body
             : JSON.stringify(body)
           : undefined,
-    });
+    };
+    if (!isFormData) {
+      (fetchOptions as RequestInit & { next?: { revalidate: number } }).next = {
+        revalidate: 60,
+      };
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     // Ensure the response is valid JSON
     const rawData = await response.json();
@@ -104,7 +116,7 @@ export function getRequest<T>(
     | Record<string, string | number | boolean>
     | ClaimFetchPayload
     | RemarksApiResponse,
-  extraHeaders?: HeadersInit
+  extraHeaders?: HeadersInit,
 ) {
   return apiRequest<T>(endpoint, "GET", undefined, params, extraHeaders);
 }
@@ -116,8 +128,9 @@ export function postRequest<T>(
     | Record<string, unknown>
     | FormData
     | GenerateLinkPaymentBody
-    | RemarkPayload,
-  extraHeaders?: HeadersInit
+    | RemarkPayload
+    | DeviceReplacementPayload,
+  extraHeaders?: HeadersInit,
 ) {
   return apiRequest<T>(endpoint, "POST", body, undefined, extraHeaders);
 }
@@ -126,7 +139,7 @@ export function postRequest<T>(
 export function putRequest<T>(
   endpoint: string,
   body: Record<string, unknown>,
-  extraHeaders?: HeadersInit
+  extraHeaders?: HeadersInit,
 ) {
   return apiRequest<T>(endpoint, "PUT", body, undefined, extraHeaders);
 }
@@ -142,7 +155,7 @@ export async function externalApiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
   body?: Record<string, unknown> | FormData,
-  extraHeaders: HeadersInit = {}
+  extraHeaders: HeadersInit = {},
 ): Promise<ApiResponse<T>> {
   try {
     const token = await getCookie("token");

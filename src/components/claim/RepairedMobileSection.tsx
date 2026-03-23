@@ -19,6 +19,8 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
   isInvalidRepairMobilePhotoStatus,
   finalDocuments,
   isMinThreeRepairImageRequired,
+  isSubmitDisabledByDeviceReplacement = false,
+  deviceReplacement,
 }) => {
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -53,13 +55,47 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
       formData.append(`74[document][]`, fileToUpload);
     }
 
+    if (deviceReplacement) {
+      formData.append(
+        "is_imei_updated",
+        deviceReplacement.is_imei_updated ? "1" : "0",
+      );
+      if (deviceReplacement.new_imei_number) {
+        formData.append("new_imei_number", deviceReplacement.new_imei_number);
+      }
+      if (deviceReplacement.imei_update_reason) {
+        formData.append("imei_update_reason", deviceReplacement.imei_update_reason);
+      }
+    }
+
     const uploadResponse = await uploadFinalDocuments(
       Number(selectedClaim?.id),
       formData
     );
     setIsLoading(false);
-    if (!uploadResponse.data) {
-      notifyError("Failed to upload repaired mobile images. Please try again.");
+    const apiPayload = uploadResponse.data as
+      | undefined
+      | {
+          success?: boolean;
+          message?: string;
+          data?: {
+            error_msg?: Record<string, string[]>;
+          };
+        };
+
+    const backendSuccess =
+      !!apiPayload && (apiPayload.success === undefined || apiPayload.success === true);
+
+    if (!uploadResponse.data || !backendSuccess) {
+      const fieldMsg =
+        apiPayload?.data?.error_msg?.new_imei_number?.[0] ||
+        apiPayload?.data?.error_msg?.imei_update_reason?.[0];
+      const msg =
+        fieldMsg ||
+        apiPayload?.message ||
+        uploadResponse.error ||
+        "Failed to upload repaired mobile images. Please try again.";
+      notifyError(msg);
     } else {
       triggerClaimRefresh();
       setReuploadMobile(false);
@@ -96,16 +132,18 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
               {repairedMobilePhotos.length > 5
                 ? `You have selected ${repairedMobilePhotos.length}. Maximum 5 images allowed.`
                 : isMinThreeRepairImageRequired &&
-                  repairedMobilePhotos.length < 3
-                ? `You have selected ${repairedMobilePhotos.length}. Please select at least 3 images.`
-                : `You have selected ${repairedMobilePhotos.length} images.`}
+                    repairedMobilePhotos.length < 3
+                  ? `You have selected ${repairedMobilePhotos.length}. Please select at least 3 images.`
+                  : `You have selected ${repairedMobilePhotos.length} images.`}
             </div>
           )}
 
           <button
-            className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2"
+            type="button"
+            className="btn w-1/2 bg-primaryBlue hover:bg-lightPrimaryBlue text-white mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             onClick={handleMobilePhotoUpload}
             disabled={
+              isSubmitDisabledByDeviceReplacement ||
               repairedMobilePhotos.length > 5 ||
               (isMinThreeRepairImageRequired && repairedMobilePhotos.length < 3)
             }
