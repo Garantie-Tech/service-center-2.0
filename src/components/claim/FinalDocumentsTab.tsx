@@ -125,14 +125,15 @@ const FinalDocumentsTab: React.FC = () => {
   const isDeviceReplacementViewMode =
     showDeviceReplacementSection && isValidRepairMobilePhoto;
 
-  const viewModeDeviceReplaced =
-    !!(
-      selectedClaim?.is_imei_updated ||
-      selectedClaim?.imei_changed ||
-      selectedClaim?.new_imei_number
-    );
+  const viewModeDeviceReplaced = !!(
+    selectedClaim?.is_imei_updated ||
+    selectedClaim?.imei_changed ||
+    selectedClaim?.new_imei_number
+  );
   const viewModeNewImei =
-    selectedClaim?.new_imei_number ?? selectedClaim?.data?.replacement_imei ?? "";
+    selectedClaim?.new_imei_number ??
+    selectedClaim?.data?.replacement_imei ??
+    "";
   const viewModeReason =
     selectedClaim?.imei_update_reason ??
     selectedClaim?.data?.imei_update_reason ??
@@ -258,7 +259,9 @@ const FinalDocumentsTab: React.FC = () => {
                     <option value="Due to shortage of spare parts">
                       Due to shortage of spare parts
                     </option>
-                    <option value="Motherboard changed">Motherboard changed</option>
+                    <option value="Motherboard changed">
+                      Motherboard changed
+                    </option>
                   </select>
                   {imeiUpdateReasonError && (
                     <span className="text-xs text-[#dc2626] font-medium max-w-[200px]">
@@ -391,6 +394,9 @@ const FinalDocumentsTab: React.FC = () => {
             handleSubmit={handleSubmit}
             isFinalDocValid={
               selectedClaim?.final_documents == "valid" ? true : false
+            }
+            isSubmitDisabledByDeviceReplacement={
+              isSubmitDisabledByDeviceReplacement
             }
           />
 
