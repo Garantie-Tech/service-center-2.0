@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fetchClaims } from "@/services/claimService";
 import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 import Claim from "@/interfaces/ClaimInterface";
+import { DuplicateClaimsIcon } from "./icons/Icons";
 
 const ClaimList: React.FC = () => {
   const {
@@ -40,7 +41,7 @@ const ClaimList: React.FC = () => {
 
   const actionRequiredStatus = useMemo(
     () => ["Invalid Documents", "Claim Initiated", "BER Marked"],
-    []
+    [],
   );
 
   // Generates API payload dynamically
@@ -109,7 +110,7 @@ const ClaimList: React.FC = () => {
       claimTypes,
       sortOrder,
       filterState,
-    ]
+    ],
   );
 
   // Fetch claims (main function)s
@@ -138,7 +139,7 @@ const ClaimList: React.FC = () => {
             setFilteredClaims((prevClaims) => [
               ...prevClaims,
               ...newClaims.filter(
-                (claim) => !prevClaims.some((prev) => prev.id === claim.id)
+                (claim) => !prevClaims.some((prev) => prev.id === claim.id),
               ),
             ]);
             setPage((prev) => prev + 1);
@@ -157,7 +158,7 @@ const ClaimList: React.FC = () => {
         setClaimRevised(false);
       }
     },
-    [loading, hasMore, generatePayload, filterState]
+    [loading, hasMore, generatePayload, filterState],
   );
 
   // Fetch claims in the background when triggered
@@ -177,7 +178,7 @@ const ClaimList: React.FC = () => {
 
         setFilteredClaims((prevClaims) => {
           const updatedClaimsMap = new Map(
-            prevClaims.map((claim) => [claim.id, claim])
+            prevClaims.map((claim) => [claim.id, claim]),
           );
 
           // Update existing claims or add new ones
@@ -189,16 +190,14 @@ const ClaimList: React.FC = () => {
 
           // Preserve selected claim if it still exists
           const existingSelectedClaim = updatedClaims.find(
-            (claim) => claim.id === selectedClaim?.id
+            (claim) => claim.id === selectedClaim?.id,
           );
 
           if (existingSelectedClaim) {
             setSelectedClaim(existingSelectedClaim);
             setClaimStatus(existingSelectedClaim.status);
             setActiveTab(
-              getActiveTab(
-                existingSelectedClaim.status
-              ) as
+              getActiveTab(existingSelectedClaim.status) as
                 | "Claim Details"
                 | "Estimate"
                 | "Approval"
@@ -206,7 +205,7 @@ const ClaimList: React.FC = () => {
                 | "Customer Documents"
                 | "Cancelled"
                 | "Rejected"
-                | "Settlement Details"
+                | "Settlement Details",
             );
             setClaimRevised(false);
           }
@@ -244,7 +243,7 @@ const ClaimList: React.FC = () => {
     } else {
       // If the selected claim exists in the updated list, do nothing
       const stillExists = filteredClaims.some(
-        (claim) => claim.id === selectedClaim.id
+        (claim) => claim.id === selectedClaim.id,
       );
       if (!stillExists) {
         setSelectedClaim(filteredClaims[0] || null);
@@ -291,7 +290,7 @@ const ClaimList: React.FC = () => {
           | "Customer Documents"
           | "Cancelled"
           | "Rejected"
-          | "Settlement Details"
+          | "Settlement Details",
       );
     }
   };
@@ -305,7 +304,7 @@ const ClaimList: React.FC = () => {
         fetchClaimsData(page);
       }
     },
-    [hasMore, loading, page, fetchClaimsData]
+    [hasMore, loading, page, fetchClaimsData],
   );
 
   useEffect(() => {
@@ -365,6 +364,9 @@ const ClaimList: React.FC = () => {
                       width={14}
                       height={14}
                     />
+                  )}
+                  {claim?.is_duplicate && (
+                    <DuplicateClaimsIcon className="w-6 h-6 text-red-500" />
                   )}
                 </div>
                 <p className="text-xs text-gray-600">{claim.name}</p>

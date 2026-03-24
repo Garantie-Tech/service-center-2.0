@@ -97,6 +97,7 @@ export default interface Claim {
   customer_document_required?: boolean;
   additional_documents?: AdditionalDocumentsBySource;
   show_device_replacement_section?: boolean;
+  is_duplicate?: boolean;
 }
 
 export interface AdditionalDocumentItem {

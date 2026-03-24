@@ -30,4 +30,33 @@ const HomeIcon = () => (
   </svg>
 );
 
-export { CheckmarkIcon, HomeIcon };
+const DuplicateClaimsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    {...props}
+  >
+    {/* Back document */}
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 5.5h6a1.5 1.5 0 011.5 1.5v7"
+    />
+
+    {/* Front document */}
+    <rect
+      x="6"
+      y="8"
+      width="8"
+      height="10"
+      rx="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export { CheckmarkIcon, HomeIcon, DuplicateClaimsIcon };
