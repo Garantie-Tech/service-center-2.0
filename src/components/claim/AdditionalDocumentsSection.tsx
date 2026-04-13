@@ -198,6 +198,11 @@ export default function AdditionalDocumentsSection({
                       <span className="font-medium text-gray-800 block mb-2">
                         {doc.name}
                       </span>
+                      {doc.created_at && (
+                        <span className="text-xs text-gray-500 block mb-2">
+                          Uploaded At: {doc.created_at}
+                        </span>
+                      )}
                       <div className="flex flex-wrap items-center gap-3">
                         {pdfUrls.map((url, i) => (
                           <a
