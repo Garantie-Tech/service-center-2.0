@@ -105,6 +105,7 @@ export interface AdditionalDocumentItem {
   code: string | null;
   custom: string | null;
   files: string[];
+  created_at?: string | null;
 }
 
 /** Service center API returns only final and customer; estimate is omitted. */
