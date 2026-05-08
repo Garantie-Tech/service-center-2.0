@@ -337,6 +337,7 @@ export interface PolicyItem {
   state_code: string;
   retail_location: string;
   invoice_amount: string;
+  benefit_value: string;
   invoice_number: string;
   imei_number: string;
   phone_model: string;
