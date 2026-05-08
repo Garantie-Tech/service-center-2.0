@@ -136,6 +136,7 @@ const PlanFinder = () => {
                   <th>IMEI 1</th>
                   <th>Model</th>
                   <th>Device MOP</th>
+                  <th>Benefit Value</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,11 +156,12 @@ const PlanFinder = () => {
                       <td>{plan.imei_number}</td>
                       <td>{plan.phone_model}</td>
                       <td>₹ {plan.invoice_amount}</td>
+                      <td>₹ {plan.benefit_value}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="text-center py-4 text-gray-500">
+                    <td colSpan={7} className="text-center py-4 text-gray-500">
                       No plans found.
                     </td>
                   </tr>
