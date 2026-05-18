@@ -85,6 +85,7 @@ export interface ApprovalState {
     replacementPaymentSuccessful?: boolean;
     replacementPaymentLink?: string;
     replacementAmount?: number;
+    availableBerDecisions?: string[];
   };
   setApprovalDetails: (
     updatedDetails: Partial<ApprovalState["approvalDetails"]>

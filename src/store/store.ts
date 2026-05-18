@@ -291,6 +291,7 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     replacementPaymentSuccessful: false,
     replacementPaymentLink: "",
     replacementAmount: 0,
+    availableBerDecisions: [],
     selectedClaim: null,
     is_tvs_claim: false,
     customer_pickup_details: null,
