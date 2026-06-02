@@ -82,7 +82,6 @@ export default interface Claim {
   isActionRequired?: boolean;
   claim_type?: string;
   is_tvs_claim?: boolean;
-  available_ber_decisions?: string[];
   customer_pickup_details: CustomerPickupDetails | null;
   pickup_photos: string[] | null;
   pickup_video: string | null;

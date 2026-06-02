@@ -31,12 +31,7 @@ const ApprovalDetailsTab: React.FC = () => {
   const [isBerModalOpen, setIsBerModalOpen] = useState(false);
   const { notifySuccess, notifyError } = useNotification();
 
-  const availableBerOptions = selectedClaim?.available_ber_decisions?.length
-    ? selectedClaim.available_ber_decisions
-    : selectedClaim?.is_tvs_claim
-      ? ["settle"]
-      : ["repair", "settle"];
-  const berOptions = availableBerOptions.filter((option) => option !== "replace");
+  const berOptions = ["repair", "settle"];
 
   // this will execute in background
   useEffect(() => {
@@ -57,7 +52,6 @@ const ApprovalDetailsTab: React.FC = () => {
           selectedClaim?.data?.replacement_payment?.replace_payment_link,
         replacementAmount:
           selectedClaim?.data?.replacement_payment?.replace_amount,
-        availableBerDecisions: selectedClaim?.available_ber_decisions,
       });
     }
   }, [selectedClaim, setApprovalDetails]);
@@ -373,7 +367,6 @@ const ApprovalDetailsTab: React.FC = () => {
                 BER Decision
               </label>
               <CustomSelect
-                key={berOptions.join("|")}
                 options={berOptions}
                 onChange={handleBerSelection}
                 className="border-[#D5D7DA] text-[#181D27] h-[50px]"
