@@ -280,7 +280,6 @@ const ClaimList: React.FC = () => {
           currentClaim?.data?.replacement_payment?.replace_payment_link,
         replacementAmount:
           currentClaim?.data?.replacement_payment?.replace_amount,
-        availableBerDecisions: currentClaim?.available_ber_decisions,
       });
       setActiveTab(
         getActiveTab(currentClaim.status) as
