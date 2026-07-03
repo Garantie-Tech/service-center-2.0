@@ -145,23 +145,30 @@ const FinalDocumentsTab: React.FC = () => {
         {/* Device replacement - view mode when Repair Mobile Images are valid */}
         {showDeviceReplacementSection && isDeviceReplacementViewMode && (
           <div className="mb-4 rounded-lg border border-[#e5e7eb] bg-[#fafbfc] px-4 py-3">
-            <h3 className="text-sm font-medium text-[#374151] mb-2">
-              Device replaced
-            </h3>
-            {viewModeDeviceReplaced && (
-              <div className="mt-2 space-y-1">
-                {viewModeNewImei && (
-                  <p className="text-sm text-[#6b7280]">
-                    New IMEI: {viewModeNewImei}
-                  </p>
-                )}
-                {viewModeReason && (
-                  <p className="text-sm text-[#6b7280]">
-                    Reason: {viewModeReason}
-                  </p>
-                )}
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-medium text-[#374151]">
+                Device replaced
+              </h3>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
+                  viewModeDeviceReplaced
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                    : "bg-slate-100 text-slate-700 ring-slate-200"
+                }`}
+              >
+                {viewModeDeviceReplaced ? "Yes" : "No"}
+              </span>
+              {viewModeDeviceReplaced && viewModeNewImei && (
+                <span className="text-sm text-[#6b7280]">
+                  New IMEI: {viewModeNewImei}
+                </span>
+              )}
+              {viewModeDeviceReplaced && viewModeReason && (
+                <span className="text-sm text-[#6b7280]">
+                  Reason: {viewModeReason}
+                </span>
+              )}
+            </div>
           </div>
         )}
 

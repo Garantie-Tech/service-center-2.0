@@ -60,13 +60,19 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
         {finalDocuments?.isImeiChanged && (
           <div className="w-[45%]">
             <div className="mt-4">
-              <h3 className="text-sm font-medium mb-2">Device replaced</h3>
-              <p className="text-sm text-[#374151]">Yes</p>
-              {finalDocuments?.newImei && (
-                <p className="text-sm text-[#6b7280] mt-1">
-                  New IMEI: {finalDocuments.newImei}
-                </p>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm font-medium text-[#374151]">
+                  Device replaced
+                </h3>
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                  Yes
+                </span>
+                {finalDocuments?.newImei && (
+                  <span className="text-sm text-[#6b7280]">
+                    New IMEI: {finalDocuments.newImei}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
