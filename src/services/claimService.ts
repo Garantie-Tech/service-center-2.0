@@ -30,6 +30,24 @@ export const fetchClaims = async (
   return await getRequest<ClaimResponse>("claims", _params);
 };
 
+export interface ServiceCentreOption {
+  title: string;
+  value: number;
+}
+
+export interface ServiceCentreResponse {
+  success: boolean;
+  status?: boolean;
+  message: string;
+  data: ServiceCentreOption[];
+}
+
+export const fetchServiceCentres = async (stateIds: string[]) => {
+  return await getRequest<ServiceCentreResponse>("service-centres", {
+    state_id: stateIds.join(","),
+  });
+};
+
 export const submitEstimate = async (claimID: number, body: FormData) => {
   const endpoint = `estimate/submit/${claimID}`;
   return await postRequest<SubmitEstimate>(endpoint, body);

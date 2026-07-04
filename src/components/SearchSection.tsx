@@ -8,10 +8,12 @@ import { useNotification } from "@/context/NotificationProvider";
 import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
 import StateMultiSelectDropdown from "./filters/StateMultiSelectDropdown";
+import ServiceCenterMultiSelectDropdown from "./filters/ServiceCenterMultiSelectDropdown";
 import { useEffect } from "react";
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { useAuthStore } from "@/store/authStore";
 
 const SearchSection: React.FC = () => {
   const {
@@ -24,7 +26,10 @@ const SearchSection: React.FC = () => {
     stateOptions,
     setStateOptions,
     appliedFilters,
+    filterState,
+    filterServiceCentre,
   } = useGlobalStore();
+  const user = useAuthStore((state) => state.user);
 
   const { notifySuccess, notifyError } = useNotification();
 
@@ -68,6 +73,14 @@ const SearchSection: React.FC = () => {
         search: searchTerm || "",
         status: filterStatus || "",
       };
+
+      if (filterState) {
+        paramsObj.state_id = filterState;
+      }
+
+      if (filterServiceCentre) {
+        paramsObj.service_centre_id = filterServiceCentre;
+      }
 
       // ✅ Add date filters if applied
       if (appliedFilters?.fromDate && appliedFilters?.toDate) {
@@ -157,36 +170,47 @@ const SearchSection: React.FC = () => {
     <div className="bg-white p-3 mt-3 rounded-md shadow-sm w-[98%] mx-auto">
       <div className="flex justify-between items-between w-full gap-8">
         {/* Claims Summary */}
-        <div className="flex w-1/4 items-center justify-between gap-2">
-          {stateOptions && Object.keys(stateOptions).length > 0 && (
-            <div className="w-2/3 relative">
-              <StateMultiSelectDropdown />
+        <div className="flex w-1/4 items-start justify-between gap-2">
+          <div className="flex items-center gap-2 flex-nowrap">
+            {stateOptions && Object.keys(stateOptions).length > 0 && (
+              <div className="w-[135px] relative">
+                <StateMultiSelectDropdown />
+              </div>
+            )}
+            {user?.user_type === "service_head" &&
+              stateOptions &&
+              Object.keys(stateOptions).length > 0 && (
+                <div className="relative w-[175px]">
+                  <ServiceCenterMultiSelectDropdown />
+                </div>
+              )}
+          </div>
+          <div className="flex flex-col leading-none">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold">Claims</h2>
+              <button
+                onClick={() => window.location.reload()}
+                className="tooltip inline-flex h-6 w-6 items-center justify-center leading-none"
+                data-tip="Refresh"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 1 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                  />
+                </svg>
+              </button>
             </div>
-          )}
-          <div>
-            <h2 className="text-sm font-bold">Claims</h2>
             <p className="text-xxs text-gray-500">{claimCount}</p>
           </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="tooltip"
-            data-tip="Refresh"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-              />
-            </svg>
-          </button>
         </div>
 
         {/* Search Input */}

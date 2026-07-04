@@ -30,6 +30,7 @@ const ClaimList: React.FC = () => {
     claimTypes,
     sortOrder,
     filterState,
+    filterServiceCentre,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -99,6 +100,10 @@ const ClaimList: React.FC = () => {
         if (filterState.trim()) {
           basePayload.state_id = filterState;
         }
+
+        if (filterServiceCentre.trim()) {
+          basePayload.service_centre_id = filterServiceCentre;
+        }
       }
 
       return basePayload;
@@ -110,6 +115,7 @@ const ClaimList: React.FC = () => {
       claimTypes,
       sortOrder,
       filterState,
+      filterServiceCentre,
     ],
   );
 
@@ -158,7 +164,7 @@ const ClaimList: React.FC = () => {
         setClaimRevised(false);
       }
     },
-    [loading, hasMore, generatePayload, filterState],
+    [loading, hasMore, generatePayload, filterState, filterServiceCentre],
   );
 
   // Fetch claims in the background when triggered
@@ -216,7 +222,13 @@ const ClaimList: React.FC = () => {
     } catch (error) {
       console.error("Background refresh failed:", error);
     }
-  }, [refreshClaimsTrigger, generatePayload, selectedClaim, filterState]);
+  }, [
+    refreshClaimsTrigger,
+    generatePayload,
+    selectedClaim,
+    filterState,
+    filterServiceCentre,
+  ]);
 
   // Initial & Filter/Search API Call
   useEffect(() => {
@@ -224,7 +236,14 @@ const ClaimList: React.FC = () => {
     setHasMore(true);
     fetchClaimsData(0, true);
     isFetching.current = false;
-  }, [appliedFilters, filterStatus, globalSearch, sortOrder, filterState]);
+  }, [
+    appliedFilters,
+    filterStatus,
+    globalSearch,
+    sortOrder,
+    filterState,
+    filterServiceCentre,
+  ]);
 
   // Background refresh effect
   useEffect(() => {
@@ -249,7 +268,7 @@ const ClaimList: React.FC = () => {
         setSelectedClaim(filteredClaims[0] || null);
       }
     }
-  }, [filteredClaims, globalSearch, sortOrder, filterState]);
+  }, [filteredClaims, globalSearch, sortOrder, filterState, filterServiceCentre]);
 
   const setClaimStates = (currentClaim: Claim) => {
     if (currentClaim) {
