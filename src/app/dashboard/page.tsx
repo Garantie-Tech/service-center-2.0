@@ -23,12 +23,18 @@ const Header = dynamic(() => import("@/components/Header"), { ssr: false });
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
-  const { selectedClaim, setFilterState, setSelectedDropdown } =
+  const {
+    selectedClaim,
+    setFilterState,
+    setFilterServiceCentre,
+    setSelectedDropdown,
+  } =
     useGlobalStore();
 
   const logout = useAuthStore((state) => state.logout);
   const handleLogout = () => {
     setFilterState("");
+    setFilterServiceCentre("");
     setSelectedDropdown("All Claims");
     logout();
     router.push("/");

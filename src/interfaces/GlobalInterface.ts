@@ -162,6 +162,7 @@ export interface ClaimFetchPayload {
   claim_type?: string;
   sort_by?: string;
   state_id?: string;
+  service_centre_id?: string;
 }
 
 export interface UploadFinalDocuments {
