@@ -117,6 +117,8 @@ interface StoreType {
   setClaimCount: (claimCount: number) => void;
   filterState: string;
   setFilterState: (state: string) => void;
+  filterServiceCentre: string;
+  setFilterServiceCentre: (serviceCentre: string) => void;
   stateOptions: StateMap;
   setStateOptions: (states: StateMap) => void;
   getStateDropdownList: () => { id: string; name: string }[];
@@ -311,6 +313,9 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   setClaimCount: (claimCount) => set({ claimCount: claimCount }),
   filterState: "",
   setFilterState: (state: string) => set({ filterState: state }),
+  filterServiceCentre: "",
+  setFilterServiceCentre: (serviceCentre: string) =>
+    set({ filterServiceCentre: serviceCentre }),
   stateOptions: {},
   setStateOptions: (states) => set({ stateOptions: states }),
   getStateDropdownList: () => {

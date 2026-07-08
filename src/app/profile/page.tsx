@@ -29,9 +29,13 @@ const ProfileDetails = () => {
   const [formError, setFormError] = useState("");
 
   const logout = useAuthStore((state) => state.logout);
+  const setFilterServiceCentre = useGlobalStore(
+    (state) => state.setFilterServiceCentre,
+  );
 
   const handleLogout = () => {
     setFilterState("");
+    setFilterServiceCentre("");
     setSelectedDropdown("All Claims");
     logout();
     router.push("/");
