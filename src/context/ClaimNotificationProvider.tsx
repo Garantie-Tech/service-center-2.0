@@ -74,7 +74,7 @@ const getBroadcasterConfig = () => {
     cluster:
       process.env.NEXT_PUBLIC_BROADCAST_CLUSTER ||
       process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER ||
-      "",
+      "mt1",
     authEndpoint,
   };
 };
@@ -137,7 +137,7 @@ const ensureEcho = (): Echo<"pusher"> | null => {
       : {}),
     forceTLS: config.scheme === "https",
     enabledTransports: ["ws", "wss"],
-    cluster: config.cluster || undefined,
+    cluster: config.cluster || "mt1",
     authEndpoint: config.authEndpoint,
     auth: {
       headers: {
