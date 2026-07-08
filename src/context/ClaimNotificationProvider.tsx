@@ -232,9 +232,11 @@ export const ClaimNotificationProvider = ({
       const response = await fetchClaimNotifications();
 
       if (response.success && response.data) {
-        const inbox: ClaimNotificationInboxResponse = response.data;
-        setNotifications(inbox.notifications || []);
-        setUnreadCount(inbox.unread_count || 0);
+        const inbox = (response.data as unknown as {
+          data?: ClaimNotificationInboxResponse;
+        })?.data;
+        setNotifications(inbox?.notifications || []);
+        setUnreadCount(inbox?.unread_count || 0);
       } else {
         setNotifications([]);
         setUnreadCount(0);
@@ -311,7 +313,16 @@ export const ClaimNotificationProvider = ({
     try {
       const response = await markClaimNotificationRead(notificationId);
 
-      if (!response.success) {
+      const payload = response.success
+        ? (response.data as unknown as {
+            data?: {
+              notification?: ClaimNotificationItem;
+              unread_count?: number;
+            };
+          })?.data
+        : null;
+
+      if (!response.success || !payload) {
         notifyError("Failed to open the notification.");
         return;
       }
@@ -321,7 +332,7 @@ export const ClaimNotificationProvider = ({
           item.id === notificationId ? { ...item, is_read: true } : item,
         ),
       );
-      setUnreadCount(response.data?.unread_count ?? Math.max(0, unreadCount - 1));
+      setUnreadCount(payload.unread_count ?? Math.max(0, unreadCount - 1));
 
       setNotificationTargetTab(
         notification.target_tab === "estimate" ? "Estimate" : "Final Documents",
