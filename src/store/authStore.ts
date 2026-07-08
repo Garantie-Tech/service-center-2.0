@@ -2,11 +2,12 @@
 
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { create } from "zustand";
+import { safeJsonParse } from "@/helpers/safeJson";
 
 interface User {
   token: string | null;
   name: string | null;
-  id: string | null;
+  id: string | number | null;
   user_type?: string | null;
   states?: StateMap;
 }
@@ -23,9 +24,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
-      const parsedUser = storedUser
-        ? JSON.parse(storedUser)
-        : { name: null, id: null, user_type: null };
+      const parsedUser = safeJsonParse<{
+        name: string | null;
+        id: string | number | null;
+        user_type: string | null;
+      }>(storedUser, { name: null, id: null, user_type: null });
       return {
         token,
         name: parsedUser.name,
@@ -46,7 +49,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           name: user.name,
           id: user.id,
           user_type: user.user_type,
-        })
+        }),
       );
     }
     set({ user, isAuthenticated: !!user.token });
