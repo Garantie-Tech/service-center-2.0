@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGlobalStore } from "@/store/store";
 import { useAuthStore } from "@/store/authStore";
-import { fetchServiceCentres, ServiceCentreOption } from "@/services/claimService";
+import {
+  fetchServiceHeadServiceCentres,
+  ServiceCentreOption,
+} from "@/services/claimService";
 
 const ServiceCenterMultiSelectDropdown: React.FC = () => {
   const filterState = useGlobalStore((s) => s.filterState);
@@ -41,7 +44,7 @@ const ServiceCenterMultiSelectDropdown: React.FC = () => {
       }
 
       try {
-        const response = await fetchServiceCentres(requestedStateIds);
+        const response = await fetchServiceHeadServiceCentres(requestedStateIds);
         setServiceCentres(response?.data?.data ?? []);
       } catch (error) {
         console.error("Failed to load service centres:", error);

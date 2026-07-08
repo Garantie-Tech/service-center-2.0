@@ -48,6 +48,12 @@ export const fetchServiceCentres = async (stateIds: string[]) => {
   });
 };
 
+export const fetchServiceHeadServiceCentres = async (stateIds: string[]) => {
+  return await getRequest<ServiceCentreResponse>("head/service-centres", {
+    state_id: stateIds.join(","),
+  });
+};
+
 export const submitEstimate = async (claimID: number, body: FormData) => {
   const endpoint = `estimate/submit/${claimID}`;
   return await postRequest<SubmitEstimate>(endpoint, body);
