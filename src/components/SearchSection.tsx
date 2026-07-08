@@ -30,6 +30,11 @@ const SearchSection: React.FC = () => {
     filterServiceCentre,
   } = useGlobalStore();
   const user = useAuthStore((state) => state.user);
+  const stateCount = Object.keys(stateOptions ?? {}).length;
+  const showStateFilter = user?.user_type === "service_head" && stateCount > 1;
+  const showServiceCentreFilter =
+    user?.user_type === "service_head" && stateCount > 0;
+  const serviceCentreFilterWidth = showStateFilter ? "w-[175px]" : "w-[235px]";
 
   const { notifySuccess, notifyError } = useNotification();
 
@@ -171,20 +176,18 @@ const SearchSection: React.FC = () => {
       <div className="flex justify-between items-between w-full gap-8">
         {/* Claims Summary */}
         <div className="flex w-1/4 items-start justify-between gap-2">
-          {user?.user_type === "service_head" && stateOptions && (
+          {showServiceCentreFilter && (
             <div className="flex items-center gap-2 flex-nowrap">
-              {stateOptions && Object.keys(stateOptions).length > 0 && (
+              {showStateFilter && (
                 <div className="w-[135px] relative">
                   <StateMultiSelectDropdown />
                 </div>
               )}
-              {user?.user_type === "service_head" &&
-                stateOptions &&
-                Object.keys(stateOptions).length > 0 && (
-                  <div className="relative w-[175px]">
-                    <ServiceCenterMultiSelectDropdown />
-                  </div>
-                )}
+              {showServiceCentreFilter && (
+                <div className={`relative ${serviceCentreFilterWidth}`}>
+                  <ServiceCenterMultiSelectDropdown />
+                </div>
+              )}
             </div>
           )}
 
