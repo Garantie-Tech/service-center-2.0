@@ -13,6 +13,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useNotification } from "@/context/NotificationProvider";
 import { useAuthStore } from "@/store/authStore";
 import { useGlobalStore } from "@/store/store";
+import { safeJsonParse } from "@/helpers/safeJson";
 import {
   ClaimNotificationInboxResponse,
   ClaimNotificationItem,
@@ -129,12 +130,21 @@ const getNotificationChannels = (): string[] => {
   const channels = new Set<string>();
 
   try {
-    const userRaw = localStorage.getItem("user");
-    const statesRaw = localStorage.getItem("states");
-    const user = userRaw ? JSON.parse(userRaw) : null;
-    const storedStates = statesRaw ? JSON.parse(statesRaw) : {};
+    type StoredUser = {
+      user_type?: string;
+      id?: string | number;
+    } | null;
+
+    const user = safeJsonParse<StoredUser>(
+      localStorage.getItem("user"),
+      null,
+    );
+    const storedStates = safeJsonParse<Record<string, string>>(
+      localStorage.getItem("states"),
+      {},
+    );
     const stateIds = Object.keys(storedStates || {});
-    const userType = user?.user_type;
+    const userType = user?.user_type ?? "";
 
     if (userType === "service_centre" && user?.id) {
       channels.add(`claim.notifications.service-centre.${user.id}`);
