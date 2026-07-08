@@ -46,9 +46,51 @@ declare global {
   }
 }
 
+const normalizeBroadcastHost = (rawHost: string, backendUrl: string) => {
+  const fallbackHost = (() => {
+    try {
+      return new URL(backendUrl).hostname;
+    } catch {
+      return window.location.hostname;
+    }
+  })();
+
+  const trimmedHost = rawHost.trim();
+  if (!trimmedHost) return fallbackHost;
+
+  const hostWithoutProtocol = trimmedHost.replace(/^https?:\/\//i, "");
+  if (
+    hostWithoutProtocol === "localhost" ||
+    hostWithoutProtocol === "127.0.0.1" ||
+    hostWithoutProtocol.startsWith("ws.")
+  ) {
+    return fallbackHost;
+  }
+
+  return hostWithoutProtocol.replace(/:\d+$/, "");
+};
+
+const resolveBackendDefaults = (backendUrl: string) => {
+  try {
+    const url = new URL(backendUrl);
+    return {
+      host: url.hostname,
+      scheme: url.protocol.replace(":", ""),
+      port: url.protocol === "https:" ? 443 : 80,
+    };
+  } catch {
+    return {
+      host: window.location.hostname,
+      scheme: window.location.protocol.replace(":", ""),
+      port: window.location.protocol === "https:" ? 443 : 80,
+    };
+  }
+};
+
 const getBroadcasterConfig = () => {
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
   const authEndpoint = `${backendUrl.replace(/\/$/, "")}/broadcasting/auth`;
+  const backendDefaults = resolveBackendDefaults(backendUrl);
   const key =
     process.env.NEXT_PUBLIC_BROADCAST_KEY ||
     process.env.NEXT_PUBLIC_REVERB_APP_KEY ||
@@ -58,19 +100,21 @@ const getBroadcasterConfig = () => {
   return {
     broadcaster: "pusher",
     key,
-    host:
+    host: normalizeBroadcastHost(
       process.env.NEXT_PUBLIC_BROADCAST_HOST ||
-      process.env.NEXT_PUBLIC_REVERB_HOST ||
-      "",
+        process.env.NEXT_PUBLIC_REVERB_HOST ||
+        "",
+      backendUrl,
+    ),
     port: Number(
       process.env.NEXT_PUBLIC_BROADCAST_PORT ||
         process.env.NEXT_PUBLIC_REVERB_PORT ||
-        443,
+        backendDefaults.port,
     ),
     scheme:
       process.env.NEXT_PUBLIC_BROADCAST_SCHEME ||
       process.env.NEXT_PUBLIC_REVERB_SCHEME ||
-      "https",
+      backendDefaults.scheme,
     cluster:
       process.env.NEXT_PUBLIC_BROADCAST_CLUSTER ||
       process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER ||
@@ -135,7 +179,7 @@ const ensureEcho = (): Echo<"pusher"> | null => {
           wssPort: config.port,
         }
       : {}),
-    forceTLS: config.scheme === "https",
+    forceTLS: config.scheme === "https" || window.location.protocol === "https:",
     enabledTransports: ["ws", "wss"],
     cluster: config.cluster || "mt1",
     authEndpoint: config.authEndpoint,
