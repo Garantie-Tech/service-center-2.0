@@ -101,6 +101,8 @@ interface StoreType {
   applyFilters: (filters: AppliedFilters) => void;
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
+  notificationTargetTab: Tab | null;
+  setNotificationTargetTab: (tab: Tab | null) => void;
   estimateDetailsState: EstimateDetailsState;
   setEstimateDetailsState: (
     updatedState: Partial<EstimateDetailsState>,
@@ -251,6 +253,8 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
   },
   activeTab: "Claim Details",
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
+  notificationTargetTab: null,
+  setNotificationTargetTab: (tab: Tab | null) => set({ notificationTargetTab: tab }),
   estimateDetailsState: {
     estimateAmount: "",
     jobSheetNumber: "",

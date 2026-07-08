@@ -11,7 +11,9 @@
   "dependencies": {
     "browser-image-compression": "^2.0.2",
     "daisyui": "^4.12.23",
+    "laravel-echo": "^2.3.7",
     "next": "15.1.6",
+    "pusher-js": "^8.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.1",

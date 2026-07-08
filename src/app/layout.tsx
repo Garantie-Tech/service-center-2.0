@@ -5,6 +5,7 @@ import Loading from "./loading";
 import ClientOnly from "@/components/ClientOnly";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { NotificationProvider } from "@/context/NotificationProvider";
+import { ClaimNotificationProvider } from "@/context/ClaimNotificationProvider";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -28,19 +29,21 @@ export default function RootLayout({
         <ErrorBoundary>
           <ClientOnly>
             <NotificationProvider>
-              <Toaster
-                toastOptions={{
-                  style: {
-                    padding: "16px",
-                    color: "#fff",
-                    background: "#333",
-                    borderRadius: "8px",
-                  },
-                  position: "top-right",
-                }}
-              />
-              <Loading />
-              {children}
+              <ClaimNotificationProvider>
+                <Toaster
+                  toastOptions={{
+                    style: {
+                      padding: "16px",
+                      color: "#fff",
+                      background: "#333",
+                      borderRadius: "8px",
+                    },
+                    position: "top-right",
+                  }}
+                />
+                <Loading />
+                {children}
+              </ClaimNotificationProvider>
             </NotificationProvider>
           </ClientOnly>
         </ErrorBoundary>
