@@ -141,9 +141,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                                 : "bg-blue-600 text-white"
                             }`}
                           >
-                            {notification.target_tab === "estimate"
-                              ? "Estimate"
-                              : "Final"}
+                            {notification.type_label}
                           </span>
                         </div>
                       </button>
