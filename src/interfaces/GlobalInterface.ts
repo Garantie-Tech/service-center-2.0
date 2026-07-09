@@ -217,11 +217,14 @@ export type ClaimNotificationTargetTab = "estimate" | "final";
 export interface ClaimNotificationItem {
   id: number;
   claim_id: number;
+  notification_type_id?: number | null;
   notification_type: string;
+  type_label: string;
   target_tab: ClaimNotificationTargetTab;
   title: string;
   message: string;
   is_read: boolean;
+  audience?: string;
   created_at?: string;
   updated_at?: string;
   payload?: Record<string, unknown>;
