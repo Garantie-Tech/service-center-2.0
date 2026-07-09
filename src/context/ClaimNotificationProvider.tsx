@@ -17,6 +17,7 @@ import { safeJsonParse } from "@/helpers/safeJson";
 import {
   ClaimNotificationInboxResponse,
   ClaimNotificationItem,
+  Tab,
 } from "@/interfaces/GlobalInterface";
 import {
   fetchClaimNotifications,
@@ -208,6 +209,20 @@ const ensureEcho = (): Echo<"pusher"> | null => {
   return window.__serviceCenterNotificationRealtime.echo;
 };
 
+const resolveNotificationTargetTab = (
+  targetTab: string | null | undefined,
+): Tab => {
+  switch (targetTab) {
+    case "estimate":
+      return "Estimate";
+    case "final":
+      return "Final Documents";
+    case "details":
+    default:
+      return "Claim Details";
+  }
+};
+
 export const ClaimNotificationProvider = ({
   children,
 }: {
@@ -334,9 +349,7 @@ export const ClaimNotificationProvider = ({
       );
       setUnreadCount(payload.unread_count ?? Math.max(0, unreadCount - 1));
 
-      setNotificationTargetTab(
-        notification.target_tab === "estimate" ? "Estimate" : "Final Documents",
-      );
+      setNotificationTargetTab(resolveNotificationTargetTab(notification.target_tab));
       setSearchTerm(String(notification.claim_id));
       handleSearch();
 
