@@ -212,7 +212,7 @@ export interface ClaimTimeline {
   data?: TimelineEvent[];
 }
 
-export type ClaimNotificationTargetTab = "estimate" | "final";
+export type ClaimNotificationTargetTab = "estimate" | "final" | "details";
 
 export interface ClaimNotificationItem {
   id: number;
