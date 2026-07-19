@@ -14,13 +14,22 @@ import { StateMap } from "@/interfaces/GlobalInterface";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { ALLOWED_ISSUERS } from "@/globalConstant";
 import { useAuthStore } from "@/store/authStore";
+import { bulkInitiateNoidaOfficeShipment } from "@/services/claimService";
 
-const SearchSection: React.FC = () => {
+interface SearchSectionProps {
+  shipmentActionsEnabled?: boolean;
+}
+
+const SearchSection: React.FC<SearchSectionProps> = ({
+  shipmentActionsEnabled = false,
+}) => {
   const {
     searchTerm,
     setSearchTerm,
     handleSearch,
     setIsLoading,
+    filteredClaims,
+    triggerClaimRefresh,
     filterStatus,
     claimCount,
     stateOptions,
@@ -30,6 +39,7 @@ const SearchSection: React.FC = () => {
     filterServiceCentre,
   } = useGlobalStore();
   const user = useAuthStore((state) => state.user);
+  const permissions = useAuthStore((state) => state.user.permissions ?? []);
   const stateCount = Object.keys(stateOptions ?? {}).length;
   const showStateFilter = user?.user_type === "service_head" && stateCount > 1;
   const showServiceCentreFilter =
@@ -37,6 +47,9 @@ const SearchSection: React.FC = () => {
   const serviceCentreFilterWidth = showStateFilter ? "w-[175px]" : "w-[235px]";
 
   const { notifySuccess, notifyError } = useNotification();
+  const canBulkInitiateNoidaShipment = permissions.includes(
+    "service_centers_actions_noida_office_shipment_bulk_initiate",
+  );
 
   // const handleExport = async () => {
   //   try {
@@ -146,6 +159,46 @@ const SearchSection: React.FC = () => {
     } catch (error) {
       console.error("Export error:", error);
       notifyError(`Failed to export data. Something went wrong ${error}`);
+      setIsLoading(false);
+    }
+  };
+
+  const handleNoidaShipmentBatch = async () => {
+    const eligibleClaimIds = filteredClaims
+      .filter((claim) => claim.office_shipment_eligible)
+      .map((claim) => claim.id);
+
+    if (!eligibleClaimIds.length) {
+      notifyError("No eligible claims are currently loaded for Noida shipment.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Initiate Noida office shipment for ${eligibleClaimIds.length} loaded claims?`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await bulkInitiateNoidaOfficeShipment(eligibleClaimIds);
+
+      if (!response?.success) {
+        notifyError(response?.message || "Failed to initiate Noida shipment batch.");
+        return;
+      }
+
+      triggerClaimRefresh();
+      notifySuccess("Noida shipment batch initiated successfully.");
+    } catch (error) {
+      notifyError(
+        error instanceof Error
+          ? error.message
+          : "Failed to initiate Noida shipment batch.",
+      );
+    } finally {
       setIsLoading(false);
     }
   };
@@ -273,6 +326,14 @@ const SearchSection: React.FC = () => {
           {/* Buttons */}
           <div className="flex items-center justify-end gap-4">
             <div className="flex gap-4">
+              {shipmentActionsEnabled && canBulkInitiateNoidaShipment && (
+                <button
+                  onClick={handleNoidaShipmentBatch}
+                  className="rounded-md border border-primaryBlue px-3 py-2 text-xs font-semibold text-primaryBlue hover:bg-primaryBlue hover:text-white transition-colors"
+                >
+                  Noida Shipment Batch
+                </button>
+              )}
               <Link
                 className="w-[30px] ml-20px tooltip"
                 data-tip="Plan Finder"

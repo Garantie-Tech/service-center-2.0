@@ -9,8 +9,17 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onLogout }) => {
-  const user = localStorage.getItem("user");
+  const user =
+    typeof window !== "undefined" ? localStorage.getItem("user") : null;
   const serviceCenterName = user ? JSON.parse(user) : null;
+  const hasShipmentPermission = Boolean(
+    serviceCenterName?.permissions?.includes(
+      "service_centers_actions_noida_office_shipment_initiate",
+    ) ||
+      serviceCenterName?.permissions?.includes(
+        "service_centers_actions_noida_office_shipment_bulk_initiate",
+      ),
+  );
   const pathname = usePathname();
 
   return (
@@ -56,19 +65,48 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
             className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-xs"
           >
             {pathname === "/dashboard" && (
+              <>
+                {hasShipmentPermission && (
+                  <li>
+                    <Link
+                      href="/noida-shipment"
+                      className="flex items-center gap-2"
+                    >
+                      <Image
+                        src="/images/all-claims-icon.svg"
+                        alt="Shipment"
+                        width={20}
+                        height={20}
+                      />
+                      Noida Shipment
+                    </Link>
+                  </li>
+                )}
+                <li>
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <Image
+                      src="/images/user-profile-icon.svg"
+                      alt="Profile"
+                      width={20}
+                      height={20}
+                    />
+                    Profile
+                  </Link>
+                </li>
+              </>
+            )}
+            {pathname !== "/dashboard" && pathname !== "/noida-shipment" && (
               <li>
-                <Link href="/profile" className="flex items-center gap-2">
-                  <Image
-                    src="/images/user-profile-icon.svg"
-                    alt="Profile"
-                    width={20}
-                    height={20}
-                  />
-                  Profile
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="w-[20px] h-[20px]">
+                    <HomeIcon />
+                  </div>
+                  Home
                 </Link>
               </li>
             )}
-            {pathname != "/dashboard" && (
+
+            {pathname === "/noida-shipment" && (
               <li>
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <div className="w-[20px] h-[20px]">

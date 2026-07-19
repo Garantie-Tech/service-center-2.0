@@ -97,6 +97,22 @@ export default interface Claim {
   additional_documents?: AdditionalDocumentsBySource;
   show_device_replacement_section?: boolean;
   is_duplicate?: boolean;
+  office_shipment_eligible?: boolean;
+  office_shipment_ineligibility_reason?: string | null;
+  office_shipment?: OfficeShipmentInfo | null;
+}
+
+export interface OfficeShipmentInfo {
+  id: number;
+  batch_id?: number | null;
+  claim_id?: number;
+  status: string;
+  order_id?: string | null;
+  awb_number?: string | null;
+  courier_id?: string | null;
+  courier_name?: string | null;
+  label_path?: string | null;
+  error_message?: string | null;
 }
 
 export interface AdditionalDocumentItem {

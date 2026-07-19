@@ -6,9 +6,10 @@ import { create } from "zustand";
 interface User {
   token: string | null;
   name: string | null;
-  id: string | null;
+  id: string | number | null;
   user_type?: string | null;
   states?: StateMap;
+  permissions?: string[];
 }
 
 interface AuthState {
@@ -25,15 +26,22 @@ export const useAuthStore = create<AuthState>((set) => ({
       const storedUser = localStorage.getItem("user");
       const parsedUser = storedUser
         ? JSON.parse(storedUser)
-        : { name: null, id: null, user_type: null };
+        : { name: null, id: null, user_type: null, permissions: [] };
       return {
         token,
         name: parsedUser.name,
         id: parsedUser.id,
         user_type: parsedUser.user_type,
+        permissions: parsedUser.permissions ?? [],
       };
     }
-    return { token: null, name: null, id: null, user_type: null };
+    return {
+      token: null,
+      name: null,
+      id: null,
+      user_type: null,
+      permissions: [],
+    };
   })(),
   isAuthenticated:
     typeof window !== "undefined" ? !!localStorage.getItem("token") : false,
@@ -46,6 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           name: user.name,
           id: user.id,
           user_type: user.user_type,
+          permissions: user.permissions ?? [],
         })
       );
     }
@@ -58,7 +67,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       document.cookie = "token=; path=/; max-age=0; secure; samesite=strict";
     }
     set({
-      user: { token: null, name: null, id: null, user_type: null },
+      user: {
+        token: null,
+        name: null,
+        id: null,
+        user_type: null,
+        permissions: [],
+      },
       isAuthenticated: false,
     });
   },

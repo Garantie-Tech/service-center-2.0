@@ -14,10 +14,12 @@ export type LoginResponse = {
   message: string;
   data?: {
     name?: string;
+    user_id?: string | number;
     service_centre_id?: string;
     token?: string;
     user_type?: string;
     states?: StateMap;
+    permissions?: string[];
   };
 };
 
@@ -70,8 +72,9 @@ export async function loginService(
       "user",
       JSON.stringify({
         name: data?.data?.name,
-        id: data?.data?.service_centre_id,
+        id: data?.data?.service_centre_id || data?.data?.user_id || null,
         user_type: data?.data?.user_type,
+        permissions: data?.data?.permissions ?? [],
       })
     );
   }

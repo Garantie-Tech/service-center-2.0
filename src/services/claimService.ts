@@ -24,6 +24,29 @@ interface ClaimCancelReasonResponse {
   data: Record<string, string>;
 }
 
+export interface NoidaOfficeShipmentBatchResponse {
+  success: boolean;
+  status?: boolean;
+  message: string;
+  data?: {
+    batch?: {
+      id: number;
+      batch_ref: string;
+      status: string;
+      requested_count: number;
+      processed_count: number;
+      success_count: number;
+      failed_count: number;
+      skipped_count: number;
+    };
+    result?: {
+      claim_id: number;
+      success: boolean;
+      message?: string;
+    };
+  };
+}
+
 export const fetchClaims = async (
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload,
 ) => {
@@ -52,6 +75,24 @@ export const fetchServiceHeadServiceCentres = async (stateIds: string[]) => {
   return await getRequest<ServiceCentreResponse>("head/service-centres", {
     state_id: stateIds.join(","),
   });
+};
+
+export const initiateNoidaOfficeShipment = async (claimId: number) => {
+  return await postRequest<NoidaOfficeShipmentBatchResponse>(
+    "noida-office-shipment",
+    {
+      claim_id: claimId,
+    },
+  );
+};
+
+export const bulkInitiateNoidaOfficeShipment = async (claimIds: number[]) => {
+  return await postRequest<NoidaOfficeShipmentBatchResponse>(
+    "noida-office-shipment/bulk",
+    {
+      claim_ids: claimIds,
+    },
+  );
 };
 
 export const submitEstimate = async (claimID: number, body: FormData) => {
