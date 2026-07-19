@@ -18,6 +18,10 @@ import {
   UploadFinalDocuments,
 } from "@/interfaces/GlobalInterface";
 import { getRequest, postRequest } from "@/utils/api";
+import {
+  ClaimNotificationInboxResponse,
+  ClaimNotificationItem,
+} from "@/interfaces/GlobalInterface";
 
 interface ClaimCancelReasonResponse {
   success: boolean;
@@ -238,6 +242,17 @@ export const addRemark = async (
 
 export const getServiceCenterProfileData = async () => {
   return await getRequest<ServiceCenterProfileResponse>("detail");
+};
+
+export const fetchClaimNotifications = async () => {
+  return await getRequest<ClaimNotificationInboxResponse>("notifications");
+};
+
+export const markClaimNotificationRead = async (notificationId: number) => {
+  return await postRequest<{
+    notification: ClaimNotificationItem;
+    unread_count: number;
+  }>(`notifications/${notificationId}/read`, {});
 };
 
 export const fetchPlans = async (
