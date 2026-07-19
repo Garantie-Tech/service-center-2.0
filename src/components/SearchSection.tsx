@@ -14,6 +14,7 @@ import { StateMap } from "@/interfaces/GlobalInterface";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { ALLOWED_ISSUERS } from "@/globalConstant";
 import { useAuthStore } from "@/store/authStore";
+import { safeJsonParse } from "@/helpers/safeJson";
 
 const SearchSection: React.FC = () => {
   const {
@@ -153,16 +154,14 @@ const SearchSection: React.FC = () => {
   useEffect(() => {
     const loadStates = async () => {
       // Load from localStorage if present
-      const storedStates = localStorage.getItem("states");
+      const parsedStates: StateMap = safeJsonParse<StateMap>(
+        localStorage.getItem("states"),
+        {},
+      );
 
-      if (storedStates && storedStates !== "undefined") {
-        try {
-          const parsedStates: StateMap = JSON.parse(storedStates);
-          setStateOptions(parsedStates);
-          return;
-        } catch (err) {
-          console.error("Failed to parse stored states:", err);
-        }
+      if (Object.keys(parsedStates ?? {}).length > 0) {
+        setStateOptions(parsedStates);
+        return;
       }
     };
 

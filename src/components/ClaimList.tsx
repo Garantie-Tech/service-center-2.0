@@ -3,12 +3,12 @@
 import { useGlobalStore } from "@/store/store";
 import Image from "next/image";
 import { formatDate } from "@/helpers/dateHelper";
-import { getActiveTab } from "@/helpers/globalHelper";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { fetchClaims } from "@/services/claimService";
 import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 import Claim from "@/interfaces/ClaimInterface";
 import { DuplicateClaimsIcon } from "./icons/Icons";
+import { applyClaimSelection } from "@/helpers/claimSelectionHelper";
 
 const ClaimList: React.FC = () => {
   const {
@@ -16,10 +16,6 @@ const ClaimList: React.FC = () => {
     setFilteredClaims,
     selectedClaim,
     setSelectedClaim,
-    setClaimStatus,
-    setEstimateDetailsState,
-    setApprovalDetails,
-    setActiveTab,
     appliedFilters,
     filterStatus,
     setIsLoading,
@@ -31,6 +27,8 @@ const ClaimList: React.FC = () => {
     sortOrder,
     filterState,
     filterServiceCentre,
+    notificationTargetTab,
+    setNotificationTargetTab,
   } = useGlobalStore();
 
   const [page, setPage] = useState(0);
@@ -200,20 +198,10 @@ const ClaimList: React.FC = () => {
           );
 
           if (existingSelectedClaim) {
-            setSelectedClaim(existingSelectedClaim);
-            setClaimStatus(existingSelectedClaim.status);
-            setActiveTab(
-              getActiveTab(existingSelectedClaim.status) as
-                | "Claim Details"
-                | "Estimate"
-                | "Approval"
-                | "Final Documents"
-                | "Customer Documents"
-                | "Cancelled"
-                | "Rejected"
-                | "Settlement Details",
-            );
-            setClaimRevised(false);
+            applyClaimSelection(existingSelectedClaim, notificationTargetTab);
+            if (notificationTargetTab) {
+              setNotificationTargetTab(null);
+            }
           }
 
           return updatedClaims;
@@ -272,45 +260,10 @@ const ClaimList: React.FC = () => {
 
   const setClaimStates = (currentClaim: Claim) => {
     if (currentClaim) {
-      setSelectedClaim(currentClaim);
-      setClaimStatus(currentClaim.status);
-      setEstimateDetailsState({
-        estimateAmount: currentClaim?.claimed_amount || "",
-        jobSheetNumber: currentClaim?.job_sheet_number || "",
-        estimateDetails: currentClaim?.data?.inputs?.estimate_details || "",
-        replacementConfirmed: currentClaim?.imei_changed,
-        damagePhotos: currentClaim?.mobile_damage_photos || [],
-        estimateDocument: currentClaim?.documents?.["15"]?.url || null,
-        documents: currentClaim?.documents || undefined,
-      });
-      setApprovalDetails({
-        estimateAmount: Number(currentClaim?.claimed_amount),
-        approvedAmount: Number(currentClaim?.approved_amount),
-        approvalType: currentClaim?.status,
-        approvalDate: currentClaim?.approval_date,
-        repairAmount: currentClaim?.repair_amount,
-        repairPaymentSuccessful: currentClaim?.repair_payment_successful,
-        repairPaymentLink: currentClaim?.repair_payment_link,
-        repairRazorpayOrderId: currentClaim?.repair_razorpay_order_id,
-        estimateDate: currentClaim?.estimated_date,
-        replacementPaymentSuccessful:
-          currentClaim?.data?.replacement_payment?.replace_payment_successful,
-        replacementPaymentLink:
-          currentClaim?.data?.replacement_payment?.replace_payment_link,
-        replacementAmount:
-          currentClaim?.data?.replacement_payment?.replace_amount,
-      });
-      setActiveTab(
-        getActiveTab(currentClaim.status) as
-          | "Claim Details"
-          | "Estimate"
-          | "Approval"
-          | "Final Documents"
-          | "Customer Documents"
-          | "Cancelled"
-          | "Rejected"
-          | "Settlement Details",
-      );
+      applyClaimSelection(currentClaim, notificationTargetTab);
+      if (notificationTargetTab) {
+        setNotificationTargetTab(null);
+      }
     }
   };
 
