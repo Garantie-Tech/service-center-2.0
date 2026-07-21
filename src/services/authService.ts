@@ -75,6 +75,7 @@ export async function loginService(
         id: data?.data?.service_centre_id || data?.data?.user_id || null,
         user_type: data?.data?.user_type,
         permissions: data?.data?.permissions ?? [],
+        states: data?.data?.states ?? {},
       })
     );
   }

@@ -3,23 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HomeIcon } from "@/components/icons/Icons";
+import { useAuthStore } from "@/store/authStore";
+import { hasNoidaShipmentAccess } from "@/helpers/globalHelper";
 
 interface HeaderProps {
   onLogout: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onLogout }) => {
-  const user =
-    typeof window !== "undefined" ? localStorage.getItem("user") : null;
-  const serviceCenterName = user ? JSON.parse(user) : null;
-  const hasShipmentPermission = Boolean(
-    serviceCenterName?.permissions?.includes(
-      "service_centers_actions_noida_office_shipment_initiate",
-    ) ||
-      serviceCenterName?.permissions?.includes(
-        "service_centers_actions_noida_office_shipment_bulk_initiate",
-      ),
-  );
+  const serviceCenterName = useAuthStore((state) => state.user);
+  const hasShipmentAccess = hasNoidaShipmentAccess(serviceCenterName);
   const pathname = usePathname();
 
   return (
@@ -66,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           >
             {pathname === "/dashboard" && (
               <>
-                {hasShipmentPermission && (
+                {hasShipmentAccess && (
                   <li>
                     <Link
                       href="/noida-shipment"

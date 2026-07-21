@@ -4,9 +4,8 @@ import dynamic from "next/dynamic";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useGlobalStore } from "@/store/store";
-// import NoticeMarquee from "@/components/NoticeMarquee";
+import useSyncAuthenticatedProfile from "@/hooks/useSyncAuthenticatedProfile";
 
-// Dynamically import components for performance optimization
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
   ssr: false,
 });
@@ -21,8 +20,9 @@ const ClaimDetails = dynamic(() => import("@/components/ClaimDetails"), {
 });
 const Header = dynamic(() => import("@/components/Header"), { ssr: false });
 
-const Dashboard: React.FC = () => {
+export default function DashboardPage() {
   const router = useRouter();
+  useSyncAuthenticatedProfile();
   const {
     selectedClaim,
     setFilterState,
@@ -44,7 +44,6 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header onLogout={handleLogout} />
       <SearchSection />
-      {/* <NoticeMarquee message="📢 Holiday Announcement: Our office will remain closed on 26th January 2026 for Republic Day 🇮🇳 as we celebrate the spirit of democracy and the strength of our nation—Happy Republic Day! 🇮🇳✨" /> */}
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh)]">
@@ -57,6 +56,4 @@ const Dashboard: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

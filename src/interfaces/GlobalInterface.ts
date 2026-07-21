@@ -154,6 +154,7 @@ export interface ClaimFetchPayload {
   partner_id: number;
   date?: string;
   source: string;
+  shipment_mode?: boolean;
   duration?: string;
   claim_status?: string | null;
   startDate?: string;
@@ -297,6 +298,8 @@ export interface ServiceCenterProfile {
   landline: string;
   landmark: string;
   user?: User[];
+  permissions?: string[];
+  states?: StateMap;
 }
 
 export interface User {

@@ -26,13 +26,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       const storedUser = localStorage.getItem("user");
       const parsedUser = storedUser
         ? JSON.parse(storedUser)
-        : { name: null, id: null, user_type: null, permissions: [] };
+        : { name: null, id: null, user_type: null, permissions: [], states: {} };
       return {
         token,
         name: parsedUser.name,
         id: parsedUser.id,
         user_type: parsedUser.user_type,
         permissions: parsedUser.permissions ?? [],
+        states: parsedUser.states ?? {},
       };
     }
     return {
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       id: null,
       user_type: null,
       permissions: [],
+      states: {},
     };
   })(),
   isAuthenticated:
@@ -48,17 +50,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user: User) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("token", user.token || "");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: user.name,
-          id: user.id,
-          user_type: user.user_type,
-          permissions: user.permissions ?? [],
-        })
-      );
-    }
-    set({ user, isAuthenticated: !!user.token });
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: user.name,
+            id: user.id,
+            user_type: user.user_type,
+            permissions: user.permissions ?? [],
+            states: user.states ?? {},
+          })
+        );
+      }
+      set({ user, isAuthenticated: !!user.token });
   },
   logout: () => {
     if (typeof window !== "undefined") {
@@ -73,6 +76,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         id: null,
         user_type: null,
         permissions: [],
+        states: {},
       },
       isAuthenticated: false,
     });

@@ -2,8 +2,11 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useGlobalStore } from "@/store/store";
+import { hasNoidaShipmentAccess } from "@/helpers/globalHelper";
+import useSyncAuthenticatedProfile from "@/hooks/useSyncAuthenticatedProfile";
 
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
   ssr: false,
@@ -21,14 +24,46 @@ const Header = dynamic(() => import("@/components/Header"), { ssr: false });
 
 const NoidaShipmentPage: React.FC = () => {
   const router = useRouter();
-  const { selectedClaim, setFilterState, setFilterServiceCentre, setSelectedDropdown } =
-    useGlobalStore();
+  const isAuthReady = useSyncAuthenticatedProfile();
+  const {
+    selectedClaim,
+    setFilterState,
+    setFilterServiceCentre,
+    setSelectedDropdown,
+    clearShipmentSelection,
+  } = useGlobalStore();
+  const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const hasShipmentAccess = hasNoidaShipmentAccess(user);
+
+  useEffect(() => {
+    clearShipmentSelection();
+    return () => clearShipmentSelection();
+  }, [clearShipmentSelection]);
+
+  useEffect(() => {
+    if (!isAuthReady) {
+      return;
+    }
+
+    if (!hasShipmentAccess) {
+      router.replace("/dashboard");
+    }
+  }, [hasShipmentAccess, isAuthReady, router]);
+
+  if (!isAuthReady) {
+    return null;
+  }
+
+  if (!hasShipmentAccess) {
+    return null;
+  }
 
   const handleLogout = () => {
     setFilterState("");
     setFilterServiceCentre("");
     setSelectedDropdown("All Claims");
+    clearShipmentSelection();
     logout();
     router.push("/");
   };
@@ -47,7 +82,7 @@ const NoidaShipmentPage: React.FC = () => {
               Noida Shipment
             </h1>
             <p className="text-sm text-gray-500">
-              Select BER settled or closed claims, then initiate individual or bulk shipment from here.
+              View shipment-eligible claims, then initiate individual or bulk shipment from here.
             </p>
           </div>
 
@@ -60,12 +95,15 @@ const NoidaShipmentPage: React.FC = () => {
         </div>
       </div>
 
-      <SearchSection shipmentActionsEnabled />
+      <SearchSection
+        shipmentActionsEnabled
+        shipmentMode
+      />
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh)]">
           <ClaimFilter />
-          <ClaimList />
+          <ClaimList shipmentMode />
         </aside>
         <main className="bg-white rounded-md shadow-sm overflow-auto pb-[500px] md:pb-[20px]">
           <ClaimDetails

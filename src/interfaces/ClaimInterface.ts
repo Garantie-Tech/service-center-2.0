@@ -66,6 +66,19 @@ export default interface Claim {
   rejection_reason?: string;
   service_centre_id: number;
   service_centre_name: string;
+  service_centre_mobile?: string;
+  service_centre_email?: string;
+  service_centre_state_id?: number | null;
+  service_centre_city?: string;
+  service_centre_pincode?: string;
+  service_centre_state?: string;
+  service_centre_address?:
+    | string
+    | {
+        address_line_1?: string;
+        address_line_2?: string | null;
+      }
+    | null;
   aadhar_photos?: string[];
   utr_number?: string;
   payment_date?: string;

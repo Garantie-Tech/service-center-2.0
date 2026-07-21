@@ -27,6 +27,7 @@ export default function LoginPage() {
         id: userData?.data?.service_centre_id || null,
         user_type: userData?.data?.user_type || null,
         permissions: userData?.data?.permissions || [],
+        states: userData?.data?.states || {},
       });
       setStateOptions(userData?.data?.states);
       localStorage.setItem("states", JSON.stringify(userData?.data?.states));

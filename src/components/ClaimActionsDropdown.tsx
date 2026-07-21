@@ -8,6 +8,7 @@ import AdditionalDetailsModal from "./AdditionalDetailsModal";
 import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
 import { handleCancelClaim } from "@/services/claimService";
+import { isServiceHeadUserType } from "@/helpers/globalHelper";
 
 const ClaimActionsDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -147,7 +148,7 @@ const ClaimActionsDropdown: React.FC = () => {
             )}
             {selectedClaim?.cancellable &&
               (serviceCenterId == selectedClaim?.service_centre_id ||
-                userType == "service_head") && (
+                isServiceHeadUserType(userType)) && (
                 <li
                   className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md"
                   onClick={() => setIsCancelModalOpen(true)}
