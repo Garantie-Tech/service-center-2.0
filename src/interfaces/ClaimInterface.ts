@@ -66,6 +66,19 @@ export default interface Claim {
   rejection_reason?: string;
   service_centre_id: number;
   service_centre_name: string;
+  service_centre_mobile?: string;
+  service_centre_email?: string;
+  service_centre_state_id?: number | null;
+  service_centre_city?: string;
+  service_centre_pincode?: string;
+  service_centre_state?: string;
+  service_centre_address?:
+    | string
+    | {
+        address_line_1?: string;
+        address_line_2?: string | null;
+      }
+    | null;
   aadhar_photos?: string[];
   utr_number?: string;
   payment_date?: string;
@@ -98,6 +111,22 @@ export default interface Claim {
   additional_documents?: AdditionalDocumentsBySource;
   show_device_replacement_section?: boolean;
   is_duplicate?: boolean;
+  office_shipment_eligible?: boolean;
+  office_shipment_ineligibility_reason?: string | null;
+  office_shipment?: OfficeShipmentInfo | null;
+}
+
+export interface OfficeShipmentInfo {
+  id: number;
+  batch_id?: number | null;
+  claim_id?: number;
+  status: string;
+  order_id?: string | null;
+  awb_number?: string | null;
+  courier_id?: string | null;
+  courier_name?: string | null;
+  label_path?: string | null;
+  error_message?: string | null;
 }
 
 export interface AdditionalDocumentItem {

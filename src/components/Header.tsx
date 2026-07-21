@@ -6,16 +6,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HomeIcon } from "@/components/icons/Icons";
 import { useClaimNotifications } from "@/context/ClaimNotificationProvider";
+import { useAuthStore } from "@/store/authStore";
+import { hasNoidaShipmentAccess } from "@/helpers/globalHelper";
 
 interface HeaderProps {
   onLogout: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onLogout }) => {
-  const user = localStorage.getItem("user");
-  const serviceCenterName = user ? JSON.parse(user) : null;
+  const user = useAuthStore((state) => state.user);
+  const hasShipmentAccess = hasNoidaShipmentAccess(user);
   const pathname = usePathname();
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
+
   const {
     notifications,
     unreadCount,
@@ -47,7 +50,6 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   return (
     <header className="bg-primaryBlue px-4 py-2 text-white shadow-sm">
       <div className="flex items-center justify-between">
-        {/* Logo Section */}
         <div className="flex items-center gap-2">
           <Image
             src="/images/v-shield.svg"
@@ -57,18 +59,16 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           />
         </div>
 
-        {/* Title Section */}
-        <h1 className="hidden md:block text-xl font-bold text-center flex-1">
-          Welcome {serviceCenterName?.name}
+        <h1 className="hidden flex-1 text-center text-xl font-bold md:block">
+          Welcome {user?.name}
         </h1>
 
-        {/* Right Actions */}
         <div className="flex items-center gap-3">
           <div className="relative" ref={notificationMenuRef}>
             <button
               type="button"
               onClick={toggleInbox}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/20 transition"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/20"
               aria-label="Notifications"
             >
               <svg
@@ -93,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
             </button>
 
             {isNotificationOpen && (
-              <div className="absolute right-0 mt-3 w-[360px] max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl z-50">
+              <div className="absolute right-0 z-50 mt-3 w-[360px] max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
                 <div className="flex items-center justify-between border-b px-4 py-3">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">Inbox</p>
@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           </div>
 
           <div
-            className="dropdown dropdown-bottom dropdown-end text-gray-600 tooltip tooltip-bottom"
+            className="dropdown dropdown-bottom dropdown-end tooltip tooltip-bottom text-gray-600"
             data-tip="Profile"
           >
             <div tabIndex={0} role="button" className="flex items-center gap-2">
@@ -173,25 +173,44 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
             </div>
             <ul
               tabIndex={0}
-              className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-xs"
+              className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 text-xs shadow"
             >
               {pathname === "/dashboard" && (
-                <li>
-                  <Link href="/profile" className="flex items-center gap-2">
-                    <Image
-                      src="/images/user-profile-icon.svg"
-                      alt="Profile"
-                      width={20}
-                      height={20}
-                    />
-                    Profile
-                  </Link>
-                </li>
+                <>
+                  {hasShipmentAccess && (
+                    <li>
+                      <Link
+                        href="/noida-shipment"
+                        className="flex items-center gap-2"
+                      >
+                        <Image
+                          src="/images/all-claims-icon.svg"
+                          alt="Shipment"
+                          width={20}
+                          height={20}
+                        />
+                        Noida Shipment
+                      </Link>
+                    </li>
+                  )}
+                  <li>
+                    <Link href="/profile" className="flex items-center gap-2">
+                      <Image
+                        src="/images/user-profile-icon.svg"
+                        alt="Profile"
+                        width={20}
+                        height={20}
+                      />
+                      Profile
+                    </Link>
+                  </li>
+                </>
               )}
-              {pathname != "/dashboard" && (
+
+              {pathname !== "/dashboard" && (
                 <li>
                   <Link href="/dashboard" className="flex items-center gap-2">
-                    <div className="w-[20px] h-[20px]">
+                    <div className="h-[20px] w-[20px]">
                       <HomeIcon />
                     </div>
                     Home
@@ -214,8 +233,8 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           </div>
         </div>
       </div>
-      <h1 className="md:hidden block text-xl font-bold text-center flex-1">
-        Welcome {serviceCenterName?.name}
+      <h1 className="flex-1 text-center text-xl font-bold md:hidden block">
+        Welcome {user?.name}
       </h1>
     </header>
   );

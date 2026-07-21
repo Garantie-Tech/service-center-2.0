@@ -7,6 +7,7 @@ import {
   fetchServiceHeadServiceCentres,
   ServiceCentreOption,
 } from "@/services/claimService";
+import { isServiceHeadUserType } from "@/helpers/globalHelper";
 
 const ServiceCenterMultiSelectDropdown: React.FC = () => {
   const filterState = useGlobalStore((s) => s.filterState);
@@ -38,7 +39,7 @@ const ServiceCenterMultiSelectDropdown: React.FC = () => {
         .split(",")
         .filter(Boolean);
 
-      if (userType !== "service_head" || requestedStateIds.length === 0) {
+      if (!isServiceHeadUserType(userType) || requestedStateIds.length === 0) {
         setServiceCentres([]);
         return;
       }
@@ -97,7 +98,7 @@ const ServiceCenterMultiSelectDropdown: React.FC = () => {
     setFilterServiceCentre("");
   };
 
-  if (userType !== "service_head") {
+  if (!isServiceHeadUserType(userType)) {
     return null;
   }
 

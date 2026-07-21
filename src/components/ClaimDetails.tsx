@@ -22,13 +22,26 @@ import {
   getFilteredTabs,
   getStatusIcon,
   getTabStatus,
+  hasNoidaShipmentPermission,
 } from "@/helpers/globalHelper";
 import SettlementDetailsTab from "@/components/claim/SettlementDetailsTab";
 import RemarksComponent from "@/components/RemarksComponent";
 import { useState } from "react";
+import {
+  initiateNoidaOfficeShipment,
+  type ShipmentBuilderPayload,
+} from "@/services/claimService";
+import { useAuthStore } from "@/store/authStore";
+import ShipmentBuilderModal from "@/components/shipment/ShipmentBuilderModal";
 
-const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
+interface ClaimDetailsProps {
+  selectedClaim: Claim | null;
+  shipmentActionsEnabled?: boolean;
+}
+
+const ClaimDetails: React.FC<ClaimDetailsProps> = ({
   selectedClaim,
+  shipmentActionsEnabled = false,
 }) => {
   const {
     activeTab,
@@ -37,6 +50,7 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     claimStatus,
     triggerClaimRefresh,
   } = useGlobalStore();
+  const permissions = useAuthStore((state) => state.user.permissions ?? []);
   const { notifySuccess, notifyError } = useNotification();
 
   const handleTabChange = (tab: Tab) => {
@@ -44,6 +58,46 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
   };
 
   const [isRemarksOpen, setIsRemarksOpen] = useState(false);
+  const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+  const canInitiateNoidaShipment = hasNoidaShipmentPermission(permissions);
+
+  const handleNoidaShipmentConfirm = async (
+    payload: ShipmentBuilderPayload,
+  ) => {
+    if (!selectedClaim?.id || !selectedClaim.office_shipment_eligible) {
+      notifyError(
+        selectedClaim?.office_shipment_ineligibility_reason ||
+          "This claim is not eligible for Noida office shipment.",
+      );
+      return false;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await initiateNoidaOfficeShipment(
+        Number(selectedClaim.id),
+        payload,
+      );
+
+      if (!response?.success) {
+        notifyError(response?.message || "Unable to initiate Noida office shipment.");
+        return false;
+      }
+
+      triggerClaimRefresh();
+      notifySuccess("Noida office shipment initiated successfully.");
+      return true;
+    } catch (error) {
+      notifyError(
+        error instanceof Error
+          ? error.message
+          : "Failed to initiate Noida office shipment.",
+      );
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRemarksSubmit = async (remark: string) => {
     try {
@@ -194,6 +248,17 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
               className="cursor-pointer"
             />
           </button>
+          {shipmentActionsEnabled &&
+            canInitiateNoidaShipment &&
+            selectedClaim?.office_shipment_eligible && (
+            <button
+              type="button"
+              className="rounded-md border border-primaryBlue px-3 py-2 text-xs font-semibold text-primaryBlue hover:bg-primaryBlue hover:text-white transition-colors"
+              onClick={() => setIsShipmentModalOpen(true)}
+            >
+              Initiate Shipment
+            </button>
+          )}
           <ClaimActionsDropdown />
         </div>
       </div>
@@ -256,6 +321,12 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
         isOpen={isRemarksOpen}
         onClose={() => setIsRemarksOpen(false)}
         onSubmit={handleRemarksSubmit}
+      />
+      <ShipmentBuilderModal
+        isOpen={isShipmentModalOpen}
+        claims={selectedClaim?.office_shipment_eligible ? [selectedClaim] : []}
+        onClose={() => setIsShipmentModalOpen(false)}
+        onConfirm={handleNoidaShipmentConfirm}
       />
     </div>
   );

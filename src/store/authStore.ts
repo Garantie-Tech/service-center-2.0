@@ -2,7 +2,6 @@
 
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { create } from "zustand";
-import { safeJsonParse } from "@/helpers/safeJson";
 
 interface User {
   token: string | null;
@@ -10,6 +9,7 @@ interface User {
   id: string | number | null;
   user_type?: string | null;
   states?: StateMap;
+  permissions?: string[];
 }
 
 interface AuthState {
@@ -24,35 +24,44 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
-      const parsedUser = safeJsonParse<{
-        name: string | null;
-        id: string | number | null;
-        user_type: string | null;
-      }>(storedUser, { name: null, id: null, user_type: null });
+      const parsedUser = storedUser
+        ? JSON.parse(storedUser)
+        : { name: null, id: null, user_type: null, permissions: [], states: {} };
       return {
         token,
         name: parsedUser.name,
         id: parsedUser.id,
         user_type: parsedUser.user_type,
+        permissions: parsedUser.permissions ?? [],
+        states: parsedUser.states ?? {},
       };
     }
-    return { token: null, name: null, id: null, user_type: null };
+    return {
+      token: null,
+      name: null,
+      id: null,
+      user_type: null,
+      permissions: [],
+      states: {},
+    };
   })(),
   isAuthenticated:
     typeof window !== "undefined" ? !!localStorage.getItem("token") : false,
   setUser: (user: User) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("token", user.token || "");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: user.name,
-          id: user.id,
-          user_type: user.user_type,
-        }),
-      );
-    }
-    set({ user, isAuthenticated: !!user.token });
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: user.name,
+            id: user.id,
+            user_type: user.user_type,
+            permissions: user.permissions ?? [],
+            states: user.states ?? {},
+          })
+        );
+      }
+      set({ user, isAuthenticated: !!user.token });
   },
   logout: () => {
     if (typeof window !== "undefined") {
@@ -61,7 +70,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       document.cookie = "token=; path=/; max-age=0; secure; samesite=strict";
     }
     set({
-      user: { token: null, name: null, id: null, user_type: null },
+      user: {
+        token: null,
+        name: null,
+        id: null,
+        user_type: null,
+        permissions: [],
+        states: {},
+      },
       isAuthenticated: false,
     });
   },

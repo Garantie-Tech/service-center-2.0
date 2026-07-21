@@ -1,5 +1,82 @@
 import Claim from "@/interfaces/ClaimInterface";
-import { Tab, TabStatus } from "@/interfaces/GlobalInterface";
+import { Tab, TabStatus, StateMap } from "@/interfaces/GlobalInterface";
+
+const NOIDA_SHIPMENT_PERMISSION_KEYS = [
+  "service_centers_actions_noida_office_shipment_initiate",
+  "service_centers_actions_noida_office_shipment_bulk_initiate",
+  "serviceCenter_actions_noida_office_shipment_initiate",
+  "serviceCenter_actions_noida_office_shipment_bulk_initiate",
+  "noida_office_shipment_initiate",
+  "noida_office_shipment_bulk_initiate",
+];
+
+const NOIDA_SHIPMENT_ALLOWED_STATE_NAMES = new Set([
+  "up",
+  "uttarpradesh",
+  "gujarat",
+  "mp",
+  "madhyapradesh",
+  "rajasthan",
+]);
+
+const normalizeShipmentStateName = (value: string): string => {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+};
+
+export const isServiceHeadUserType = (
+  userType?: string | null,
+): boolean => {
+  return ["service_head", "service_head_ho"].includes(userType ?? "");
+};
+
+export const hasNoidaShipmentPermission = (
+  permissions?: string[] | null,
+): boolean => {
+  return (permissions ?? []).some((permission) =>
+    NOIDA_SHIPMENT_PERMISSION_KEYS.includes(permission),
+  );
+};
+
+export const hasNoidaShipmentAccess = (
+  user?:
+    | {
+        user_type?: string | null;
+        permissions?: string[];
+        states?: StateMap | Record<string, string> | null;
+      }
+    | null,
+): boolean => {
+  if (!user || !isServiceHeadUserType(user.user_type)) {
+    return false;
+  }
+
+  if (!hasNoidaShipmentPermission(user.permissions)) {
+    return false;
+  }
+
+  let states: Record<string, string> = user.states ?? {};
+  if (Object.keys(states).length === 0 && typeof window !== "undefined") {
+    const storedStates = localStorage.getItem("states");
+    if (storedStates && storedStates !== "undefined") {
+      try {
+        states = JSON.parse(storedStates) as Record<string, string>;
+      } catch {
+        states = {};
+      }
+    }
+  }
+
+  const stateNames = Object.values(states)
+    .map((state) => normalizeShipmentStateName(String(state ?? "")))
+    .filter(Boolean);
+
+  return stateNames.some((stateName) =>
+    NOIDA_SHIPMENT_ALLOWED_STATE_NAMES.has(stateName),
+  );
+};
 
 export const getEstimateButtonLabel = (claimStatus: string): string => {
   if (

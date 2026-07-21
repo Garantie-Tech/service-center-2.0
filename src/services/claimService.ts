@@ -28,10 +28,122 @@ interface ClaimCancelReasonResponse {
   data: Record<string, string>;
 }
 
+export interface NoidaOfficeShipmentBatchResponse {
+  success: boolean;
+  status?: boolean;
+  message: string;
+  data?: {
+    batch?: {
+      id: number;
+      batch_ref: string;
+      status: string;
+      requested_count: number;
+      processed_count: number;
+      success_count: number;
+      failed_count: number;
+      skipped_count: number;
+    };
+    result?: {
+      claim_id: number;
+      success: boolean;
+      message?: string;
+    };
+  };
+}
+
+export interface NoidaOfficeShipmentConfig {
+  destination: {
+    name: string;
+    address_line_one: string;
+    address_line_two: string;
+    city: string;
+    state: string;
+    pincode: string;
+    phone: string;
+    alternate_phone: string;
+    email: string;
+  };
+  allowed_source_states: string[];
+  eligible_status_bodies: string[];
+  batch_limit: number;
+  configured: boolean;
+}
+
+export interface NoidaOfficeShipmentConfigResponse {
+  success: boolean;
+  status_code: number;
+  message: string;
+  data: NoidaOfficeShipmentConfig;
+}
+
+export interface ServiceCentreDetail {
+  id: number;
+  title: string;
+  value: number;
+  name: string;
+  mobile: string;
+  email: string;
+  address: Record<string, unknown>;
+  address_line_one: string;
+  address_line_two: string;
+  city: string;
+  state: string;
+  pincode: string;
+  state_id: number | null;
+}
+
+export interface ServiceCentreDetailResponse {
+  success: boolean;
+  status_code: number;
+  message: string;
+  data: ServiceCentreDetail;
+}
+
+export interface ShipmentAddressForm {
+  address_title: string;
+  service_centre_id?: number | null;
+  state_id?: number | null;
+  name: string;
+  phone: string;
+  alternate_phone: string;
+  email: string;
+  address_line_one: string;
+  address_line_two: string;
+  pincode: string;
+  city: string;
+  state: string;
+}
+
+export interface ShipmentBuilderPayload {
+  destination: ShipmentAddressForm;
+  source_addresses: Record<number, ShipmentAddressForm>;
+}
+
 export const fetchClaims = async (
   _params?: Record<string, string | number | boolean> | ClaimFetchPayload,
 ) => {
   return await getRequest<ClaimResponse>("claims", _params);
+};
+
+export const fetchShipmentEligibleClaims = async (
+  params?: Record<string, string | number | boolean> | ClaimFetchPayload,
+) => {
+  return await getRequest<ClaimResponse>("noida-office-shipment/eligible-claims", {
+    ...(params ?? {}),
+    shipment_mode: true,
+  });
+};
+
+export const fetchNoidaOfficeShipmentConfig = async () => {
+  return await getRequest<NoidaOfficeShipmentConfigResponse>(
+    "noida-office-shipment/config",
+  );
+};
+
+export const fetchServiceCentreDetail = async (serviceCentreId: number) => {
+  return await getRequest<ServiceCentreDetailResponse>(
+    `service-centres/${serviceCentreId}`,
+  );
 };
 
 export interface ServiceCentreOption {
@@ -56,6 +168,32 @@ export const fetchServiceHeadServiceCentres = async (stateIds: string[]) => {
   return await getRequest<ServiceCentreResponse>("head/service-centres", {
     state_id: stateIds.join(","),
   });
+};
+
+export const initiateNoidaOfficeShipment = async (
+  claimId: number,
+  payload?: Partial<ShipmentBuilderPayload>,
+) => {
+  return await postRequest<NoidaOfficeShipmentBatchResponse>(
+    "noida-office-shipment",
+    {
+      claim_id: claimId,
+      ...(payload ?? {}),
+    },
+  );
+};
+
+export const bulkInitiateNoidaOfficeShipment = async (
+  claimIds: number[],
+  payload?: Partial<ShipmentBuilderPayload>,
+) => {
+  return await postRequest<NoidaOfficeShipmentBatchResponse>(
+    "noida-office-shipment/bulk",
+    {
+      claim_ids: claimIds,
+      ...(payload ?? {}),
+    },
+  );
 };
 
 export const submitEstimate = async (claimID: number, body: FormData) => {

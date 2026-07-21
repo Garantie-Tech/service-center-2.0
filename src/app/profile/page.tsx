@@ -3,16 +3,19 @@
 import Header from "@/components/Header";
 import { useNotification } from "@/context/NotificationProvider";
 import { formatDate } from "@/helpers/dateHelper";
+import { isServiceHeadUserType } from "@/helpers/globalHelper";
 import { ServiceCenterProfile } from "@/interfaces/GlobalInterface";
 import { resetPassword } from "@/services/authService";
 import { getServiceCenterProfileData } from "@/services/claimService";
 import { useAuthStore } from "@/store/authStore";
 import { useGlobalStore } from "@/store/store";
+import useSyncAuthenticatedProfile from "@/hooks/useSyncAuthenticatedProfile";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const ProfileDetails = () => {
+export default function ProfilePage() {
+  useSyncAuthenticatedProfile();
   const [profile, setProfile] = useState<ServiceCenterProfile | null>(null);
   const { setIsLoading, setFilterState, setSelectedDropdown } =
     useGlobalStore();
@@ -192,7 +195,7 @@ const ProfileDetails = () => {
                     ***********
                   </p>
                 </div>
-                {profile?.user?.[0]?.type !== "service_head" &&
+                {!isServiceHeadUserType(profile?.user?.[0]?.type) &&
                   (showResetPasswordSection ? (
                     <button
                       className="text-xs text-blue-600 font-medium hover:underline"
@@ -281,19 +284,19 @@ const ProfileDetails = () => {
                     handleInputChange("confirmNewPassword", e.target.value)
                   }
                   className="input input-bordered text-sm w-full bg-inputBg"
-                  placeholder="Confirm New Password"
+                  placeholder="Enter Confirm New Password"
                 />
               </div>
 
               {formError && (
-                <p className="text-[#f00] text-xs mb-4">{formError}</p>
+                <p className="text-sm text-red-500 mb-3">{formError}</p>
               )}
 
               <button
-                className={`btn w-1/2 bg-primaryBlue text-white hover:bg-blue-700`}
+                className="btn btn-primary bg-primaryBlue text-white rounded-[8px] w-full"
                 onClick={handleSubmit}
               >
-                Reset Password
+                Submit
               </button>
             </div>
           )}
@@ -301,6 +304,4 @@ const ProfileDetails = () => {
       </div>
     </div>
   );
-};
-
-export default ProfileDetails;
+}

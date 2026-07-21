@@ -35,6 +35,11 @@ interface StoreType {
     claims: Claim[] | ((prevClaims: Claim[]) => Claim[]),
   ) => void;
 
+  shipmentSelectedClaimIds: number[];
+  setShipmentSelectedClaimIds: (claimIds: number[]) => void;
+  toggleShipmentClaimSelection: (claimId: number) => void;
+  clearShipmentSelection: () => void;
+
   selectedClaim: Claim | null;
   setSelectedClaim: (
     claim: Claim | null | ((prevClaim: Claim | null) => Claim | null),
@@ -144,6 +149,21 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
           ? claims(state.filteredClaims || [])
           : claims || [],
     })),
+
+  shipmentSelectedClaimIds: [],
+  setShipmentSelectedClaimIds: (claimIds) =>
+    set({ shipmentSelectedClaimIds: claimIds }),
+  toggleShipmentClaimSelection: (claimId) =>
+    set((state) => {
+      const isSelected = state.shipmentSelectedClaimIds.includes(claimId);
+
+      return {
+        shipmentSelectedClaimIds: isSelected
+          ? state.shipmentSelectedClaimIds.filter((id) => id !== claimId)
+          : [...state.shipmentSelectedClaimIds, claimId],
+      };
+    }),
+  clearShipmentSelection: () => set({ shipmentSelectedClaimIds: [] }),
 
   selectedClaim: null,
   setSelectedClaim: (claim) =>

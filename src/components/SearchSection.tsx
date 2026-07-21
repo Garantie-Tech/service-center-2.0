@@ -9,19 +9,40 @@ import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
 import StateMultiSelectDropdown from "./filters/StateMultiSelectDropdown";
 import ServiceCenterMultiSelectDropdown from "./filters/ServiceCenterMultiSelectDropdown";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StateMap } from "@/interfaces/GlobalInterface";
-import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
+import {
+  decodeJWT,
+  hasNoidaShipmentPermission,
+  isServiceHeadUserType,
+  logoutUser,
+} from "@/helpers/globalHelper";
 import { ALLOWED_ISSUERS } from "@/globalConstant";
 import { useAuthStore } from "@/store/authStore";
 import { safeJsonParse } from "@/helpers/safeJson";
+import {
+  bulkInitiateNoidaOfficeShipment,
+  type ShipmentBuilderPayload,
+} from "@/services/claimService";
+import ShipmentBuilderModal from "./shipment/ShipmentBuilderModal";
 
-const SearchSection: React.FC = () => {
+interface SearchSectionProps {
+  shipmentActionsEnabled?: boolean;
+  shipmentMode?: boolean;
+}
+
+const SearchSection: React.FC<SearchSectionProps> = ({
+  shipmentActionsEnabled = false,
+  shipmentMode = false,
+}) => {
   const {
     searchTerm,
+    globalSearch,
     setSearchTerm,
     handleSearch,
     setIsLoading,
+    filteredClaims,
+    triggerClaimRefresh,
     filterStatus,
     claimCount,
     stateOptions,
@@ -29,15 +50,36 @@ const SearchSection: React.FC = () => {
     appliedFilters,
     filterState,
     filterServiceCentre,
+    shipmentSelectedClaimIds,
+    clearShipmentSelection,
   } = useGlobalStore();
   const user = useAuthStore((state) => state.user);
+  const permissions = useAuthStore((state) => state.user.permissions ?? []);
   const stateCount = Object.keys(stateOptions ?? {}).length;
-  const showStateFilter = user?.user_type === "service_head" && stateCount > 1;
+  const showStateFilter = isServiceHeadUserType(user?.user_type) && stateCount > 1;
   const showServiceCentreFilter =
-    user?.user_type === "service_head" && stateCount > 0;
+    isServiceHeadUserType(user?.user_type) && stateCount > 0;
   const serviceCentreFilterWidth = showStateFilter ? "w-[175px]" : "w-[235px]";
 
   const { notifySuccess, notifyError } = useNotification();
+  const canBulkInitiateNoidaShipment = hasNoidaShipmentPermission(permissions);
+  const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+
+  const selectedShipmentClaims = useMemo(() => {
+    if (!shipmentMode) {
+      return [];
+    }
+
+    const selectedClaimIdSet = new Set(
+      shipmentSelectedClaimIds.map((claimId) => Number(claimId)),
+    );
+
+    return filteredClaims.filter(
+      (claim) =>
+        selectedClaimIdSet.has(Number(claim.id)) &&
+        claim.office_shipment_eligible,
+    );
+  }, [filteredClaims, shipmentMode, shipmentSelectedClaimIds]);
 
   // const handleExport = async () => {
   //   try {
@@ -76,9 +118,15 @@ const SearchSection: React.FC = () => {
       const paramsObj: Record<string, string> = {
         page: "1",
         pageSize: "25",
-        search: searchTerm || "",
-        status: filterStatus || "",
       };
+
+      if (shipmentMode) {
+        paramsObj.shipment_mode = "true";
+        paramsObj.claim_search = globalSearch || searchTerm || "";
+      } else {
+        paramsObj.search = searchTerm || "";
+        paramsObj.status = filterStatus || "";
+      }
 
       if (filterState) {
         paramsObj.state_id = filterState;
@@ -97,7 +145,9 @@ const SearchSection: React.FC = () => {
 
       const params = new URLSearchParams(paramsObj).toString();
 
-      const exportUrl = `${API_BASE_URL}/service/claims/export-claims?${params}`;
+      const exportUrl = shipmentMode
+        ? `${API_BASE_URL}/service/noida-office-shipment/export?${params}`
+        : `${API_BASE_URL}/service/claims/export-claims?${params}`;
 
       // 🔒 Include token if endpoint is protected
       setIsLoading(true);
@@ -116,6 +166,7 @@ const SearchSection: React.FC = () => {
 
       if (!response.ok) {
         notifyError(`Failed to export data. Something went wrong`);
+        return;
       }
 
       // 🧩 Convert stream to blob
@@ -123,7 +174,9 @@ const SearchSection: React.FC = () => {
 
       // 🏷 Try to extract filename from headers
       const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = "claims_export.csv";
+      let filename = shipmentMode
+        ? "noida-office-shipment-eligible-claims.csv"
+        : "claims_export.csv";
       if (contentDisposition && contentDisposition.includes("filename=")) {
         filename = contentDisposition
           .split("filename=")[1]
@@ -147,6 +200,44 @@ const SearchSection: React.FC = () => {
     } catch (error) {
       console.error("Export error:", error);
       notifyError(`Failed to export data. Something went wrong ${error}`);
+      setIsLoading(false);
+    }
+  };
+
+  const handleNoidaShipmentBatch = async (
+    payload: ShipmentBuilderPayload,
+  ) => {
+    const eligibleClaimIds = selectedShipmentClaims.map((claim) => claim.id);
+
+    if (!eligibleClaimIds.length) {
+      notifyError("Select at least one eligible claim for Noida shipment.");
+      return false;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await bulkInitiateNoidaOfficeShipment(
+        eligibleClaimIds,
+        payload,
+      );
+
+      if (!response?.success) {
+        notifyError(response?.message || "Failed to initiate Noida shipment batch.");
+        return false;
+      }
+
+      triggerClaimRefresh();
+      clearShipmentSelection();
+      notifySuccess("Noida shipment batch initiated successfully.");
+      return true;
+    } catch (error) {
+      notifyError(
+        error instanceof Error
+          ? error.message
+          : "Failed to initiate Noida shipment batch.",
+      );
+      return false;
+    } finally {
       setIsLoading(false);
     }
   };
@@ -272,6 +363,24 @@ const SearchSection: React.FC = () => {
           {/* Buttons */}
           <div className="flex items-center justify-end gap-4">
             <div className="flex gap-4">
+              {shipmentActionsEnabled && canBulkInitiateNoidaShipment && (
+                <button
+                  onClick={() => {
+                    if (!selectedShipmentClaims.length) {
+                      notifyError(
+                        "Select at least one eligible claim for Noida shipment.",
+                      );
+                      return;
+                    }
+
+                    setIsShipmentModalOpen(true);
+                  }}
+                  disabled={!shipmentSelectedClaimIds.length}
+                  className="rounded-md border border-primaryBlue px-3 py-2 text-xs font-semibold text-primaryBlue transition-colors hover:bg-primaryBlue hover:text-white disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                >
+                  {`Initiate Shipment${shipmentSelectedClaimIds.length ? ` (${shipmentSelectedClaimIds.length})` : ""}`}
+                </button>
+              )}
               <Link
                 className="w-[30px] ml-20px tooltip"
                 data-tip="Plan Finder"
@@ -313,6 +422,13 @@ const SearchSection: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ShipmentBuilderModal
+        isOpen={isShipmentModalOpen}
+        claims={selectedShipmentClaims}
+        onClose={() => setIsShipmentModalOpen(false)}
+        onConfirm={handleNoidaShipmentBatch}
+      />
     </div>
   );
 };
