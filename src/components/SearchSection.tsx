@@ -64,6 +64,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   const { notifySuccess, notifyError } = useNotification();
   const canBulkInitiateNoidaShipment = hasNoidaShipmentPermission(permissions);
   const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+  const isPendingShipmentView = !shipmentMode || (filterStatus || "pending") === "pending";
 
   const selectedShipmentClaims = useMemo(() => {
     if (!shipmentMode) {
@@ -218,17 +219,56 @@ const SearchSection: React.FC<SearchSectionProps> = ({
       setIsLoading(true);
       const response = await bulkInitiateNoidaOfficeShipment(
         eligibleClaimIds,
-        payload,
+        {
+          ...payload,
+          process_now: true,
+        },
       );
 
-      if (!response?.success) {
-        notifyError(response?.message || "Failed to initiate Noida shipment batch.");
+      const responseBody = response.data;
+      const shipmentResult = responseBody?.data?.result;
+      const batch = responseBody?.data?.batch;
+      const successCount = Number(
+        shipmentResult?.success_count ?? batch?.success_count ?? 0,
+      );
+      const failedCount = Number(
+        shipmentResult?.failed_count ?? batch?.failed_count ?? 0,
+      );
+      const skippedCount = Number(
+        shipmentResult?.skipped_count ?? batch?.skipped_count ?? 0,
+      );
+      const firstResultMessage =
+        shipmentResult?.message ||
+        shipmentResult?.results?.find((result) => result?.message)?.message;
+      const queued = responseBody?.data?.queued === true;
+      const apiAccepted =
+        Boolean(response?.success) &&
+        responseBody?.success !== false &&
+        responseBody?.status !== false;
+
+      if (!apiAccepted || (!queued && successCount < 1)) {
+        notifyError(
+          response.error ||
+            firstResultMessage ||
+            responseBody?.message ||
+            "Failed to initiate Noida shipment.",
+        );
         return false;
       }
 
       triggerClaimRefresh();
       clearShipmentSelection();
-      notifySuccess("Noida shipment batch initiated successfully.");
+      notifySuccess(
+        queued
+          ? "Noida shipment queued for processing."
+          : `Noida shipment initiated successfully for ${successCount} ${
+              successCount === 1 ? "claim" : "claims"
+            }.${
+              skippedCount || failedCount
+                ? ` Skipped: ${skippedCount}, failed: ${failedCount}.`
+                : ""
+            }`,
+      );
       return true;
     } catch (error) {
       notifyError(
@@ -286,26 +326,28 @@ const SearchSection: React.FC<SearchSectionProps> = ({
               <h2 className="text-sm font-bold">Claims</h2>
               <p className="text-xxs text-gray-500">{claimCount}</p>
             </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="tooltip inline-flex h-6 w-6 items-center justify-center leading-none"
-              data-tip="Refresh"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6"
+            {!shipmentMode && (
+              <button
+                onClick={() => window.location.reload()}
+                className="tooltip inline-flex h-6 w-6 items-center justify-center leading-none"
+                data-tip="Refresh"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
@@ -375,50 +417,58 @@ const SearchSection: React.FC<SearchSectionProps> = ({
 
                     setIsShipmentModalOpen(true);
                   }}
-                  disabled={!shipmentSelectedClaimIds.length}
+                  disabled={
+                    !shipmentSelectedClaimIds.length || !isPendingShipmentView
+                  }
                   className="rounded-md border border-primaryBlue px-3 py-2 text-xs font-semibold text-primaryBlue transition-colors hover:bg-primaryBlue hover:text-white disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-transparent disabled:hover:text-gray-400"
                 >
                   {`Initiate Shipment${shipmentSelectedClaimIds.length ? ` (${shipmentSelectedClaimIds.length})` : ""}`}
                 </button>
               )}
-              <Link
-                className="w-[30px] ml-20px tooltip"
-                data-tip="Plan Finder"
-                href="/plan-finder"
-              >
-                <Image
-                  src="/images/plan-finder.svg"
-                  alt="Download"
-                  width={24}
-                  height={24}
-                />
-              </Link>
-              <button
-                onClick={handleExport}
-                className="w-[30px] tooltip"
-                data-tip="Export Claims"
-              >
-                <Image
-                  src="/images/download-icon.svg"
-                  alt="Download"
-                  width={24}
-                  height={24}
-                />
-              </button>
+              {!shipmentMode && (
+                <>
+                  <Link
+                    className="w-[30px] ml-20px tooltip"
+                    data-tip="Plan Finder"
+                    href="/plan-finder"
+                  >
+                    <Image
+                      src="/images/plan-finder.svg"
+                      alt="Download"
+                      width={24}
+                      height={24}
+                    />
+                  </Link>
+                  <button
+                    onClick={handleExport}
+                    className="w-[30px] tooltip"
+                    data-tip="Export Claims"
+                  >
+                    <Image
+                      src="/images/download-icon.svg"
+                      alt="Download"
+                      width={24}
+                      height={24}
+                    />
+                  </button>
+                </>
+              )}
             </div>
-            <button
-              onClick={redirectToClaimsPortal}
-              className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"
-              data-tip="Initiate Claim"
-            >
-              <Image
-                src="/images/plus-circle.svg"
-                alt="Initiate Claim"
-                width={20}
-                height={20}
-              />
-              <span className="hidden md:block">Initiate Claim</span>
-            </button>
+            {!shipmentMode && (
+              <button
+                onClick={redirectToClaimsPortal}
+                className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"
+                data-tip="Initiate Claim"
+              >
+                <Image
+                  src="/images/plus-circle.svg"
+                  alt="Initiate Claim"
+                  width={20}
+                  height={20}
+                />
+                <span className="hidden md:block">Initiate Claim</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

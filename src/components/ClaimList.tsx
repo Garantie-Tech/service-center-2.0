@@ -89,9 +89,11 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
       };
 
       if (shipmentMode) {
+        const shipmentStatus = filterStatus || "pending";
         basePayload.shipment_mode = true;
-        basePayload.claim_search = globalSearch || "";
-
+        basePayload.shipment_status = shipmentStatus;
+        basePayload.shipment_view = shipmentStatus;
+        basePayload.claim_search = globalSearch;
         if (appliedFilters?.fromDate && appliedFilters?.toDate) {
           basePayload.duration = "custom";
           basePayload.startDate = appliedFilters.fromDate;
@@ -278,6 +280,26 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
 
       if (response.success && Array.isArray(response.data?.data?.claims)) {
         const newClaims = response.data.data.claims;
+        if (shipmentMode) {
+          setClaims(newClaims);
+          setFilteredClaims(newClaims);
+
+          const updatedSelectedClaim = newClaims.find(
+            (claim) => claim.id === selectedClaim?.id,
+          );
+
+          if (updatedSelectedClaim) {
+            setClaimStates(updatedSelectedClaim);
+          } else {
+            setSelectedClaim(newClaims[0] || null);
+            if (newClaims[0]) {
+              setClaimStates(newClaims[0]);
+            }
+          }
+
+          return;
+        }
+
         const updatedClaimsMap = new Map(
           claimsRef.current.map((claim) => [claim.id, claim]),
         );
@@ -312,6 +334,7 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
     setFilteredClaims,
     setClaimRevised,
     shipmentMode,
+    setClaimStates,
   ]);
 
   useEffect(() => {
@@ -433,7 +456,10 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
                       checked={shipmentSelectedClaimIds.includes(
                         Number(claim.id),
                       )}
-                      disabled={!claim.office_shipment_eligible}
+                      disabled={
+                        (filterStatus || "pending") !== "pending" ||
+                        !claim.office_shipment_eligible
+                      }
                       onClick={(event) => event.stopPropagation()}
                       onChange={(event) => {
                         event.stopPropagation();

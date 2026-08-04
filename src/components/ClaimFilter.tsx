@@ -6,7 +6,22 @@ import { useGlobalStore } from "@/store/store";
 import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
 import { SORT_OPTIONS } from "@/globalConstant";
 
-const ClaimFilter: React.FC = () => {
+interface ClaimFilterProps {
+  shipmentMode?: boolean;
+}
+
+const SHIPMENT_STATUS_OPTIONS: Record<string, string> = {
+  pending: "Pending",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  failed: "Failed",
+  cancelled: "Cancelled",
+  all: "All",
+};
+
+const ClaimFilter: React.FC<ClaimFilterProps> = ({
+  shipmentMode = false,
+}) => {
   const {
     isFilterOpen,
     toggleFilter,
@@ -26,6 +41,7 @@ const ClaimFilter: React.FC = () => {
     setAppliedFilters,
     handleSortingChange,
     handleFilterChange,
+    filterStatus,
     claimStatuses,
     setClaimTypes,
   } = useGlobalStore();
@@ -198,6 +214,10 @@ const ClaimFilter: React.FC = () => {
     allClaims: "allClaims",
     pendingClaims: "pendingClaims",
   };
+  const statusOptions = shipmentMode ? SHIPMENT_STATUS_OPTIONS : claimStatuses;
+  const currentStatusLabel = shipmentMode
+    ? statusOptions[filterStatus || "pending"] || "Pending"
+    : claimStatuses[selectedDropdown] || "All Claims";
 
   return (
     <div className="sticky top-0 bg-white h-[50px] mt-2">
@@ -216,7 +236,7 @@ const ClaimFilter: React.FC = () => {
             data-tip="Claim Status"
           >
             <span className="flex items-center text-sm">
-              {claimStatuses[selectedDropdown] || "All Claims"}
+              {currentStatusLabel}
             </span>
             <Image
               src="/images/select-dropdown.svg"
@@ -227,21 +247,23 @@ const ClaimFilter: React.FC = () => {
             />
           </summary>
           <ul className="dropdown-content menu bg-base-100 w-full rounded-box mt-2 shadow-lg text-sm">
-            {Object.entries(claimStatuses).map(([key, value]) => (
+            {Object.entries(statusOptions).map(([key, value]) => (
               <li key={key}>
                 <button
                   className="w-full flex items-center text-left px-4 py-2 hover:bg-gray-200"
                   onClick={() => handleDropdownChange(key)}
                 >
-                  <Image
-                    src={`/images/${key
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}-icon.svg`}
-                    alt={key}
-                    width={20}
-                    height={20}
-                    className="mr-2"
-                  />
+                  {!shipmentMode && (
+                    <Image
+                      src={`/images/${key
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}-icon.svg`}
+                      alt={key}
+                      width={20}
+                      height={20}
+                      className="mr-2"
+                    />
+                  )}
                   {value}
                 </button>
               </li>
@@ -371,31 +393,34 @@ const ClaimFilter: React.FC = () => {
             ))}
           </div>
 
-          {/* Claim Types */}
-          <h3 className="text-sm font-bold mb-3">Claim Type</h3>
-          <div className="flex gap-2 mb-4">
-            {(claimTypeOptions as Array<keyof typeof claimTypes>).map(
-              (type) => (
-                <label key={type} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="claimType"
-                    className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
-                    value={type}
-                    checked={
-                      claimTypes[
-                        mappedClaimType[type as keyof typeof mappedClaimType]
-                      ]
-                    }
-                    onChange={handleClaimTypeChange}
-                  />
-                  <span className="ml-2 text-xs capitalize">
-                    {type.replace("SC", " SC").replace("Claims", " Claims")}
-                  </span>
-                </label>
-              )
-            )}
-          </div>
+          {!shipmentMode && (
+            <>
+              <h3 className="text-sm font-bold mb-3">Claim Type</h3>
+              <div className="flex gap-2 mb-4">
+                {(claimTypeOptions as Array<keyof typeof claimTypes>).map(
+                  (type) => (
+                    <label key={type} className="flex items-center">
+                      <input
+                        type="radio"
+                        name="claimType"
+                        className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
+                        value={type}
+                        checked={
+                          claimTypes[
+                            mappedClaimType[type as keyof typeof mappedClaimType]
+                          ]
+                        }
+                        onChange={handleClaimTypeChange}
+                      />
+                      <span className="ml-2 text-xs capitalize">
+                        {type.replace("SC", " SC").replace("Claims", " Claims")}
+                      </span>
+                    </label>
+                  )
+                )}
+              </div>
+            </>
+          )}
 
           {/* Action Buttons */}
           <div className="flex justify-center gap-2 mt-4">

@@ -180,7 +180,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                   {hasShipmentAccess && (
                     <li>
                       <Link
-                        href="/noida-shipment"
+                        href="/bulk-shipment"
                         className="flex items-center gap-2"
                       >
                         <Image
@@ -189,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                           width={20}
                           height={20}
                         />
-                        Noida Shipment
+                        Bulk Shipment
                       </Link>
                     </li>
                   )}
