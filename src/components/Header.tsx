@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                 {hasShipmentAccess && (
                   <li>
                     <Link
-                      href="/noida-shipment"
+                      href="/bulk-shipment"
                       className="flex items-center gap-2"
                     >
                       <Image
@@ -71,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                         width={20}
                         height={20}
                       />
-                      Noida Shipment
+                      Bulk Shipment
                     </Link>
                   </li>
                 )}
@@ -88,18 +88,20 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                 </li>
               </>
             )}
-            {pathname !== "/dashboard" && pathname !== "/noida-shipment" && (
-              <li>
-                <Link href="/dashboard" className="flex items-center gap-2">
-                  <div className="w-[20px] h-[20px]">
-                    <HomeIcon />
-                  </div>
-                  Home
-                </Link>
-              </li>
-            )}
+            {pathname !== "/dashboard" &&
+              pathname !== "/bulk-shipment" &&
+              pathname !== "/noida-shipment" && (
+                <li>
+                  <Link href="/dashboard" className="flex items-center gap-2">
+                    <div className="w-[20px] h-[20px]">
+                      <HomeIcon />
+                    </div>
+                    Home
+                  </Link>
+                </li>
+              )}
 
-            {pathname === "/noida-shipment" && (
+            {(pathname === "/bulk-shipment" || pathname === "/noida-shipment") && (
               <li>
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <div className="w-[20px] h-[20px]">

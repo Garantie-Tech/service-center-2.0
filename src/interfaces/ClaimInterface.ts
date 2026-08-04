@@ -118,6 +118,7 @@ export default interface Claim {
 export interface OfficeShipmentInfo {
   id: number;
   batch_id?: number | null;
+  batch_ref?: string | null;
   claim_id?: number;
   status: string;
   order_id?: string | null;
@@ -125,7 +126,46 @@ export interface OfficeShipmentInfo {
   courier_id?: string | null;
   courier_name?: string | null;
   label_path?: string | null;
+  source_state_id?: number | null;
+  source_state_name?: string | null;
+  destination_name?: string | null;
+  destination_state_name?: string | null;
+  payload?: {
+    source?: Partial<ShipmentAddressSnapshot>;
+    source_address?: Partial<ShipmentAddressSnapshot>;
+    destination?: Partial<ShipmentAddressSnapshot>;
+    [key: string]: unknown;
+  } | null;
   error_message?: string | null;
+  package_claim_ids?: number[];
+  package_claim_count?: number;
+  package_claims?: OfficeShipmentPackageClaim[];
+  is_bulk_package?: boolean;
+  tracking_current_status?: string | null;
+  tracking_refreshed_at?: string | null;
+  initiated_at?: string | null;
+  processed_at?: string | null;
+}
+
+export interface OfficeShipmentPackageClaim {
+  id: number;
+  customer_name?: string;
+  status?: string;
+}
+
+export interface ShipmentAddressSnapshot {
+  address_title?: string;
+  service_centre_id?: number | null;
+  state_id?: number | null;
+  name?: string;
+  phone?: string;
+  alternate_phone?: string;
+  email?: string;
+  address_line_one?: string;
+  address_line_two?: string;
+  pincode?: string;
+  city?: string;
+  state?: string;
 }
 
 export interface AdditionalDocumentItem {

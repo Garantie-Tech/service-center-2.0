@@ -164,6 +164,8 @@ export interface ClaimFetchPayload {
   sort_by?: string;
   state_id?: string;
   service_centre_id?: string;
+  shipment_status?: string;
+  shipment_view?: string;
 }
 
 export interface UploadFinalDocuments {

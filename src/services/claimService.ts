@@ -29,6 +29,7 @@ export interface NoidaOfficeShipmentBatchResponse {
   status?: boolean;
   message: string;
   data?: {
+    queued?: boolean;
     batch?: {
       id: number;
       batch_ref: string;
@@ -40,10 +41,38 @@ export interface NoidaOfficeShipmentBatchResponse {
       skipped_count: number;
     };
     result?: {
-      claim_id: number;
-      success: boolean;
+      claim_id?: number;
+      success?: boolean;
+      success_count?: number;
+      failed_count?: number;
+      skipped_count?: number;
+      results?: Array<{
+        claim_id?: number;
+        success?: boolean;
+        message?: string;
+        reason_type?: string;
+      }>;
       message?: string;
     };
+  };
+}
+
+export interface NoidaOfficeShipmentCancelResponse {
+  success: boolean;
+  status?: boolean;
+  status_code?: number;
+  message: string;
+  data?: {
+    success?: boolean;
+    already_cancelled?: boolean;
+    claim_ids?: number[];
+    shipment?: {
+      id: number;
+      status: string;
+      order_id?: string | null;
+      awb_number?: string | null;
+    };
+    response?: Record<string, unknown>;
   };
 }
 
@@ -59,9 +88,20 @@ export interface NoidaOfficeShipmentConfig {
     alternate_phone: string;
     email: string;
   };
+  source_addresses: ShipmentAddressForm[];
   allowed_source_states: string[];
   eligible_status_bodies: string[];
   batch_limit: number;
+  shipment_defaults?: {
+    weight?: number | string;
+    length?: number | string;
+    width?: number | string;
+    height?: number | string;
+    order_amount?: number | string;
+    type_of_package?: string;
+    rov_type?: string;
+    no_of_box?: number | string;
+  };
   configured: boolean;
 }
 
@@ -112,7 +152,34 @@ export interface ShipmentAddressForm {
 
 export interface ShipmentBuilderPayload {
   destination: ShipmentAddressForm;
-  source_addresses: Record<number, ShipmentAddressForm>;
+  source_address?: ShipmentAddressForm;
+  source_addresses?: Record<number, ShipmentAddressForm>;
+  selected_courier_id?: number;
+  selected_courier?: NoidaOfficeShipmentCourier;
+  process_now?: boolean;
+}
+
+export interface NoidaOfficeShipmentCourier {
+  id: number;
+  name: string;
+  total_charges: number;
+  estimated_delivery?: string | number | null;
+}
+
+export interface NoidaOfficeShipmentCourierResponse {
+  success: boolean;
+  status_code: number;
+  message: string;
+  data: {
+    couriers: NoidaOfficeShipmentCourier[];
+    package: {
+      claim_ids: number[];
+      claim_count: number;
+      weight: number;
+      pickup_pincode: string;
+      delivery_pincode: string;
+    };
+  };
 }
 
 export const fetchClaims = async (
@@ -133,6 +200,19 @@ export const fetchShipmentEligibleClaims = async (
 export const fetchNoidaOfficeShipmentConfig = async () => {
   return await getRequest<NoidaOfficeShipmentConfigResponse>(
     "noida-office-shipment/config",
+  );
+};
+
+export const fetchNoidaOfficeShipmentCouriers = async (
+  claimIds: number[],
+  payload: Pick<ShipmentBuilderPayload, "destination" | "source_address">,
+) => {
+  return await postRequest<NoidaOfficeShipmentCourierResponse>(
+    "noida-office-shipment/couriers",
+    {
+      claim_ids: claimIds,
+      ...payload,
+    },
   );
 };
 
@@ -189,6 +269,13 @@ export const bulkInitiateNoidaOfficeShipment = async (
       claim_ids: claimIds,
       ...(payload ?? {}),
     },
+  );
+};
+
+export const cancelNoidaOfficeShipment = async (claimId: number) => {
+  return await postRequest<NoidaOfficeShipmentCancelResponse>(
+    `noida-office-shipment/${claimId}/cancel`,
+    {},
   );
 };
 

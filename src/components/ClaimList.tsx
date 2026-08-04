@@ -136,7 +136,10 @@ const ClaimList: React.FC<ClaimListProps> = ({
       };
 
       if (shipmentMode) {
+        const shipmentStatus = filterStatus || "pending";
         basePayload.shipment_mode = true;
+        basePayload.shipment_status = shipmentStatus;
+        basePayload.shipment_view = shipmentStatus;
         basePayload.claim_search = globalSearch;
         if (appliedFilters?.fromDate && appliedFilters?.toDate) {
           basePayload.duration = "custom";
@@ -312,6 +315,26 @@ const ClaimList: React.FC<ClaimListProps> = ({
 
       if (response.success && Array.isArray(response.data?.data?.claims)) {
         const newClaims = response.data.data.claims;
+        if (shipmentMode) {
+          setClaims(newClaims);
+          setFilteredClaims(newClaims);
+
+          const updatedSelectedClaim = newClaims.find(
+            (claim) => claim.id === selectedClaim?.id,
+          );
+
+          if (updatedSelectedClaim) {
+            setClaimStates(updatedSelectedClaim);
+          } else {
+            setSelectedClaim(newClaims[0] || null);
+            if (newClaims[0]) {
+              setClaimStates(newClaims[0]);
+            }
+          }
+
+          return;
+        }
+
         const updatedClaimsMap = new Map(
           claimsRef.current.map((claim) => [claim.id, claim]),
         );
@@ -361,6 +384,7 @@ const ClaimList: React.FC<ClaimListProps> = ({
     setActiveTab,
     setClaimRevised,
     shipmentMode,
+    setClaimStates,
   ]);
 
   // Initial & Filter/Search API Call
@@ -482,7 +506,10 @@ const ClaimList: React.FC<ClaimListProps> = ({
                       checked={shipmentSelectedClaimIds.includes(
                         Number(claim.id),
                       )}
-                      disabled={!claim.office_shipment_eligible}
+                      disabled={
+                        (filterStatus || "pending") !== "pending" ||
+                        !claim.office_shipment_eligible
+                      }
                       onClick={(event) => event.stopPropagation()}
                       onChange={(event) => {
                         event.stopPropagation();
