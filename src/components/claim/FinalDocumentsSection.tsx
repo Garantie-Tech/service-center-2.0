@@ -4,6 +4,7 @@ import PdfUpload from "@/components/ui/PdfUpload";
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { FinalDocumentsSectionProps } from "@/interfaces/ClaimInterface";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   repairInvoice,
@@ -40,7 +41,10 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
           />
         ) : finalDocuments.repairInvoiceImage.toLowerCase().includes(".pdf") ? (
           <>
-            <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
+            <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+              <span>Repair Invoice</span>
+              <DocumentDateInfo document={finalDocuments.repairInvoiceDateInfo} />
+            </h3>
             <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
               <a
                 href={finalDocuments.repairInvoiceImage}
@@ -58,7 +62,10 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
           </>
         ) : (
           <>
-            <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
+            <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+              <span>Repair Invoice</span>
+              <DocumentDateInfo document={finalDocuments.repairInvoiceDateInfo} />
+            </h3>
             <GalleryPopup images={[finalDocuments.repairInvoiceImage]} />
           </>
         )}
@@ -99,8 +106,11 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
                 .toLowerCase()
                 .includes(".pdf") ? (
               <>
-                <h3 className="text-sm font-medium mb-2">
-                  Replacement Receipt
+                <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+                  <span>Replacement Receipt</span>
+                  <DocumentDateInfo
+                    document={finalDocuments.replacementReceiptDateInfo}
+                  />
                 </h3>
                 <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
                   <a
@@ -119,8 +129,11 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               </>
             ) : (
               <>
-                <h3 className="text-sm font-medium mb-2">
-                  Replacement Receipt
+                <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+                  <span>Replacement Receipt</span>
+                  <DocumentDateInfo
+                    document={finalDocuments.replacementReceiptDateInfo}
+                  />
                 </h3>
                 <GalleryPopup
                   images={[finalDocuments.replacementReceiptImage]}

@@ -22,6 +22,7 @@ import {
   validateImeiFromImage,
 } from "@/services/claimService";
 import WarningAlert from "@/components/ui/WarningAlert";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 interface EstimateDetailsTabProps {
   onSubmit: (formData: FormData) => void;
@@ -59,6 +60,8 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
     claimRevised,
     setClaimRevised,
   } = useGlobalStore();
+  const estimateDocumentDateInfo = selectedClaim?.documents?.["15"] ?? null;
+  const damageImagesDateInfo = selectedClaim?.documents?.["73"] ?? null;
   const [showDamageImagesError, setShowDamageImagesError] = useState(true);
   const [showEstimateDocumentError, setShowEstimateDocumentError] =
     useState(true);
@@ -617,8 +620,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
         <div className="w-1/2">
           {/* Upload document */}
-          <label className="block text-xs font-medium mb-2">
-            Estimate Document (pdf)
+          <label className="flex items-center gap-1 text-xs font-medium mb-2">
+            <span>Estimate Document (pdf)</span>
+            <DocumentDateInfo document={estimateDocumentDateInfo} />
           </label>
           <div className="mb-4">
             {!isFormDisabled && estimateDocStatus == false && (
@@ -776,8 +780,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           </div>
 
           {/* Upload damage images */}
-          <label className="block text-xs font-medium mb-2">
-            Damage Mobile Photo (Upload at least 4 images)
+          <label className="flex items-center gap-1 text-xs font-medium mb-2">
+            <span>Damage Mobile Photo (Upload at least 4 images)</span>
+            <DocumentDateInfo document={damageImagesDateInfo} />
           </label>
           <div className="mb-4">
             {!isFormDisabled && damageImageStatus == false && (
@@ -1081,8 +1086,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
         <div className="w-1/2">
           {/* Upload document */}
-          <label className="block text-xs font-medium mb-2">
-            Estimate Document (pdf)
+          <label className="flex items-center gap-1 text-xs font-medium mb-2">
+            <span>Estimate Document (pdf)</span>
+            <DocumentDateInfo document={estimateDocumentDateInfo} />
           </label>
           <div className="mb-4">
             <div className="space-y-2">
@@ -1217,8 +1223,9 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
           </div>
 
           {/* Upload damage images */}
-          <label className="block text-xs font-medium mb-2">
-            Damage Mobile Photo (Upload at least 4 images)
+          <label className="flex items-center gap-1 text-xs font-medium mb-2">
+            <span>Damage Mobile Photo (Upload at least 4 images)</span>
+            <DocumentDateInfo document={damageImagesDateInfo} />
           </label>
           <div className="mb-4">
             <label className="w-[185px] h-[45px] flex items-center justify-between bg-inputBg border rounded cursor-pointer px-[10px]">
