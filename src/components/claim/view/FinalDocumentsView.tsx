@@ -3,6 +3,7 @@
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { FinalDocumentsViewProps } from "@/interfaces/ClaimInterface";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
   finalDocuments,
@@ -17,7 +18,12 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
       <div className="flex w-full gap-8 flex-wrap">
         {/* Repaired Mobile Photos Section */}
         <div className="w-[45%]">
-          <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
+          <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+            <span>Repaired Mobile</span>
+            <DocumentDateInfo
+              document={finalDocuments?.repairMobilePhotoDateInfo}
+            />
+          </h3>
           {finalDocuments?.repairMobilePhoto && (
             <GalleryPopup images={finalDocuments?.repairMobilePhoto} />
           )}
@@ -29,7 +35,12 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
         {/* Repair Invoice Section */}
         <div className="w-[45%]">
           <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">Repair Invoice</h3>
+            <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+              <span>Repair Invoice</span>
+              <DocumentDateInfo
+                document={finalDocuments?.repairInvoiceDateInfo}
+              />
+            </h3>
             {finalDocuments?.repairInvoiceImage ? (
               isPdf(finalDocuments.repairInvoiceImage) ? (
                 <div className="relative bg-inputBg w-[60px] h-[60px] flex items-center justify-center border border-[#EEEEEE]">
@@ -81,7 +92,12 @@ const FinalDocumentsView: React.FC<FinalDocumentsViewProps> = ({
         <div className="w-[45%]">
           <div className="mt-4">
             {/* Replacement Receipt Section */}
-            <h3 className="text-sm font-medium mb-2">Replacement Receipt</h3>
+            <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+              <span>Replacement Receipt</span>
+              <DocumentDateInfo
+                document={finalDocuments?.replacementReceiptDateInfo}
+              />
+            </h3>
             {finalDocuments?.isImeiChanged &&
               finalDocuments?.replacementReceiptImage &&
               (isPdf(finalDocuments.replacementReceiptImage) ? (

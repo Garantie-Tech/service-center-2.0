@@ -8,6 +8,7 @@ import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { getFileSizeError } from "@/utils/fileSizeValidation";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 function isPdfUrl(url: string): boolean {
   try {
@@ -195,14 +196,10 @@ export default function AdditionalDocumentsSection({
                   const imageUrls = files.filter((url) => !isPdfUrl(url));
                   return (
                     <li key={idx} className="text-sm">
-                      <span className="font-medium text-gray-800 block mb-2">
-                        {doc.name}
+                      <span className="flex items-center gap-1 font-medium text-gray-800 mb-2">
+                        <span>{doc.name}</span>
+                        <DocumentDateInfo document={doc} />
                       </span>
-                      {doc.created_at && (
-                        <span className="text-xs text-gray-500 block mb-2">
-                          Uploaded At: {doc.created_at}
-                        </span>
-                      )}
                       <div className="flex flex-wrap items-center gap-3">
                         {pdfUrls.map((url, i) => (
                           <a

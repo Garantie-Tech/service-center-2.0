@@ -105,6 +105,8 @@ export interface AdditionalDocumentItem {
   custom: string | null;
   files: string[];
   created_at?: string | null;
+  uploaded_at_formatted?: string | null;
+  validated_at_formatted?: string | null;
 }
 
 /** Service center API returns only final and customer; estimate is omitted. */
@@ -197,6 +199,7 @@ export interface RepairedMobileSectionProps {
   isInvalidRepairMobilePhotoStatus: boolean | null;
   finalDocuments: {
     repairMobilePhoto: string[] | null;
+    repairMobilePhotoDateInfo?: DocumentItem | null;
   };
   isMinThreeRepairImageRequired: boolean;
   isSubmitDisabledByDeviceReplacement?: boolean;
@@ -227,6 +230,8 @@ export interface FinalDocumentsSectionProps {
     repairInvoiceImage: string;
     replacementReceiptImage: string;
     isImeiChanged: boolean;
+    repairInvoiceDateInfo?: DocumentItem | null;
+    replacementReceiptDateInfo?: DocumentItem | null;
   };
   repairInvoiceError: boolean;
   replacementReceiptError: boolean;
@@ -258,6 +263,8 @@ export interface DocumentActionButtonsProps {
     repairInvoiceImage: string;
     replacementReceiptImage: string;
     isImeiChanged: boolean;
+    repairInvoiceDateInfo?: DocumentItem | null;
+    replacementReceiptDateInfo?: DocumentItem | null;
   };
   isImeiChanged: boolean;
   setReuploadFinalDocs: (value: boolean) => void;
@@ -275,6 +282,9 @@ export interface FinalDocumentsViewProps {
     isImeiChanged: boolean;
     newImei?: string;
     shipmentReceipt?: string;
+    repairInvoiceDateInfo?: DocumentItem | null;
+    repairMobilePhotoDateInfo?: DocumentItem | null;
+    replacementReceiptDateInfo?: DocumentItem | null;
   };
 }
 
