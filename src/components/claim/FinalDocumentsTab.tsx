@@ -7,6 +7,7 @@ import FinalDocumentsSection from "@/components/claim/FinalDocumentsSection";
 import DocumentErrorAlerts from "@/components/claim/DocumentErrorAlerts";
 import DocumentActionButtons from "@/components/claim/DocumentActionButtons";
 import AdditionalDocumentsSection from "@/components/claim/AdditionalDocumentsSection";
+import AiAnalysisProgressModal from "@/components/claim/AiAnalysisProgressModal";
 import { useFinalDocuments } from "@/hooks/useFinalDocuments";
 
 const FinalDocumentsTab: React.FC = () => {
@@ -42,6 +43,9 @@ const FinalDocumentsTab: React.FC = () => {
     setImeiUpdateReason,
     imeiUpdateReasonError,
     setImeiUpdateReasonError,
+    showAiAnalysisModal,
+    setShowAiAnalysisModal,
+    setInvoiceLocallyValidated,
 
     // Document info
     isImeiChanged,
@@ -413,6 +417,15 @@ const FinalDocumentsTab: React.FC = () => {
           />
         </div>
       )}
+
+      <AiAnalysisProgressModal
+        isOpen={showAiAnalysisModal}
+        onClose={() => setShowAiAnalysisModal(false)}
+        onSettled={() => setInvoiceLocallyValidated(true)}
+        settlementAmount={
+          selectedClaim?.repair_amount ?? selectedClaim?.approved_amount
+        }
+      />
     </div>
   ) : (
     <FinalDocumentsView finalDocuments={finalDocuments} />

@@ -27,6 +27,9 @@ export const useFinalDocuments = () => {
   const [imeiUpdateReasonError, setImeiUpdateReasonError] = useState<
     string | null
   >(null);
+  const [showAiAnalysisModal, setShowAiAnalysisModal] = useState(false);
+  const [invoiceLocallyValidated, setInvoiceLocallyValidated] =
+    useState(false);
 
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -42,9 +45,23 @@ export const useFinalDocuments = () => {
   );
 
   // Get document info for each type (needed early for hasRepairMobileImagesOnServer)
-  const repairInvoiceInfo = getDocumentInfo(selectedClaim, "16");
+  const repairInvoiceInfoRaw = getDocumentInfo(selectedClaim, "16");
   const repairMobilePhotoInfo = getDocumentInfo(selectedClaim, "74");
   const replacementReceiptInfo = getDocumentInfo(selectedClaim, "75");
+
+  // Once the AI analysis + instant settlement flow completes, treat the
+  // repair invoice as valid immediately instead of waiting on the backend's
+  // (not-yet-existent) status_reason field to catch up.
+  const repairInvoiceInfo = invoiceLocallyValidated
+    ? {
+        ...repairInvoiceInfoRaw,
+        isInvalid: false,
+        invalidReason: "",
+        statusValue: true,
+        isValid: true,
+        hasInvalidStatus: false,
+      }
+    : repairInvoiceInfoRaw;
 
   // const hasValidNewImei =
   //   showDeviceReplacementSection &&
@@ -273,7 +290,13 @@ export const useFinalDocuments = () => {
         return;
       } else {
         triggerClaimRefresh();
-        notifySuccess("Final documents uploaded successfully!");
+        const uploadedRepairInvoice =
+          repairInvoice !== undefined && repairInvoice.length > 0;
+        if (uploadedRepairInvoice) {
+          setShowAiAnalysisModal(true);
+        } else {
+          notifySuccess("Final documents uploaded successfully!");
+        }
       }
     } catch (error) {
       console.error("Error submitting final documents:", error);
@@ -297,6 +320,10 @@ export const useFinalDocuments = () => {
     setReuploadMobile(false);
     setReuploadFinalDocs(false);
   }, [selectedClaim]);
+
+  useEffect(() => {
+    setInvoiceLocallyValidated(false);
+  }, [selectedClaim?.id]);
 
   useEffect(() => {
     if (selectedClaim) {
@@ -366,6 +393,9 @@ export const useFinalDocuments = () => {
     setImeiUpdateReason,
     imeiUpdateReasonError,
     setImeiUpdateReasonError,
+    showAiAnalysisModal,
+    setShowAiAnalysisModal,
+    setInvoiceLocallyValidated,
 
     // Document info
     isImeiChanged,
