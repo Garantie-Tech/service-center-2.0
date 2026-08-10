@@ -105,6 +105,9 @@ export const useFinalDocuments = () => {
     repairInvoiceImage: selectedClaim?.documents?.["16"]?.url ?? "",
     repairMobilePhoto: selectedClaim?.repaired_mobile_images ?? [],
     replacementReceiptImage: selectedClaim?.documents?.["75"]?.url ?? "",
+    repairInvoiceDateInfo: selectedClaim?.documents?.["16"] ?? null,
+    repairMobilePhotoDateInfo: selectedClaim?.documents?.["74"] ?? null,
+    replacementReceiptDateInfo: selectedClaim?.documents?.["75"] ?? null,
     isImeiChanged: isImeiChangedFromServer || isImeiChanged,
     new_imei_number: isImeiChanged
       ? ((newImei ||

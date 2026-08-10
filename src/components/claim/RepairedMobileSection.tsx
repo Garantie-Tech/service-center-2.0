@@ -7,6 +7,7 @@ import { useNotification } from "@/context/NotificationProvider";
 import { uploadFinalDocuments } from "@/services/claimService";
 import { compressImage } from "@/utils/compressImage";
 import { RepairedMobileSectionProps } from "@/interfaces/ClaimInterface";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
   repairedMobilePhotos,
@@ -153,7 +154,12 @@ const RepairedMobileSection: React.FC<RepairedMobileSectionProps> = ({
         </>
       ) : (
         <>
-          <h3 className="text-sm font-medium mb-2">Repaired Mobile</h3>
+          <h3 className="flex items-center gap-1 text-sm font-medium mb-2">
+            <span>Repaired Mobile</span>
+            <DocumentDateInfo
+              document={finalDocuments.repairMobilePhotoDateInfo}
+            />
+          </h3>
           <GalleryPopup images={finalDocuments.repairMobilePhoto ?? []} />
         </>
       )}

@@ -107,6 +107,8 @@ export interface DocumentItem {
   status_reason_id?: string | number | null;
   status_reason?: string | null;
   url?: string | null;
+  uploaded_at_formatted?: string | null;
+  validated_at_formatted?: string | null;
 }
 
 // Fixed document keys

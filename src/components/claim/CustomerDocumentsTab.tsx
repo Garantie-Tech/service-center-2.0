@@ -14,6 +14,7 @@ import GalleryPopup from "@/components/ui/GalleryPopup";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import AdditionalDocumentsSection from "@/components/claim/AdditionalDocumentsSection";
 import { handleFileUploadWithCompression } from "@/utils/handleFileUploadWithCompression";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   documents,
@@ -366,8 +367,11 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
       <div className="grid grid-cols-2 gap-4">
         {/* Aadhar Front & Back */}
         <div className="col-span-2">
-          <h3 className="text-sm font-medium mb-2 text-primaryDark">
-            Aadhar (Front and Back) <span className="text-red-500">*</span>
+          <h3 className="flex items-center gap-1 text-sm font-medium mb-2 text-primaryDark">
+            <span>
+              Aadhar (Front and Back) <span className="text-red-500">*</span>
+            </span>
+            <DocumentDateInfo document={aadharDocuments?.[76]} />
           </h3>
           <div className="flex gap-4">
             <div className="w-1/2">
@@ -458,8 +462,11 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
 
         {/* Bank Details */}
         <div className="col-span-1">
-          <h3 className="text-sm font-medium mb-2 text-primaryDark">
-            Bank Details <span className="text-red-500">*</span>
+          <h3 className="flex items-center gap-1 text-sm font-medium mb-2 text-primaryDark">
+            <span>
+              Bank Details <span className="text-red-500">*</span>
+            </span>
+            <DocumentDateInfo document={bankDetails} />
           </h3>
 
           {isFormEditable &&
@@ -516,7 +523,10 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
             />
           ) : pancardImageUrl ? (
             <div>
-              <label className="text-xs">Pan Card (Optional)</label>
+              <label className="flex items-center gap-1 text-xs">
+                <span>Pan Card (Optional)</span>
+                <DocumentDateInfo document={panCard} />
+              </label>
               {pancardImageUrl && (
                 <GalleryPopup images={[String(pancardImageUrl)]} />
               )}

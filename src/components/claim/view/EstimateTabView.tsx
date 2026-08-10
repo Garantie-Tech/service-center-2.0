@@ -3,6 +3,7 @@
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { EstimateDetailsState } from "@/interfaces/GlobalInterface";
 import Image from "next/image";
+import DocumentDateInfo from "@/components/claim/DocumentDateInfo";
 
 const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
   estimateDetailsState
@@ -86,7 +87,10 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
       <div className="space-y-8">
         {/* Estimate Document*/}
         <div>
-          <h4 className="text-xs text-gray-500">Estimate Document</h4>
+          <h4 className="flex items-center gap-1 text-xs text-gray-500">
+            <span>Estimate Document</span>
+            <DocumentDateInfo document={documents?.[15]} />
+          </h4>
           <div className="mb-4">
             {estimateDetailsState?.estimateDocument && (
               <div className="relative bg-inputBg w-[60px] h-[50px] flex items-center justify-center border border-[#EEEEEE]">
@@ -160,8 +164,9 @@ const EstimateTabViewComponent: React.FC<EstimateDetailsState> = (
 
         {/* Damage Mobile Photo */}
         <div>
-          <h4 className="text-xs text-gray-500">
-            Damaged Mobile & IMEI Photos
+          <h4 className="flex items-center gap-1 text-xs text-gray-500">
+            <span>Damaged Mobile & IMEI Photos</span>
+            <DocumentDateInfo document={documents?.[73]} />
           </h4>
           <GalleryPopup images={estimateDetailsState?.damagePhotos} />
           {damagePhotoStatus && (
