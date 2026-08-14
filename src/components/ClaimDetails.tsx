@@ -45,6 +45,46 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
 
   const [isRemarksOpen, setIsRemarksOpen] = useState(false);
 
+  const getEstimateSubmitErrorMessage = (payload: unknown): string | null => {
+    if (!payload || typeof payload !== "object") {
+      return null;
+    }
+
+    const response = payload as {
+      message?: string;
+      data?: {
+        error_msg?:
+          | string
+          | Record<string, string[]>
+          | Record<string, string>
+          | null;
+      };
+    };
+
+    const fieldError = response.data?.error_msg;
+
+    if (fieldError && typeof fieldError === "object") {
+      const claimedAmountError = fieldError.claimed_amount;
+
+      if (Array.isArray(claimedAmountError) && claimedAmountError.length > 0) {
+        return claimedAmountError[0];
+      }
+
+      if (
+        typeof claimedAmountError === "string" &&
+        claimedAmountError.length > 0
+      ) {
+        return claimedAmountError;
+      }
+    }
+
+    if (typeof fieldError === "string" && fieldError.length > 0) {
+      return fieldError;
+    }
+
+    return response.message ?? null;
+  };
+
   const handleRemarksSubmit = async (remark: string) => {
     try {
       const response = await addRemark(
@@ -100,11 +140,15 @@ const ClaimDetails: React.FC<{ selectedClaim: Claim | null }> = ({
     try {
       setIsLoading(true);
       const response = await submitEstimate(selectedClaim?.id, formData);
+      const apiPayload = response?.data as unknown;
 
       if (!response.success) {
         notifyError("Failed to submit estimate!");
       } else if (!response?.data?.success) {
-        notifyError(response?.data?.message || "Failed to submit estimate!");
+        const errorMessage =
+          getEstimateSubmitErrorMessage(apiPayload) ||
+          "Failed to submit estimate!";
+        notifyError(errorMessage);
       } else {
         notifySuccess("Estimate Submitted Successfully!");
         triggerClaimRefresh();

@@ -79,6 +79,25 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const [documentValidationMessage, setDocumentValidationMessage] = useState<
     string | null
   >(null);
+  const deviceMopValue = Number(
+    selectedClaim?.invoice_amount ?? selectedClaim?.model_price ?? 0,
+  );
+  const hasDeviceMopValue =
+    Number.isFinite(deviceMopValue) && deviceMopValue > 0;
+  const estimateAmountValue = Number(estimateDetailsState.estimateAmount);
+  const isEstimateAmountAboveDeviceMop =
+    hasDeviceMopValue &&
+    estimateDetailsState.estimateAmount !== "" &&
+    !Number.isNaN(estimateAmountValue) &&
+    estimateAmountValue > deviceMopValue;
+  const estimateAmountLimitError = isEstimateAmountAboveDeviceMop
+    ? `Estimate amount cannot be greater than the device MOP of ₹${new Intl.NumberFormat(
+        "en-IN",
+        {
+          maximumFractionDigits: 2,
+        },
+      ).format(deviceMopValue)}.`
+    : "";
 
   useEffect(() => {
     setIsFormDisabled(
@@ -386,6 +405,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
   const isSubmitDisabled =
     !estimateAmount ||
     Number(estimateAmount) < 0 ||
+    isEstimateAmountAboveDeviceMop ||
     !jobSheetNumber ||
     !estimateDetails ||
     !isReplacementConfirmed ||
@@ -396,6 +416,7 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
+    if (isEstimateAmountAboveDeviceMop) return;
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append("claimed_amount", estimateAmount);
@@ -494,6 +515,19 @@ const EstimateDetailsTab: React.FC<EstimateDetailsTabProps> = ({
             placeholder="Ex: 9000"
             disabled={isFormDisabled}
           />
+          {hasDeviceMopValue && (
+            <p className="text-[11px] text-gray-500 -mt-2 mb-2">
+              Maximum allowed: ₹
+              {new Intl.NumberFormat("en-IN", {
+                maximumFractionDigits: 2,
+              }).format(deviceMopValue)}
+            </p>
+          )}
+          {estimateAmountLimitError && (
+            <p className="text-xs text-red-600 -mt-2 mb-2">
+              {estimateAmountLimitError}
+            </p>
+          )}
 
           <label className="block text-xs font-medium mb-1">
             Job Sheet Number *

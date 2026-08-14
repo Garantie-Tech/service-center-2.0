@@ -75,6 +75,7 @@ export default interface Claim {
   plan_end_date?: string;
   model_name?: string;
   model_price?: string | number;
+  invoice_amount?: string | number;
   copay_refunded?: boolean;
   copay_refunded_date?: string;
   copay_refunded_id?: string;
