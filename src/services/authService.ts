@@ -1,4 +1,4 @@
-import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { isAllowedIssuer } from "@/globalConstant";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { addCookie, getCookie } from "@/utils/cookieManager";
@@ -92,7 +92,7 @@ export async function resetPassword(
 ): Promise<ResetPasswordResponse> {
   const token = await getCookie("token");
   const getTokenValue = decodeJWT(token || "");
-  if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+  if (!getTokenValue || !isAllowedIssuer(getTokenValue.iss)) {
     logoutUser();
   }
 

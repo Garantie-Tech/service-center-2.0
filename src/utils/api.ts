@@ -1,4 +1,4 @@
-import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { isAllowedIssuer } from "@/globalConstant";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import {
   ClaimFetchPayload,
@@ -57,7 +57,7 @@ export async function apiRequest<T>(
   try {
     const token = await getCookie("token");
     const getTokenValue = decodeJWT(token || "");
-    if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+    if (!getTokenValue || !isAllowedIssuer(getTokenValue.iss)) {
       logoutUser();
     }
 
@@ -160,7 +160,7 @@ export async function externalApiRequest<T>(
   try {
     const token = await getCookie("token");
     const getTokenValue = decodeJWT(token || "");
-    if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+    if (!getTokenValue || !isAllowedIssuer(getTokenValue.iss)) {
       logoutUser();
     }
     const isForm = body instanceof FormData;

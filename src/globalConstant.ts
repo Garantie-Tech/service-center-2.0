@@ -13,4 +13,16 @@ export const ALLOWED_ISSUERS = [
   "https://prod-platform.garantie.in/",
   "https://pyqa.garantie.in/",
   "https://py.garantie.in/",
+  "https://upgrade-claim.garantie.in/",
 ];
+
+const normalizeIssuer = (issuer: string) => issuer.replace(/\/+$/, "");
+
+export const isAllowedIssuer = (issuer: string | null | undefined): boolean => {
+  if (!issuer) return false;
+
+  const normalizedIssuer = normalizeIssuer(issuer);
+  return ALLOWED_ISSUERS.some(
+    (allowedIssuer) => normalizeIssuer(allowedIssuer) === normalizedIssuer,
+  );
+};
