@@ -45,7 +45,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header onLogout={handleLogout} />
       <SearchSection />
-      <NoticeMarquee message="📢 Holiday Announcement: Please note that 28th August 2026 will be observed as a holiday for Raksha Bandhan. Kindly plan all pending claims, repairs, and service-related activities accordingly." />
+      {/* <NoticeMarquee message="📢 Holiday Announcement: Please note that 28th August 2026 will be observed as a holiday for Raksha Bandhan. Kindly plan all pending claims, repairs, and service-related activities accordingly." /> */}
 
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[0.8fr_2.2fr] gap-3 p-3 relative">
         <aside className="bg-white p-3 pt-0 rounded-md shadow-sm overflow-auto max-h-[calc(100vh)]">
