@@ -12,7 +12,7 @@ import ServiceCenterMultiSelectDropdown from "./filters/ServiceCenterMultiSelect
 import { useEffect } from "react";
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
-import { ALLOWED_ISSUERS } from "@/globalConstant";
+import { isAllowedIssuer } from "@/globalConstant";
 import { useAuthStore } from "@/store/authStore";
 import { safeJsonParse } from "@/helpers/safeJson";
 
@@ -103,7 +103,7 @@ const SearchSection: React.FC = () => {
       setIsLoading(true);
       const token = localStorage.getItem("token") || "";
       const getTokenValue = decodeJWT(token || "");
-      if (!getTokenValue || !ALLOWED_ISSUERS.includes(getTokenValue.iss)) {
+      if (!getTokenValue || !isAllowedIssuer(getTokenValue.iss)) {
         logoutUser();
       }
       const response = await fetch(exportUrl, {
