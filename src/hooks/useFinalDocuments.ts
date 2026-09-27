@@ -1,8 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGlobalStore } from "@/store/store";
 import { useNotification } from "@/context/NotificationProvider";
-import { uploadFinalDocuments } from "@/services/claimService";
+import {
+  extractRepairInvoiceJobSheet,
+  uploadFinalDocuments,
+} from "@/services/claimService";
 import { getDocumentInfo, isIMEIFormat } from "@/helpers/globalHelper";
+
+type PlainObject = Record<string, unknown>;
+
+const JOB_SHEET_MISMATCH_REASONS = [
+  "Due no-response from the customer",
+  "Due to shortage of spare parts",
+  "Due to special approval given by the claims.",
+  "Due to Part Failure Post Repair",
+] as const;
 
 export const useFinalDocuments = () => {
   const [repairInvoice, setRepairInvoice] = useState<File[] | undefined>(
@@ -27,6 +39,30 @@ export const useFinalDocuments = () => {
   const [imeiUpdateReasonError, setImeiUpdateReasonError] = useState<
     string | null
   >(null);
+  const [jobSheetMismatchReason, setJobSheetMismatchReason] = useState("");
+  const [newJobSheetNumber, setNewJobSheetNumber] = useState("");
+  const [jobSheetMismatchReasonError, setJobSheetMismatchReasonError] =
+    useState<string | null>(null);
+  const [newJobSheetNumberError, setNewJobSheetNumberError] = useState<
+    string | null
+  >(null);
+  const [isRepairInvoiceExtracting, setIsRepairInvoiceExtracting] =
+    useState(false);
+  const [extractedRepairInvoiceJobSheetNumber, setExtractedRepairInvoiceJobSheetNumber] =
+    useState<string | null>(null);
+  const [
+    extractedRepairInvoiceJobSheetMatched,
+    setExtractedRepairInvoiceJobSheetMatched,
+  ] = useState<boolean | null>(null);
+  const [repairInvoiceExtractError, setRepairInvoiceExtractError] = useState<
+    string | null
+  >(null);
+  const [repairInvoiceExtractStatus, setRepairInvoiceExtractStatus] = useState<
+    "success" | "error" | null
+  >(null);
+  const [repairInvoiceExtractMessage, setRepairInvoiceExtractMessage] =
+    useState<string | null>(null);
+  const repairInvoiceExtractRequestIdRef = useRef(0);
 
   const { selectedClaim, setIsLoading, triggerClaimRefresh } = useGlobalStore();
   const { notifySuccess, notifyError } = useNotification();
@@ -57,14 +93,6 @@ export const useFinalDocuments = () => {
     (Array.isArray(selectedClaim?.repaired_mobile_images) &&
       selectedClaim.repaired_mobile_images.length > 0);
 
-  const isSubmitDisabledByDeviceReplacement =
-    showDeviceReplacementSection &&
-    isDeviceReplaced &&
-    (!newImei ||
-      newImei.length !== 15 ||
-      !imeiUpdateReason ||
-      (repairedMobilePhotos.length === 0 && !hasRepairMobileImagesOnServer));
-
   // Assign values
   const isInvalidRepairInvoice = repairInvoiceInfo.isInvalid;
   const isInvalidRepairMobilePhoto = repairMobilePhotoInfo.isInvalid;
@@ -82,6 +110,53 @@ export const useFinalDocuments = () => {
   const isValidRepairInvoice = repairInvoiceInfo.isValid;
   const isValidRepairMobilePhoto = repairMobilePhotoInfo.isValid;
   const isValidReplacementReceipt = replacementReceiptInfo.isValid;
+  const canSubmitDeviceReplacementUpdate =
+    showDeviceReplacementSection && !isValidRepairMobilePhoto;
+  const isSubmitDisabledByDeviceReplacement =
+    canSubmitDeviceReplacementUpdate &&
+    isDeviceReplaced &&
+    (!newImei ||
+      newImei.length !== 15 ||
+      !imeiUpdateReason ||
+      (repairedMobilePhotos.length === 0 && !hasRepairMobileImagesOnServer));
+  const savedJobSheetMismatchReason =
+    selectedClaim?.job_sheet_mismatch_reason ??
+    selectedClaim?.data?.inputs?.job_sheet_mismatch_reason ??
+    "";
+  const jobSheetMismatchReasons =
+    selectedClaim?.job_sheet_mismatch_reasons &&
+    selectedClaim.job_sheet_mismatch_reasons.length > 0
+      ? selectedClaim.job_sheet_mismatch_reasons
+      : JOB_SHEET_MISMATCH_REASONS;
+  const hasLocalRepairInvoiceExtract =
+    repairInvoice !== undefined &&
+    repairInvoice.length > 0 &&
+    (extractedRepairInvoiceJobSheetMatched !== null ||
+      !!extractedRepairInvoiceJobSheetNumber ||
+      !!repairInvoiceExtractError);
+  const serverRepairInvoiceJobSheetMismatch =
+    selectedClaim?.repair_invoice_job_sheet_matched === false &&
+    (!isValidRepairInvoice || !!savedJobSheetMismatchReason);
+  const isRepairInvoiceJobSheetMismatch =
+    (hasLocalRepairInvoiceExtract &&
+      extractedRepairInvoiceJobSheetMatched === false) ||
+    (!reuploadFinalDocs && serverRepairInvoiceJobSheetMismatch);
+  const repairInvoiceJobSheetNumber =
+    hasLocalRepairInvoiceExtract && extractedRepairInvoiceJobSheetNumber
+      ? extractedRepairInvoiceJobSheetNumber
+      : reuploadFinalDocs
+        ? null
+      : selectedClaim?.repair_invoice_job_sheet_number;
+  const repairInvoiceJobSheetError =
+    hasLocalRepairInvoiceExtract && repairInvoiceExtractError
+      ? repairInvoiceExtractError
+      : reuploadFinalDocs
+        ? null
+      : selectedClaim?.repair_invoice_job_sheet_error;
+  const isSubmitDisabledByJobSheetMismatch =
+    isRepairInvoiceJobSheetMismatch &&
+    !isValidRepairInvoice &&
+    (!jobSheetMismatchReason || !newJobSheetNumber.trim());
 
   const replacementReceiptApplicable = isImeiChangedFromServer || isImeiChanged;
   const isEditable =
@@ -95,10 +170,7 @@ export const useFinalDocuments = () => {
   const showReuploadButton =
     isInvalidRepairInvoice ||
     isInvalidRepairMobilePhoto ||
-    (replacementReceiptApplicable && isInvalidReplacementReceipt) ||
-    repairInvoiceInfo.hasInvalidStatus ||
-    repairMobilePhotoInfo.hasInvalidStatus ||
-    replacementReceiptInfo.hasInvalidStatus;
+    (replacementReceiptApplicable && isInvalidReplacementReceipt);
 
   // document
   const finalDocuments = {
@@ -194,6 +266,21 @@ export const useFinalDocuments = () => {
         setImeiUpdateReasonError(null);
       }
 
+      if (isRepairInvoiceJobSheetMismatch) {
+        if (!jobSheetMismatchReason) {
+          setJobSheetMismatchReasonError("Please select a reason");
+          notifyError("Please select the reason for job sheet mismatch.");
+          return;
+        }
+        if (!newJobSheetNumber.trim()) {
+          setNewJobSheetNumberError("Please enter the new job sheet number");
+          notifyError("Please enter the new job sheet number.");
+          return;
+        }
+        setJobSheetMismatchReasonError(null);
+        setNewJobSheetNumberError(null);
+      }
+
       setIsLoading(true);
 
       // Helper function to append files in required format
@@ -241,6 +328,11 @@ export const useFinalDocuments = () => {
         }
       }
 
+      if (isRepairInvoiceJobSheetMismatch) {
+        formData.append("job_sheet_mismatch_reason", jobSheetMismatchReason);
+        formData.append("new_job_sheet_number", newJobSheetNumber.trim());
+      }
+
       const response = await uploadFinalDocuments(
         Number(selectedClaim?.id),
         formData,
@@ -262,7 +354,9 @@ export const useFinalDocuments = () => {
       if (!response.data || !backendSuccess) {
         const fieldMsg =
           apiPayload?.data?.error_msg?.new_imei_number?.[0] ||
-          apiPayload?.data?.error_msg?.imei_update_reason?.[0];
+          apiPayload?.data?.error_msg?.imei_update_reason?.[0] ||
+          apiPayload?.data?.error_msg?.new_job_sheet_number?.[0] ||
+          apiPayload?.data?.error_msg?.job_sheet_mismatch_reason?.[0];
         const msg =
           fieldMsg ||
           apiPayload?.message ||
@@ -271,6 +365,12 @@ export const useFinalDocuments = () => {
 
         if (fieldMsg?.toLowerCase().includes("imei")) {
           setNewImeiError(fieldMsg);
+        }
+        if (fieldMsg?.toLowerCase().includes("job sheet")) {
+          setNewJobSheetNumberError(fieldMsg);
+        }
+        if (fieldMsg?.toLowerCase().includes("reason")) {
+          setJobSheetMismatchReasonError(fieldMsg);
         }
         notifyError(msg);
         return;
@@ -286,9 +386,235 @@ export const useFinalDocuments = () => {
     }
   };
 
-  const handleRepairInvoiceUpload = (files: File[]) => {
+  const getNestedValue = (source: unknown, paths: string[]): unknown => {
+    for (const path of paths) {
+      const value = path.split(".").reduce<unknown>((current, key) => {
+        if (current && typeof current === "object" && key in current) {
+          return (current as PlainObject)[key];
+        }
+
+        return undefined;
+      }, source);
+
+      if (value !== undefined && value !== null && value !== "") {
+        return value;
+      }
+    }
+
+    return undefined;
+  };
+
+  const normalizeJobSheetNumber = (value: string | null | undefined) =>
+    (value ?? "").trim().toLowerCase();
+
+  const resetRepairInvoiceExtractState = () => {
+    repairInvoiceExtractRequestIdRef.current += 1;
+    setIsRepairInvoiceExtracting(false);
+    setExtractedRepairInvoiceJobSheetNumber(null);
+    setExtractedRepairInvoiceJobSheetMatched(null);
+    setRepairInvoiceExtractError(null);
+    setRepairInvoiceExtractStatus(null);
+    setRepairInvoiceExtractMessage(null);
+  };
+
+  const hasFailedJobSheetCheck = (validationRules: unknown) => {
+    if (!validationRules || typeof validationRules !== "object") {
+      return false;
+    }
+
+    const checks = (validationRules as PlainObject).checks;
+    if (!checks || typeof checks !== "object") {
+      return false;
+    }
+
+    return Object.entries(checks as PlainObject).some(([key, value]) => {
+      if (!value || typeof value !== "object") {
+        return false;
+      }
+
+      const check = value as PlainObject;
+      const status = check.status;
+      const failed =
+        status === false ||
+        status === 0 ||
+        String(status).toLowerCase() === "false" ||
+        String(status).toLowerCase() === "0";
+      const text = [
+        key,
+        check.message,
+        check.label,
+        check.name,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        failed &&
+        (text.includes("job sheet") ||
+          text.includes("jobsheet") ||
+          text.includes("job_sheet"))
+      );
+    });
+  };
+
+  const handleRepairInvoiceUpload = async (files: File[]) => {
     setRepairInvoice(files);
     setRepairInvoiceError(false);
+    setJobSheetMismatchReasonError(null);
+    setNewJobSheetNumberError(null);
+    resetRepairInvoiceExtractState();
+
+    const repairInvoiceFile = files[0];
+    if (!repairInvoiceFile || !selectedClaim?.id) {
+      return;
+    }
+
+    const requestId = repairInvoiceExtractRequestIdRef.current + 1;
+    repairInvoiceExtractRequestIdRef.current = requestId;
+    setIsRepairInvoiceExtracting(true);
+
+    const formData = new FormData();
+    formData.append("claim_id", String(selectedClaim.id));
+    formData.append(
+      "job_sheet_number",
+      selectedClaim.estimate_job_sheet_number ??
+        selectedClaim.job_sheet_number ??
+        selectedClaim.data?.inputs?.job_sheet_number ??
+        "",
+    );
+    formData.append("16[delete_existing_document]", "1");
+    formData.append("16[document]", repairInvoiceFile);
+    formData.append("16[document_type_id]", "16");
+
+    try {
+      const response = await extractRepairInvoiceJobSheet(formData);
+
+      if (repairInvoiceExtractRequestIdRef.current !== requestId) {
+        return;
+      }
+
+      const payload = response.data;
+      const apiSucceeded =
+        response.success &&
+        (payload?.success === undefined || payload.success === true);
+
+      if (!apiSucceeded) {
+        setRepairInvoiceExtractStatus("error");
+        setRepairInvoiceExtractMessage(
+          payload?.message ||
+            response.error ||
+            "Repair invoice could not be checked right now.",
+        );
+        setRepairInvoiceExtractError(null);
+        setExtractedRepairInvoiceJobSheetMatched(null);
+        return;
+      }
+
+      setRepairInvoiceExtractStatus("success");
+      setRepairInvoiceExtractMessage(
+        payload?.message || "Repair invoice checked successfully.",
+      );
+
+      const extractedJobSheetRaw = getNestedValue(payload, [
+        "data.data.job_sheet_number",
+        "data.data.repair_invoice_job_sheet_number",
+        "data.data.repair_invoice_detail.job_sheet_number",
+        "data.data.qr_data.JobSheetNumber",
+        "data.data.qr_data.job_sheet_number",
+        "data.data.qr_data.jobsheet_number",
+        "data.job_sheet_number",
+        "data.repair_invoice_job_sheet_number",
+        "data.repair_invoice_detail.job_sheet_number",
+        "data.qr_data.JobSheetNumber",
+        "data.qr_data.job_sheet_number",
+        "data.qr_data.jobsheet_number",
+        "job_sheet_number",
+        "repair_invoice_job_sheet_number",
+        "qr_data.JobSheetNumber",
+        "qr_data.job_sheet_number",
+        "qr_data.jobsheet_number",
+      ]);
+      const extractedJobSheet =
+        typeof extractedJobSheetRaw === "string"
+          ? extractedJobSheetRaw.trim()
+          : extractedJobSheetRaw !== undefined
+            ? String(extractedJobSheetRaw).trim()
+            : "";
+      const matchedRaw = getNestedValue(payload, [
+        "data.data.repair_invoice_job_sheet_matched",
+        "data.data.is_job_sheet_number",
+        "data.data.job_sheet_matched",
+        "data.data.validation.is_job_sheet_number",
+        "data.repair_invoice_job_sheet_matched",
+        "data.is_job_sheet_number",
+        "data.job_sheet_matched",
+        "data.validation.is_job_sheet_number",
+        "repair_invoice_job_sheet_matched",
+        "is_job_sheet_number",
+        "job_sheet_matched",
+      ]);
+      const validationRules = getNestedValue(payload, [
+        "data.data.validation_rules",
+        "data.data.repair_invoice_detail.validation_rules",
+        "data.validation_rules",
+        "data.repair_invoice_detail.validation_rules",
+        "validation_rules",
+      ]);
+      const claimJobSheet =
+        selectedClaim.estimate_job_sheet_number ??
+        selectedClaim.job_sheet_number ??
+        selectedClaim.data?.inputs?.job_sheet_number ??
+        "";
+
+      let matched: boolean | null = null;
+      if (typeof matchedRaw === "boolean") {
+        matched = matchedRaw;
+      } else if (
+        typeof matchedRaw === "string" &&
+        ["true", "false", "1", "0"].includes(matchedRaw.toLowerCase())
+      ) {
+        matched = ["true", "1"].includes(matchedRaw.toLowerCase());
+      } else if (extractedJobSheet && claimJobSheet) {
+        matched =
+          normalizeJobSheetNumber(extractedJobSheet) ===
+          normalizeJobSheetNumber(claimJobSheet);
+      } else if (hasFailedJobSheetCheck(validationRules)) {
+        matched = false;
+      }
+
+      setExtractedRepairInvoiceJobSheetNumber(extractedJobSheet || null);
+
+      if (!extractedJobSheet) {
+        setExtractedRepairInvoiceJobSheetMatched(null);
+        setRepairInvoiceExtractError(
+          "We could not read the job sheet number from the repair invoice. You can still submit; final validation will verify the document.",
+        );
+        return;
+      }
+
+      setRepairInvoiceExtractError(null);
+      setExtractedRepairInvoiceJobSheetMatched(matched);
+
+      if (matched === false) {
+        setNewJobSheetNumber(extractedJobSheet);
+      }
+    } catch {
+      if (repairInvoiceExtractRequestIdRef.current !== requestId) {
+        return;
+      }
+
+      setRepairInvoiceExtractStatus("error");
+      setRepairInvoiceExtractMessage(
+        "Repair invoice could not be checked right now.",
+      );
+      setRepairInvoiceExtractError(null);
+      setExtractedRepairInvoiceJobSheetMatched(null);
+    } finally {
+      if (repairInvoiceExtractRequestIdRef.current === requestId) {
+        setIsRepairInvoiceExtracting(false);
+      }
+    }
   };
 
   const handleReplacementReceiptUpload = (files: File[]) => {
@@ -296,9 +622,21 @@ export const useFinalDocuments = () => {
     setReplacementReceiptError(false);
   };
 
+  const beginFinalDocumentsReupload = () => {
+    setReuploadFinalDocs(true);
+    setRepairInvoice(undefined);
+    setRepairInvoiceError(true);
+    setJobSheetMismatchReason("");
+    setNewJobSheetNumber("");
+    setJobSheetMismatchReasonError(null);
+    setNewJobSheetNumberError(null);
+    resetRepairInvoiceExtractState();
+  };
+
   useEffect(() => {
     setReuploadMobile(false);
     setReuploadFinalDocs(false);
+    resetRepairInvoiceExtractState();
   }, [selectedClaim]);
 
   useEffect(() => {
@@ -325,8 +663,27 @@ export const useFinalDocuments = () => {
         );
         setImeiUpdateReasonError(null);
       }
+      setJobSheetMismatchReason(
+        selectedClaim.job_sheet_mismatch_reason ??
+          selectedClaim.data?.inputs?.job_sheet_mismatch_reason ??
+          "",
+      );
+      const hasSavedJobSheetCorrection = !!(
+        selectedClaim.job_sheet_mismatch_reason ||
+        selectedClaim.data?.inputs?.job_sheet_mismatch_reason
+      );
+      setNewJobSheetNumber(
+        hasSavedJobSheetCorrection
+          ? (selectedClaim.corrected_job_sheet_number ??
+              selectedClaim.data?.inputs?.corrected_job_sheet_number ??
+              "")
+          : (selectedClaim.repair_invoice_job_sheet_number ?? ""),
+      );
+      setJobSheetMismatchReasonError(null);
+      setNewJobSheetNumberError(null);
     }
   }, [
+    selectedClaim,
     selectedClaim?.id,
     showDeviceReplacementSection,
     selectedClaim?.is_imei_updated,
@@ -335,6 +692,12 @@ export const useFinalDocuments = () => {
     selectedClaim?.imei_update_reason,
     selectedClaim?.data?.replacement_imei,
     selectedClaim?.data?.imei_update_reason,
+    selectedClaim?.job_sheet_number,
+    selectedClaim?.corrected_job_sheet_number,
+    selectedClaim?.data?.inputs?.corrected_job_sheet_number,
+    selectedClaim?.repair_invoice_job_sheet_number,
+    selectedClaim?.job_sheet_mismatch_reason,
+    selectedClaim?.data?.inputs?.job_sheet_mismatch_reason,
   ]);
 
   return {
@@ -347,6 +710,7 @@ export const useFinalDocuments = () => {
     setReuploadMobile,
     reuploadFinalDocs,
     setReuploadFinalDocs,
+    beginFinalDocumentsReupload,
     repairInvoiceError,
     setRepairInvoiceError,
     repairMobilePhotoError,
@@ -369,6 +733,15 @@ export const useFinalDocuments = () => {
     setImeiUpdateReason,
     imeiUpdateReasonError,
     setImeiUpdateReasonError,
+    jobSheetMismatchReason,
+    setJobSheetMismatchReason,
+    newJobSheetNumber,
+    setNewJobSheetNumber,
+    jobSheetMismatchReasonError,
+    setJobSheetMismatchReasonError,
+    newJobSheetNumberError,
+    setNewJobSheetNumberError,
+    jobSheetMismatchReasons,
 
     // Document info
     isImeiChanged,
@@ -390,6 +763,13 @@ export const useFinalDocuments = () => {
     showSubmitButton,
     isImeiChangedFromServer,
     isSubmitDisabledByDeviceReplacement,
+    isRepairInvoiceJobSheetMismatch,
+    isSubmitDisabledByJobSheetMismatch,
+    isRepairInvoiceExtracting,
+    repairInvoiceExtractStatus,
+    repairInvoiceExtractMessage,
+    repairInvoiceJobSheetNumber,
+    repairInvoiceJobSheetError,
 
     // Handlers
     handleSubmit,

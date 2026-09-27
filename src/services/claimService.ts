@@ -115,6 +115,25 @@ export const uploadFinalDocuments = async (claimID: number, body: FormData) => {
   return await postRequest<UploadFinalDocuments>(endpoint, body);
 };
 
+export interface RepairInvoiceExtractResponse {
+  success?: boolean;
+  status_code?: number;
+  message?: string;
+  data?: unknown;
+  job_sheet_number?: string | null;
+  is_job_sheet_number?: boolean | null;
+  repair_invoice_job_sheet_matched?: boolean | null;
+  validation_rules?: Record<string, unknown> | null;
+  qr_data?: Record<string, unknown> | null;
+}
+
+export const extractRepairInvoiceJobSheet = async (body: FormData) => {
+  return await postRequest<RepairInvoiceExtractResponse>(
+    "claim/repair-invoice-extract",
+    body,
+  );
+};
+
 export interface DeviceReplacementPayload {
   imei_changed: boolean;
   new_imei_number?: string;
