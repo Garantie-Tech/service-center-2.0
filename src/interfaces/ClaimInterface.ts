@@ -22,6 +22,12 @@ export default interface Claim {
       estimate_details?: string;
       date_of_damage?: string;
       damage_date?: string;
+      job_sheet_number?: string;
+      corrected_job_sheet_number?: string;
+      job_sheet_mismatch_reason?: string;
+      previous_job_sheet_number?: string | null;
+      job_sheet_correction_repair_invoice_detail_id?: number | string | null;
+      job_sheet_correction_repair_invoice_document_id?: number | string | null;
     };
     replacement_imei?: string;
     imei_update_reason?: string;
@@ -36,6 +42,15 @@ export default interface Claim {
   };
   claimed_amount?: string;
   job_sheet_number?: string;
+  estimate_job_sheet_number?: string | null;
+  corrected_job_sheet_number?: string | null;
+  active_job_sheet_number?: string | null;
+  job_sheet_mismatch_reason?: string | null;
+  job_sheet_mismatch_reasons?: string[];
+  repair_invoice_job_sheet_number?: string | null;
+  repair_invoice_job_sheet_error?: string | null;
+  repair_invoice_job_sheet_matched?: boolean | null;
+  repair_invoice_validation_rules?: Record<string, unknown> | null;
   imei_changed?: boolean;
   is_imei_updated?: boolean;
   new_imei_number?: string | null;
@@ -306,6 +321,20 @@ export interface FinalDocumentsSectionProps {
   };
   repairInvoiceError: boolean;
   replacementReceiptError: boolean;
+  isRepairInvoiceJobSheetMismatch?: boolean;
+  isRepairInvoiceExtracting?: boolean;
+  repairInvoiceExtractStatus?: "success" | "error" | null;
+  repairInvoiceExtractMessage?: string | null;
+  repairInvoiceJobSheetError?: string | null;
+  estimateJobSheetNumber?: string | null;
+  repairInvoiceJobSheetNumber?: string | null;
+  jobSheetMismatchReason?: string;
+  setJobSheetMismatchReason?: (value: string) => void;
+  newJobSheetNumber?: string;
+  setNewJobSheetNumber?: (value: string) => void;
+  jobSheetMismatchReasonError?: string | null;
+  newJobSheetNumberError?: string | null;
+  jobSheetMismatchReasons?: readonly string[];
 }
 
 export interface DocumentErrorAlertsProps {
@@ -339,10 +368,14 @@ export interface DocumentActionButtonsProps {
   };
   isImeiChanged: boolean;
   setReuploadFinalDocs: (value: boolean) => void;
+  beginFinalDocumentsReupload?: () => void;
   handleSubmit: () => void;
   isFinalDocValid?: boolean;
   /** When true, Submit is disabled (e.g. device replaced Yes but New IMEI missing/invalid) */
   isSubmitDisabledByDeviceReplacement?: boolean;
+  isSubmitDisabledByJobSheetMismatch?: boolean;
+  isRepairInvoiceJobSheetMismatch?: boolean;
+  isRepairInvoiceValid?: boolean;
 }
 
 export interface FinalDocumentsViewProps {

@@ -22,6 +22,7 @@ const FinalDocumentsTab: React.FC = () => {
     setReuploadMobile,
     reuploadFinalDocs,
     setReuploadFinalDocs,
+    beginFinalDocumentsReupload,
     repairInvoiceError,
     repairMobilePhotoError,
     setRepairMobilePhotoError,
@@ -42,6 +43,15 @@ const FinalDocumentsTab: React.FC = () => {
     setImeiUpdateReason,
     imeiUpdateReasonError,
     setImeiUpdateReasonError,
+    jobSheetMismatchReason,
+    setJobSheetMismatchReason,
+    newJobSheetNumber,
+    setNewJobSheetNumber,
+    jobSheetMismatchReasonError,
+    setJobSheetMismatchReasonError,
+    newJobSheetNumberError,
+    setNewJobSheetNumberError,
+    jobSheetMismatchReasons,
 
     // Document info
     isImeiChanged,
@@ -61,6 +71,13 @@ const FinalDocumentsTab: React.FC = () => {
     showReuploadButton,
     finalDocuments,
     isImeiChangedFromServer,
+    isRepairInvoiceJobSheetMismatch,
+    isSubmitDisabledByJobSheetMismatch,
+    isRepairInvoiceExtracting,
+    repairInvoiceExtractStatus,
+    repairInvoiceExtractMessage,
+    repairInvoiceJobSheetNumber,
+    repairInvoiceJobSheetError,
 
     // Handlers
     handleSubmit,
@@ -389,6 +406,30 @@ const FinalDocumentsTab: React.FC = () => {
             finalDocuments={finalDocuments}
             repairInvoiceError={repairInvoiceError}
             replacementReceiptError={replacementReceiptError}
+            isRepairInvoiceJobSheetMismatch={isRepairInvoiceJobSheetMismatch}
+            isRepairInvoiceExtracting={isRepairInvoiceExtracting}
+            repairInvoiceExtractStatus={repairInvoiceExtractStatus}
+            repairInvoiceExtractMessage={repairInvoiceExtractMessage}
+            repairInvoiceJobSheetError={repairInvoiceJobSheetError}
+            estimateJobSheetNumber={
+              selectedClaim?.estimate_job_sheet_number ??
+              selectedClaim?.job_sheet_number ??
+              null
+            }
+            repairInvoiceJobSheetNumber={repairInvoiceJobSheetNumber ?? null}
+            jobSheetMismatchReason={jobSheetMismatchReason}
+            setJobSheetMismatchReason={(value) => {
+              setJobSheetMismatchReason(value);
+              setJobSheetMismatchReasonError(null);
+            }}
+            newJobSheetNumber={newJobSheetNumber}
+            setNewJobSheetNumber={(value) => {
+              setNewJobSheetNumber(value);
+              setNewJobSheetNumberError(null);
+            }}
+            jobSheetMismatchReasonError={jobSheetMismatchReasonError}
+            newJobSheetNumberError={newJobSheetNumberError}
+            jobSheetMismatchReasons={jobSheetMismatchReasons}
           />
 
           {/* Add Upload Again and Submit buttons for reupload mode */}
@@ -398,6 +439,7 @@ const FinalDocumentsTab: React.FC = () => {
             finalDocuments={finalDocuments}
             isImeiChanged={isImeiChangedFromServer}
             setReuploadFinalDocs={setReuploadFinalDocs}
+            beginFinalDocumentsReupload={beginFinalDocumentsReupload}
             handleSubmit={handleSubmit}
             isFinalDocValid={
               selectedClaim?.final_documents == "valid" ? true : false
@@ -405,6 +447,11 @@ const FinalDocumentsTab: React.FC = () => {
             isSubmitDisabledByDeviceReplacement={
               isSubmitDisabledByDeviceReplacement
             }
+            isSubmitDisabledByJobSheetMismatch={
+              isSubmitDisabledByJobSheetMismatch
+            }
+            isRepairInvoiceJobSheetMismatch={isRepairInvoiceJobSheetMismatch}
+            isRepairInvoiceValid={isValidRepairInvoice}
           />
 
           <AdditionalDocumentsSection
