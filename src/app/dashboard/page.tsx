@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useGlobalStore } from "@/store/store";
 import useSyncAuthenticatedProfile from "@/hooks/useSyncAuthenticatedProfile";
-import NoticeMarquee from "@/components/NoticeMarquee";
+// import NoticeMarquee from "@/components/NoticeMarquee";
 
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
   ssr: false,
