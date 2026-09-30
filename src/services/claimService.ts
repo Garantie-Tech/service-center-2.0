@@ -359,6 +359,34 @@ export const extractRepairInvoiceJobSheet = async (body: FormData) => {
   );
 };
 
+export type BulkRepairInvoiceSeverity =
+  | "queued"
+  | "processing"
+  | "success"
+  | "warning"
+  | "error";
+
+export interface BulkRepairInvoiceUploadResult {
+  file_name: string;
+  severity: BulkRepairInvoiceSeverity;
+  claim_id: number | null;
+  match_status: string | null;
+  upload_status: string | null;
+  message?: string;
+  http_status?: number;
+  extracted?: {
+    job_sheet_number?: string | null;
+    job_sheet_number_as_printed?: string | null;
+    imei?: string | null;
+    source?: string | null;
+  } | null;
+}
+
+export const uploadBulkRepairInvoice = async (body: FormData) => {
+  const endpoint = "repair-invoices/bulk-upload";
+  return await postRequest<BulkRepairInvoiceUploadResult>(endpoint, body);
+};
+
 export interface DeviceReplacementPayload {
   imei_changed: boolean;
   new_imei_number?: string;

@@ -25,6 +25,7 @@ import {
   type ShipmentBuilderPayload,
 } from "@/services/claimService";
 import ShipmentBuilderModal from "./shipment/ShipmentBuilderModal";
+import BulkRepairInvoiceUploadModal from "@/components/BulkRepairInvoiceUploadModal";
 
 interface SearchSectionProps {
   shipmentActionsEnabled?: boolean;
@@ -53,6 +54,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
     shipmentSelectedClaimIds,
     clearShipmentSelection,
   } = useGlobalStore();
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const permissions = useAuthStore((state) => state.user.permissions ?? []);
   const stateCount = Object.keys(stateOptions ?? {}).length;
@@ -455,19 +457,35 @@ const SearchSection: React.FC<SearchSectionProps> = ({
               )}
             </div>
             {!shipmentMode && (
-              <button
-                onClick={redirectToClaimsPortal}
-                className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"
-                data-tip="Initiate Claim"
-              >
-                <Image
-                  src="/images/plus-circle.svg"
-                  alt="Initiate Claim"
-                  width={20}
-                  height={20}
-                />
-                <span className="hidden md:block">Initiate Claim</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setIsBulkUploadOpen(true)}
+                  className="btn group border border-primaryBlue bg-white text-primaryBlue shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primaryBlue hover:text-white hover:shadow-lg hover:shadow-blue-200 active:translate-y-0 tooltip flex items-center gap-2"
+                  data-tip="Bulk Uplaod"
+                >
+                  <Image
+                    src="/images/upload-icon.svg"
+                    alt="Bulk Uplaod"
+                    width={20}
+                    height={20}
+                    className="transition duration-200 group-hover:-translate-y-0.5 group-hover:brightness-0 group-hover:invert"
+                  />
+                  <span className="hidden xl:block">Bulk Uplaod</span>
+                </button>
+                <button
+                  onClick={redirectToClaimsPortal}
+                  className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"
+                  data-tip="Initiate Claim"
+                >
+                  <Image
+                    src="/images/plus-circle.svg"
+                    alt="Initiate Claim"
+                    width={20}
+                    height={20}
+                  />
+                  <span className="hidden md:block">Initiate Claim</span>
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -478,6 +496,11 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         claims={selectedShipmentClaims}
         onClose={() => setIsShipmentModalOpen(false)}
         onConfirm={handleNoidaShipmentBatch}
+      />
+      <BulkRepairInvoiceUploadModal
+        isOpen={isBulkUploadOpen}
+        onClose={() => setIsBulkUploadOpen(false)}
+        onComplete={triggerClaimRefresh}
       />
     </div>
   );
