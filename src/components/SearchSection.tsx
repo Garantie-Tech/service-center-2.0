@@ -9,12 +9,13 @@ import { redirectToClaimsPortal } from "@/utils/redirect";
 import Link from "next/link";
 import StateMultiSelectDropdown from "./filters/StateMultiSelectDropdown";
 import ServiceCenterMultiSelectDropdown from "./filters/ServiceCenterMultiSelectDropdown";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { decodeJWT, logoutUser } from "@/helpers/globalHelper";
 import { ALLOWED_ISSUERS } from "@/globalConstant";
 import { useAuthStore } from "@/store/authStore";
 import { safeJsonParse } from "@/helpers/safeJson";
+import BulkRepairInvoiceUploadModal from "@/components/BulkRepairInvoiceUploadModal";
 
 const SearchSection: React.FC = () => {
   const {
@@ -29,7 +30,9 @@ const SearchSection: React.FC = () => {
     appliedFilters,
     filterState,
     filterServiceCentre,
+    triggerClaimRefresh,
   } = useGlobalStore();
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const stateCount = Object.keys(stateOptions ?? {}).length;
   const showStateFilter = user?.user_type === "service_head" && stateCount > 1;
@@ -298,6 +301,20 @@ const SearchSection: React.FC = () => {
               </button>
             </div>
             <button
+              onClick={() => setIsBulkUploadOpen(true)}
+              className="btn group border border-primaryBlue bg-white text-primaryBlue shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primaryBlue hover:text-white hover:shadow-lg hover:shadow-blue-200 active:translate-y-0 tooltip flex items-center gap-2"
+              data-tip="Bulk Uplaod"
+            >
+              <Image
+                src="/images/upload-icon.svg"
+                alt="Bulk Uplaod"
+                width={20}
+                height={20}
+                className="transition duration-200 group-hover:-translate-y-0.5 group-hover:brightness-0 group-hover:invert"
+              />
+              <span className="hidden xl:block">Bulk Uplaod</span>
+            </button>
+            <button
               onClick={redirectToClaimsPortal}
               className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"
               data-tip="Initiate Claim"
@@ -313,6 +330,11 @@ const SearchSection: React.FC = () => {
           </div>
         </div>
       </div>
+      <BulkRepairInvoiceUploadModal
+        isOpen={isBulkUploadOpen}
+        onClose={() => setIsBulkUploadOpen(false)}
+        onComplete={triggerClaimRefresh}
+      />
     </div>
   );
 };
