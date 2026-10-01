@@ -120,9 +120,16 @@ export interface RepairInvoiceExtractResponse {
   status_code?: number;
   message?: string;
   data?: unknown;
+  invoice_obj?: {
+    job_sheet_number?: string | null;
+    is_job_sheet_number?: boolean | null;
+    repair_invoice_job_sheet_matched?: boolean | null;
+    qr_data?: Record<string, unknown> | null;
+  } | null;
   job_sheet_number?: string | null;
   is_job_sheet_number?: boolean | null;
   repair_invoice_job_sheet_matched?: boolean | null;
+  validation_results?: Record<string, unknown> | null;
   validation_rules?: Record<string, unknown> | null;
   qr_data?: Record<string, unknown> | null;
 }
