@@ -16,6 +16,9 @@ import { ALLOWED_ISSUERS } from "@/globalConstant";
 import { useAuthStore } from "@/store/authStore";
 import { safeJsonParse } from "@/helpers/safeJson";
 
+const INVALID_DOCUMENT_STATUS = "INVALID DOCUMENTS";
+const ALL_INVALID_DOCUMENT_TYPES = ["estimate", "final", "customer"];
+
 const SearchSection: React.FC = () => {
   const {
     searchTerm,
@@ -29,6 +32,7 @@ const SearchSection: React.FC = () => {
     appliedFilters,
     filterState,
     filterServiceCentre,
+    claimTypes,
   } = useGlobalStore();
   const user = useAuthStore((state) => state.user);
   const stateCount = Object.keys(stateOptions ?? {}).length;
@@ -88,11 +92,41 @@ const SearchSection: React.FC = () => {
         paramsObj.service_centre_id = filterServiceCentre;
       }
 
+      const activeClaimTypes = Object.entries(
+        appliedFilters?.claimTypes ?? claimTypes,
+      )
+        .filter(([, value]) => value)
+        .map(([key]) => key);
+
+      const selectedClaimType =
+        user?.user_type === "service_centre"
+          ? activeClaimTypes.includes("myClaims")
+            ? "myClaims"
+            : activeClaimTypes[0]
+          : activeClaimTypes.includes("allClaims")
+            ? "allClaims"
+            : activeClaimTypes[0];
+
+      if (selectedClaimType) {
+        paramsObj.claim_type = selectedClaimType;
+      }
+
       // ✅ Add date filters if applied
       if (appliedFilters?.fromDate && appliedFilters?.toDate) {
         paramsObj.duration = "custom";
         paramsObj.startDate = appliedFilters.fromDate;
         paramsObj.endDate = appliedFilters.toDate;
+      }
+
+      if (filterStatus === INVALID_DOCUMENT_STATUS) {
+        paramsObj.invalid_document_types = (
+          appliedFilters?.invalidDocumentTypes?.length
+            ? appliedFilters.invalidDocumentTypes
+            : ALL_INVALID_DOCUMENT_TYPES
+        ).join(",");
+      } else if (appliedFilters?.invalidDocumentTypes?.length) {
+        paramsObj.invalid_document_types =
+          appliedFilters.invalidDocumentTypes.join(",");
       }
 
       const params = new URLSearchParams(paramsObj).toString();

@@ -7,6 +7,7 @@ import { SortByOptions, SortOrder } from "@/interfaces/ClaimFilterInterfaces";
 import { SORT_OPTIONS } from "@/globalConstant";
 
 const ClaimFilter: React.FC = () => {
+  const INVALID_DOCUMENT_STATUS = "INVALID DOCUMENTS";
   const {
     isFilterOpen,
     toggleFilter,
@@ -28,6 +29,8 @@ const ClaimFilter: React.FC = () => {
     handleFilterChange,
     claimStatuses,
     setClaimTypes,
+    invalidDocumentTypes,
+    setInvalidDocumentTypes,
   } = useGlobalStore();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,6 +39,8 @@ const ClaimFilter: React.FC = () => {
     "otherSC",
     "pendingClaims",
   ]);
+  const [isInvalidDocumentDropdownOpen, setIsInvalidDocumentDropdownOpen] =
+    useState(false);
   const dropdownRef = useRef<HTMLDetailsElement | null>(null);
 
   useEffect(() => {
@@ -92,12 +97,39 @@ const ClaimFilter: React.FC = () => {
   }, [closeFilter]);
 
   const handleApply = () => {
-    setAppliedFilters({ fromDate, toDate, claimTypes });
+    const appliedInvalidDocumentTypes =
+      selectedDropdown === INVALID_DOCUMENT_STATUS &&
+      invalidDocumentTypes.length === 0
+        ? invalidDocumentOptionKeys
+        : invalidDocumentTypes;
+
+    if (selectedDropdown === INVALID_DOCUMENT_STATUS) {
+      setInvalidDocumentTypes(appliedInvalidDocumentTypes);
+    }
+
+    setAppliedFilters({
+      fromDate,
+      toDate,
+      claimTypes,
+      invalidDocumentTypes:
+        selectedDropdown === INVALID_DOCUMENT_STATUS
+          ? appliedInvalidDocumentTypes
+          : [],
+    });
     toggleFilter();
   };
 
   const handleDropdownChange = (value: string) => {
     setSelectedDropdown(value);
+    const nextInvalidDocumentTypes =
+      value === INVALID_DOCUMENT_STATUS ? invalidDocumentOptionKeys : [];
+    setInvalidDocumentTypes(nextInvalidDocumentTypes);
+    setAppliedFilters({
+      fromDate,
+      toDate,
+      claimTypes,
+      invalidDocumentTypes: nextInvalidDocumentTypes,
+    });
     handleFilterChange(value);
     setIsDropdownOpen(false);
   };
@@ -155,10 +187,12 @@ const ClaimFilter: React.FC = () => {
       claimTypes.otherClaims ||
       claimTypes.allClaims ||
       claimTypes.pendingClaims;
+    const hasInvalidDocumentFilter = invalidDocumentTypes.length > 0;
 
-    if (fromDate || toDate || isAnyClaimTypeSelected) {
+    if (fromDate || toDate || isAnyClaimTypeSelected || hasInvalidDocumentFilter) {
       setToDate("");
       setFromDate("");
+      setInvalidDocumentTypes([]);
 
       const user = localStorage.getItem("user");
       let serviceCenter: { user_type?: string } | null = null;
@@ -170,23 +204,84 @@ const ClaimFilter: React.FC = () => {
       }
 
       if (serviceCenter?.user_type != "service_centre") {
-        setClaimTypes({
+        const resetClaimTypes = {
           myClaims: false,
           otherClaims: false,
           allClaims: true,
           pendingClaims: false,
+        };
+        setClaimTypes(resetClaimTypes);
+        setAppliedFilters({
+          fromDate: "",
+          toDate: "",
+          claimTypes: resetClaimTypes,
+          invalidDocumentTypes: [],
         });
       } else {
-        setClaimTypes({
+        const resetClaimTypes = {
           myClaims: true,
           otherClaims: false,
           allClaims: false,
           pendingClaims: false,
+        };
+        setClaimTypes(resetClaimTypes);
+        setAppliedFilters({
+          fromDate: "",
+          toDate: "",
+          claimTypes: resetClaimTypes,
+          invalidDocumentTypes: [],
         });
       }
-      setAppliedFilters({ fromDate: "", toDate: "", claimTypes });
     }
     toggleFilter();
+  };
+
+  const invalidDocumentOptions = [
+    { key: "estimate", label: "Estimate Docs" },
+    { key: "final", label: "Final Docs" },
+    { key: "customer", label: "Customer Docs" },
+  ];
+  const invalidDocumentCheckboxClass =
+    "checkbox checked:bg-primaryBlue checked:border-primaryBlue [--chkbg:#3C63FC] [--chkfg:white] w-[20px] h-[20px]";
+  const invalidDocumentOptionKeys = invalidDocumentOptions.map(
+    ({ key }) => key,
+  );
+  const areAllInvalidDocumentTypesSelected = invalidDocumentOptionKeys.every(
+    (key) => invalidDocumentTypes.includes(key),
+  );
+  const invalidDocumentDropdownLabel =
+    invalidDocumentTypes.length === 0 ||
+    areAllInvalidDocumentTypesSelected
+      ? "All Document Types"
+      : invalidDocumentOptions
+          .filter(({ key }) => invalidDocumentTypes.includes(key))
+          .map(({ label }) => label)
+          .join(", ");
+
+  const handleAllInvalidDocumentTypesChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setInvalidDocumentTypes(
+      event.target.checked ? invalidDocumentOptionKeys : [],
+    );
+  };
+
+  const statusIconMap: Record<string, string> = {
+    "INVALID DOCUMENTS": "action-required",
+  };
+
+  const getStatusIcon = (key: string) =>
+    statusIconMap[key] ?? key.toLowerCase().replace(/\s+/g, "-");
+
+  const handleInvalidDocumentTypeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const { value, checked } = event.target;
+    setInvalidDocumentTypes(
+      checked
+        ? Array.from(new Set([...invalidDocumentTypes, value]))
+        : invalidDocumentTypes.filter((type) => type !== value),
+    );
   };
 
   const mappedClaimType: Record<
@@ -234,9 +329,7 @@ const ClaimFilter: React.FC = () => {
                   onClick={() => handleDropdownChange(key)}
                 >
                   <Image
-                    src={`/images/${key
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")}-icon.svg`}
+                    src={`/images/${getStatusIcon(key)}-icon.svg`}
                     alt={key}
                     width={20}
                     height={20}
@@ -396,6 +489,60 @@ const ClaimFilter: React.FC = () => {
               )
             )}
           </div>
+
+          {selectedDropdown === INVALID_DOCUMENT_STATUS && (
+            <>
+              <h3 className="text-sm font-bold mb-3">Invalid Document Type</h3>
+              <div className="relative mb-4">
+                <button
+                  type="button"
+                  className="input input-bordered w-full text-xs flex items-center justify-between bg-white"
+                  onClick={() =>
+                    setIsInvalidDocumentDropdownOpen(
+                      !isInvalidDocumentDropdownOpen,
+                    )
+                  }
+                >
+                  <span className="truncate text-left">
+                    {invalidDocumentDropdownLabel}
+                  </span>
+                  <Image
+                    src="/images/select-dropdown.svg"
+                    alt="Arrow"
+                    width={18}
+                    height={18}
+                    className="ml-2"
+                  />
+                </button>
+
+                {isInvalidDocumentDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+                    <label className="flex items-center py-2">
+                      <input
+                        type="checkbox"
+                        className={invalidDocumentCheckboxClass}
+                        checked={areAllInvalidDocumentTypesSelected}
+                        onChange={handleAllInvalidDocumentTypesChange}
+                      />
+                      <span className="ml-2 text-xs">Select All</span>
+                    </label>
+                    {invalidDocumentOptions.map(({ key, label }) => (
+                      <label key={key} className="flex items-center py-2">
+                        <input
+                          type="checkbox"
+                          className={invalidDocumentCheckboxClass}
+                          value={key}
+                          checked={invalidDocumentTypes.includes(key)}
+                          onChange={handleInvalidDocumentTypeChange}
+                        />
+                        <span className="ml-2 text-xs">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Action Buttons */}
           <div className="flex justify-center gap-2 mt-4">
