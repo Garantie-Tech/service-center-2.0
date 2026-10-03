@@ -17,6 +17,9 @@ interface ClaimListProps {
   shipmentMode?: boolean;
 }
 
+const INVALID_DOCUMENT_STATUS = "INVALID DOCUMENTS";
+const ALL_INVALID_DOCUMENT_TYPES = ["estimate", "final", "customer"];
+
 const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
   const {
     claims,
@@ -165,6 +168,17 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
 
         if (filterServiceCentre.trim()) {
           basePayload.service_centre_id = filterServiceCentre;
+        }
+
+        if (filterStatus === INVALID_DOCUMENT_STATUS) {
+          basePayload.invalid_document_types = (
+            appliedFilters?.invalidDocumentTypes?.length
+              ? appliedFilters.invalidDocumentTypes
+              : ALL_INVALID_DOCUMENT_TYPES
+          ).join(",");
+        } else if (appliedFilters?.invalidDocumentTypes?.length) {
+          basePayload.invalid_document_types =
+            appliedFilters.invalidDocumentTypes.join(",");
         }
       }
 

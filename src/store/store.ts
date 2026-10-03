@@ -19,6 +19,7 @@ interface FilterProps {
     allClaims?: boolean;
     pendingClaims: boolean;
   };
+  invalidDocumentTypes?: string[];
 }
 
 type AppliedFilters = FilterProps;
@@ -87,6 +88,8 @@ interface StoreType {
     allClaims?: boolean;
     pendingClaims: boolean;
   }) => void;
+  invalidDocumentTypes: string[];
+  setInvalidDocumentTypes: (types: string[]) => void;
 
   claimStatuses: Record<string, string>;
   selectedDropdown: string;
@@ -203,12 +206,15 @@ export const useGlobalStore = create<StoreType>((set, get) => ({
     pendingClaims: false,
   },
   setClaimTypes: (types) => set({ claimTypes: types }),
+  invalidDocumentTypes: [],
+  setInvalidDocumentTypes: (types) => set({ invalidDocumentTypes: types }),
 
   claimStatuses: {
     "ALL CLAIMS": "All Claims",
     NEW: "Estimate Pending",
     "IN PROGRESS": "Approval Pending",
     APPROVED: "Approved",
+    "INVALID DOCUMENTS": "Invalid Documents",
     REJECTED: "Rejected",
     CLOSED: "Completed",
     CANCELLED: "Cancelled",
