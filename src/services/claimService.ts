@@ -67,6 +67,10 @@ export const handleBerDecision = async (
   claimID: number,
   berDecision: string,
   newDeviceAmount?: string,
+  settleDetails?: {
+    device_collected: "yes" | "no";
+    accessory_provided: "yes" | "no";
+  },
 ) => {
   const endpoint = `claim/${claimID}/ber-decision`;
   const body: Record<string, string> = {
@@ -76,6 +80,11 @@ export const handleBerDecision = async (
 
   if (newDeviceAmount) {
     body.new_device_amount = newDeviceAmount;
+  }
+
+  if (berDecision === "settle" && settleDetails) {
+    body.device_collected = settleDetails.device_collected;
+    body.accessory_provided = settleDetails.accessory_provided;
   }
 
   try {

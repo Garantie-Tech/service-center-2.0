@@ -32,6 +32,12 @@ const ApprovalDetailsTab: React.FC = () => {
   const { notifySuccess, notifyError } = useNotification();
 
   const berOptions = ["repair", "settle"];
+  const berSettleDetails = selectedClaim?.data?.ber_settle;
+  const formatYesNo = (value?: string | boolean | null) => {
+    if (value === true || value === "yes") return "Yes";
+    if (value === false || value === "no") return "No";
+    return "N/A";
+  };
 
   // this will execute in background
   useEffect(() => {
@@ -105,14 +111,19 @@ const ApprovalDetailsTab: React.FC = () => {
     }, 1000);
   };
 
-  const handleBerSubmit = async () => {
+  const handleBerSubmit = async (settleDetails?: {
+    device_collected: "yes" | "no";
+    accessory_provided: "yes" | "no";
+  }) => {
     setIsBerModalOpen(false);
     if (approvalDetails.berDecision != "replace") {
       try {
         setIsLoading(true);
         const response = await handleBerDecision(
           Number(selectedClaim?.id),
-          String(approvalDetails.berDecision)
+          String(approvalDetails.berDecision),
+          undefined,
+          settleDetails
         );
 
         if (!response?.success) {
@@ -375,6 +386,33 @@ const ApprovalDetailsTab: React.FC = () => {
               />
             </div>
           )}
+
+        {(claimStatus === "BER SETTLE" ||
+          claimStatus === "BER Settlement Initiated" ||
+          claimStatus === "BER Settlement Completed" ||
+          berSettleDetails) && (
+          <>
+            <div className="pb-[10px] w-[45%]">
+              <label className="block text-darkGray text-xs font-medium">
+                Device Collected
+              </label>
+              <p className="text-sm font-semibold">
+                {formatYesNo(berSettleDetails?.device_collected)}
+              </p>
+            </div>
+            <div className="pb-[10px] w-[45%]">
+              <label className="block text-darkGray text-xs font-medium">
+                Accessories Provided
+              </label>
+              <p className="text-sm font-semibold">
+                {formatYesNo(
+                  berSettleDetails?.accessory_provided ??
+                    selectedClaim?.data?.accessory_provided,
+                )}
+              </p>
+            </div>
+          </>
+        )}
 
         {/* Conditionally show Device Amount Input only when BER Decision is replace */}
         {approvalDetails.berDecision == "replace" &&

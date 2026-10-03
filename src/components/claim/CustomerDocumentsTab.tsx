@@ -290,11 +290,36 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const accessoryAlreadySaved =
     documents?.accessoriesProvided === "yes" ||
     documents?.accessoriesProvided === "no";
+  const berSettleDetails = selectedClaim?.data?.ber_settle;
+  const formatYesNo = (value?: string | boolean | null) => {
+    if (value === true || value === "yes") return "Yes";
+    if (value === false || value === "no") return "No";
+    return "N/A";
+  };
 
   if (accessoryOnly) {
     return (
       <div>
         <h2 className="text-lg font-semibold mb-4">Customer Documents</h2>
+        {berSettleDetails && (
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-[#e5e7eb] bg-[#fafbfc] p-4">
+            <div>
+              <h4 className="text-xs text-gray-500">Device Collected</h4>
+              <p className="text-sm font-semibold">
+                {formatYesNo(berSettleDetails.device_collected)}
+              </p>
+            </div>
+            <div>
+              <h4 className="text-xs text-gray-500">Accessories Provided</h4>
+              <p className="text-sm font-semibold">
+                {formatYesNo(
+                  berSettleDetails.accessory_provided ??
+                    selectedClaim?.data?.accessory_provided,
+                )}
+              </p>
+            </div>
+          </div>
+        )}
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded">
           <p className="font-medium">
             Documents are not required for this claim.
@@ -349,6 +374,26 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Upload Customer Documents</h2>
+
+      {berSettleDetails && (
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-[#e5e7eb] bg-[#fafbfc] p-4">
+          <div>
+            <h4 className="text-xs text-gray-500">Device Collected</h4>
+            <p className="text-sm font-semibold">
+              {formatYesNo(berSettleDetails.device_collected)}
+            </p>
+          </div>
+          <div>
+            <h4 className="text-xs text-gray-500">Accessories Provided</h4>
+            <p className="text-sm font-semibold">
+              {formatYesNo(
+                berSettleDetails.accessory_provided ??
+                  selectedClaim?.data?.accessory_provided,
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       {showAadharCardInvalidReason && invalidAadharFrontImageReason && (
         <ErrorAlert
