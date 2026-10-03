@@ -6,7 +6,10 @@ import Image from "next/image";
 interface BerSettleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmit: (details: {
+    device_collected: "yes" | "no";
+    accessory_provided: "yes" | "no";
+  }) => void;
 }
 
 const BerSettleModal: React.FC<BerSettleModalProps> = ({
@@ -15,10 +18,18 @@ const BerSettleModal: React.FC<BerSettleModalProps> = ({
   onSubmit,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [deviceCollected, setDeviceCollected] = useState<"yes" | "no" | "">(
+    "",
+  );
+  const [accessoryProvided, setAccessoryProvided] = useState<"yes" | "no" | "">(
+    "",
+  );
 
   // Handle fade-in and fade-out effect
   useEffect(() => {
     if (isOpen) {
+      setDeviceCollected("");
+      setAccessoryProvided("");
       setShowModal(true);
     } else {
       setTimeout(() => setShowModal(false), 300); // Wait for animation before unmounting
@@ -26,10 +37,57 @@ const BerSettleModal: React.FC<BerSettleModalProps> = ({
   }, [isOpen]);
 
   const handleSubmit = () => {
-    onSubmit(); // Close modal after submission
+    if (!deviceCollected || !accessoryProvided) return;
+
+    onSubmit({
+      device_collected: deviceCollected,
+      accessory_provided: accessoryProvided,
+    });
+    setDeviceCollected("");
+    setAccessoryProvided("");
+  };
+
+  const handleClose = () => {
+    setDeviceCollected("");
+    setAccessoryProvided("");
+    onClose();
   };
 
   if (!showModal) return null; // Don't render if modal is not open
+
+  const canSubmit = !!deviceCollected && !!accessoryProvided;
+
+  const renderRadioGroup = (
+    label: string,
+    value: "yes" | "no" | "",
+    onChange: (value: "yes" | "no") => void,
+  ) => (
+    <div className="mt-4 text-left">
+      <p className="text-sm font-semibold text-[#181D27] mb-2">
+        {label} <span className="text-red-500">*</span>
+      </p>
+      <div className="flex gap-4">
+        {(["yes", "no"] as const).map((option) => (
+          <label
+            key={option}
+            className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium cursor-pointer ${
+              value === option
+                ? "border-blue-600 bg-blue-50 text-blue-700"
+                : "border-gray-200 text-[#414651]"
+            }`}
+          >
+            <input
+              type="radio"
+              className="radio checked:bg-primaryBlue w-[18px] h-[18px]"
+              checked={value === option}
+              onChange={() => onChange(option)}
+            />
+            {option === "yes" ? "Yes" : "No"}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div
@@ -46,7 +104,7 @@ const BerSettleModal: React.FC<BerSettleModalProps> = ({
         {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-          onClick={onClose}
+          onClick={handleClose}
         >
           <Image
             src="/images/cross-square.svg"
@@ -79,18 +137,33 @@ const BerSettleModal: React.FC<BerSettleModalProps> = ({
           Are you sure? You are choosing to settle the device
         </p>
 
+        {renderRadioGroup(
+          "Is the device collected?",
+          deviceCollected,
+          setDeviceCollected,
+        )}
+        {renderRadioGroup(
+          "Accessories provided?",
+          accessoryProvided,
+          setAccessoryProvided,
+        )}
+
         {/* Buttons */}
         <div className="mt-6 flex justify-between gap-6 text-base font-semibold">
           <button
             className="w-1/2 border border-gray-300 px-4 py-2 rounded-md text-[#414651] hover:bg-gray-100 transition-all duration-200 h-[50px]"
-            onClick={onClose}
+            onClick={handleClose}
           >
             Cancel
           </button>
           <button
-            className={`w-1/2 h-[50px] px-4 py-2 rounded-md text-white transition-all duration-200 bg-blue-600 hover:bg-blue-700`}
+            className={`w-1/2 h-[50px] px-4 py-2 rounded-md text-white transition-all duration-200 ${
+              canSubmit
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
             onClick={handleSubmit}
-            disabled={false}
+            disabled={!canSubmit}
           >
             Confirm
           </button>

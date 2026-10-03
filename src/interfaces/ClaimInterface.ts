@@ -39,6 +39,13 @@ export default interface Claim {
       replace_amount: number;
     };
     accessory_provided?: string | boolean;
+    ber_settle?: {
+      device_collected?: string | boolean | null;
+      accessory_provided?: string | boolean | null;
+      submitted_at?: string | null;
+      submitted_by?: string | number | null;
+      submitted_by_type?: string | null;
+    };
   };
   claimed_amount?: string;
   job_sheet_number?: string;
