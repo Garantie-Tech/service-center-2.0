@@ -165,6 +165,7 @@ export interface ClaimFetchPayload {
   sort_by?: string;
   state_id?: string;
   service_centre_id?: string;
+  invalid_document_types?: string;
 }
 
 export interface UploadFinalDocuments {
