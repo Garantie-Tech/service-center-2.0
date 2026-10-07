@@ -43,30 +43,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   const showReplacement = showReplacementReceiptSection === true;
   const isJobSheetCorrectionReadOnly =
     isRepairInvoiceJobSheetMismatch === true && isValidRepairInvoice === true;
-  const claimJobSheetDisplay = estimateJobSheetNumber || "Not available";
-  const repairInvoiceJobSheetDisplay =
-    repairInvoiceJobSheetNumber || "Not available";
-
-  const JobSheetComparison = () => (
-    <div className="mb-3 divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
-      <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-        <div className="text-xs font-medium text-[#6b7280]">
-          Claim job sheet
-        </div>
-        <div className="break-all text-sm font-medium text-[#181D27]">
-          {claimJobSheetDisplay}
-        </div>
-      </div>
-      <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-        <div className="text-xs font-medium text-[#6b7280]">
-          Invoice job sheet
-        </div>
-        <div className="break-all text-sm font-medium text-[#181D27]">
-          {repairInvoiceJobSheetDisplay}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="flex gap-8">
@@ -182,22 +158,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               <div className="divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
                 <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
                   <div className="text-xs font-medium text-[#6b7280]">
-                    Claim job sheet
-                  </div>
-                  <div className="break-all text-sm font-medium text-[#181D27]">
-                    {claimJobSheetDisplay}
-                  </div>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-                  <div className="text-xs font-medium text-[#6b7280]">
-                    Invoice job sheet
-                  </div>
-                  <div className="break-all text-sm font-medium text-[#181D27]">
-                    {repairInvoiceJobSheetDisplay}
-                  </div>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-                  <div className="text-xs font-medium text-[#6b7280]">
                     Reason
                   </div>
                   <div className="text-sm font-medium text-[#181D27]">
@@ -215,8 +175,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                <JobSheetComparison />
-
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#374151]">
                     Reason <span className="text-[#dc2626]">*</span>
