@@ -58,7 +58,7 @@ export const useFinalDocuments = () => {
     string | null
   >(null);
   const [repairInvoiceExtractStatus, setRepairInvoiceExtractStatus] = useState<
-    "success" | "error" | null
+    "success" | "warning" | "error" | null
   >(null);
   const [repairInvoiceExtractMessage, setRepairInvoiceExtractMessage] =
     useState<string | null>(null);
@@ -511,11 +511,6 @@ export const useFinalDocuments = () => {
         return;
       }
 
-      setRepairInvoiceExtractStatus("success");
-      setRepairInvoiceExtractMessage(
-        payload?.message || "Repair invoice checked successfully.",
-      );
-
       const extractedJobSheetRaw = getNestedValue(payload, [
         "data.data.invoice_obj.job_sheet_number",
         "data.data.invoice_obj.qr_data.JobSheetNumber",
@@ -617,6 +612,10 @@ export const useFinalDocuments = () => {
 
       if (!extractedJobSheet) {
         setExtractedRepairInvoiceJobSheetMatched(null);
+        setRepairInvoiceExtractStatus("warning");
+        setRepairInvoiceExtractMessage(
+          "Job sheet number could not be read from the repair invoice.",
+        );
         setRepairInvoiceExtractError(
           "We could not read the job sheet number from the repair invoice. You can still submit; final validation will verify the document.",
         );
@@ -627,7 +626,21 @@ export const useFinalDocuments = () => {
       setExtractedRepairInvoiceJobSheetMatched(matched);
 
       if (matched === false) {
+        setRepairInvoiceExtractStatus("warning");
+        setRepairInvoiceExtractMessage(
+          "Job sheet mismatch found. Please select a reason before submitting.",
+        );
         setNewJobSheetNumber(extractedJobSheet);
+      } else if (matched === true) {
+        setRepairInvoiceExtractStatus("success");
+        setRepairInvoiceExtractMessage(
+          "Repair invoice job sheet matched successfully.",
+        );
+      } else {
+        setRepairInvoiceExtractStatus("warning");
+        setRepairInvoiceExtractMessage(
+          "Repair invoice checked. Job sheet match will be confirmed during final validation.",
+        );
       }
     } catch {
       if (repairInvoiceExtractRequestIdRef.current !== requestId) {
