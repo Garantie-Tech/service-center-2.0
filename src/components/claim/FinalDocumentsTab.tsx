@@ -452,6 +452,7 @@ const FinalDocumentsTab: React.FC = () => {
             }
             isRepairInvoiceJobSheetMismatch={isRepairInvoiceJobSheetMismatch}
             isRepairInvoiceValid={isValidRepairInvoice}
+            isRepairInvoiceExtracting={isRepairInvoiceExtracting}
           />
 
           <AdditionalDocumentsSection
