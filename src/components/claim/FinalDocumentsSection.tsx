@@ -155,7 +155,7 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
         {isRepairInvoiceExtracting ? (
           <div className="flex items-center gap-1.5 px-2 py-2 text-[#6b7280]">
             <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-primaryBlue" />
-            <span className="text-xxs font-semibold">Checking document</span>
+            <span className="text-xxs font-semibold">Validating invoice</span>
           </div>
         ) : isInvalidRepairInvoice && repairInvoiceError ? (
           <span className="block p-2 text-[#EB5757] text-xxs font-semibold">
