@@ -15,9 +15,12 @@ const DocumentActionButtons: React.FC<DocumentActionButtonsProps> = ({
   isSubmitDisabledByJobSheetMismatch = false,
   isRepairInvoiceJobSheetMismatch = false,
   isRepairInvoiceValid = false,
+  isRepairInvoiceExtracting = false,
 }) => {
   const submitDisabled =
-    isSubmitDisabledByDeviceReplacement || isSubmitDisabledByJobSheetMismatch;
+    isRepairInvoiceExtracting ||
+    isSubmitDisabledByDeviceReplacement ||
+    isSubmitDisabledByJobSheetMismatch;
   const needsJobSheetCorrection =
     isRepairInvoiceJobSheetMismatch && !isRepairInvoiceValid;
 

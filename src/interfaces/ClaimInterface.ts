@@ -306,6 +306,7 @@ export interface DocumentActionButtonsProps {
   isSubmitDisabledByJobSheetMismatch?: boolean;
   isRepairInvoiceJobSheetMismatch?: boolean;
   isRepairInvoiceValid?: boolean;
+  isRepairInvoiceExtracting?: boolean;
 }
 
 export interface FinalDocumentsViewProps {

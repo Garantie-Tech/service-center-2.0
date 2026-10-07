@@ -176,7 +176,7 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
           repairInvoiceExtractStatus &&
           repairInvoiceExtractMessage && (
             <span
-              className={`block px-2 pb-2 text-xxs font-semibold ${
+              className={`mt-2 block px-2 pb-2 text-xxs font-semibold ${
                 repairInvoiceExtractStatus === "success"
                   ? "text-[#19AD61]"
                   : repairInvoiceExtractStatus === "warning"
