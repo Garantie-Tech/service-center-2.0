@@ -1,6 +1,7 @@
 "use client";
 
 import PdfUpload from "@/components/ui/PdfUpload";
+import { useState } from "react";
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { FinalDocumentsSectionProps } from "@/interfaces/ClaimInterface";
@@ -43,6 +44,69 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   const showReplacement = showReplacementReceiptSection === true;
   const isJobSheetCorrectionReadOnly =
     isRepairInvoiceJobSheetMismatch === true && isValidRepairInvoice === true;
+  const [isEditingInvoiceJobSheet, setIsEditingInvoiceJobSheet] =
+    useState(false);
+  const claimJobSheetDisplay = estimateJobSheetNumber || "Not available";
+  const invoiceJobSheetCanEdit =
+    !isJobSheetCorrectionReadOnly && !repairInvoiceJobSheetNumber;
+  const repairInvoiceJobSheetDisplay =
+    repairInvoiceJobSheetNumber || newJobSheetNumber || "Not available";
+
+  const InvoiceJobSheetValue = () =>
+    isEditingInvoiceJobSheet ? (
+      <input
+        type="text"
+        value={newJobSheetNumber}
+        onChange={(event) => setNewJobSheetNumber?.(event.target.value)}
+        placeholder="Enter invoice job sheet"
+        className={`w-full rounded-md border bg-white px-2.5 py-1.5 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
+          newJobSheetNumberError
+            ? "border-[#dc2626] focus:border-[#dc2626]"
+            : "border-[#e5e7eb] focus:border-primaryBlue"
+        }`}
+      />
+    ) : (
+      <span>{repairInvoiceJobSheetDisplay}</span>
+    );
+
+  const InvoiceJobSheetRow = () => (
+    <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3 px-3 py-2">
+      <div className="text-xs font-medium text-[#6b7280]">
+        Invoice job sheet
+      </div>
+      <div className="min-w-0 break-all text-sm font-medium text-[#181D27]">
+        <InvoiceJobSheetValue />
+        {newJobSheetNumberError && isEditingInvoiceJobSheet && (
+          <div className="mt-1 text-xs font-medium text-[#dc2626]">
+            {newJobSheetNumberError}
+          </div>
+        )}
+      </div>
+      {invoiceJobSheetCanEdit && (
+        <button
+          type="button"
+          onClick={() => setIsEditingInvoiceJobSheet((value) => !value)}
+          className="text-xs font-semibold text-primaryBlue hover:text-lightPrimaryBlue"
+        >
+          {isEditingInvoiceJobSheet ? "Done" : "Edit"}
+        </button>
+      )}
+    </div>
+  );
+
+  const JobSheetComparison = () => (
+    <div className="mb-3 divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
+      <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
+        <div className="text-xs font-medium text-[#6b7280]">
+          Estimate job sheet
+        </div>
+        <div className="break-all text-sm font-medium text-[#181D27]">
+          {claimJobSheetDisplay}
+        </div>
+      </div>
+      <InvoiceJobSheetRow />
+    </div>
+  );
 
   return (
     <div className="flex gap-8">
@@ -115,7 +179,9 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               className={`block px-2 pb-2 text-xxs font-semibold ${
                 repairInvoiceExtractStatus === "success"
                   ? "text-[#19AD61]"
-                  : "text-[#EB5757]"
+                  : repairInvoiceExtractStatus === "warning"
+                    ? "text-[#c2410c]"
+                    : "text-[#EB5757]"
               }`}
             >
               {repairInvoiceExtractMessage}
@@ -158,23 +224,26 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               <div className="divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
                 <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
                   <div className="text-xs font-medium text-[#6b7280]">
+                    Estimate job sheet
+                  </div>
+                  <div className="break-all text-sm font-medium text-[#181D27]">
+                    {claimJobSheetDisplay}
+                  </div>
+                </div>
+                <InvoiceJobSheetRow />
+                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
+                  <div className="text-xs font-medium text-[#6b7280]">
                     Reason
                   </div>
                   <div className="text-sm font-medium text-[#181D27]">
                     {jobSheetMismatchReason || "Not available"}
                   </div>
                 </div>
-                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-                  <div className="text-xs font-medium text-[#6b7280]">
-                    New job sheet
-                  </div>
-                  <div className="text-sm font-medium text-[#181D27]">
-                    {newJobSheetNumber || "Not available"}
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="space-y-3">
+                <JobSheetComparison />
+
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#374151]">
                     Reason <span className="text-[#dc2626]">*</span>
@@ -206,30 +275,11 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
                   )}
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-[#374151]">
-                    New job sheet number{" "}
-                    <span className="text-[#dc2626]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={newJobSheetNumber}
-                    onChange={(event) =>
-                      setNewJobSheetNumber?.(event.target.value)
-                    }
-                    placeholder="Enter new job sheet number"
-                    className={`w-full rounded-md border bg-white px-2.5 py-2 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
-                      newJobSheetNumberError
-                        ? "border-[#dc2626] focus:border-[#dc2626]"
-                        : "border-[#e5e7eb] focus:border-primaryBlue"
-                    }`}
-                  />
-                  {newJobSheetNumberError && (
-                    <div className="mt-1 text-xs font-medium text-[#dc2626]">
-                      {newJobSheetNumberError}
-                    </div>
-                  )}
-                </div>
+                {newJobSheetNumberError && !isEditingInvoiceJobSheet && (
+                  <div className="text-xs font-medium text-[#dc2626]">
+                    {newJobSheetNumberError}
+                  </div>
+                )}
               </div>
             )}
           </div>

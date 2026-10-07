@@ -330,7 +330,7 @@ export interface FinalDocumentsSectionProps {
   replacementReceiptError: boolean;
   isRepairInvoiceJobSheetMismatch?: boolean;
   isRepairInvoiceExtracting?: boolean;
-  repairInvoiceExtractStatus?: "success" | "error" | null;
+  repairInvoiceExtractStatus?: "success" | "warning" | "error" | null;
   repairInvoiceExtractMessage?: string | null;
   repairInvoiceJobSheetError?: string | null;
   estimateJobSheetNumber?: string | null;
