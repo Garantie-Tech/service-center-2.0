@@ -205,20 +205,11 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               <div className="text-sm font-semibold text-[#374151]">
                 Job sheet correction
               </div>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  isJobSheetCorrectionReadOnly
-                    ? "bg-[#E8F7EF] text-[#19AD61]"
-                    : "bg-[#EEF2FF] text-primaryBlue"
-                }`}
-              >
-                {isJobSheetCorrectionReadOnly ? "Recorded" : "Action required"}
-              </span>
             </div>
             <p className="mb-3 text-xs leading-5 text-[#6b7280]">
               {isJobSheetCorrectionReadOnly
-                ? "The job sheet number on the repair invoice did not match the claim record. The corrected job sheet details were captured before validation."
-                : "The job sheet number on the repair invoice does not match the claim record. Please select a reason and provide the updated job sheet number."}
+                ? "The repair invoice job sheet was different from the estimate job sheet. The correction details have been recorded for review."
+                : "The repair invoice job sheet is different from the estimate job sheet. Please review the invoice job sheet and select the reason for correction."}
             </p>
             {isJobSheetCorrectionReadOnly ? (
               <div className="divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
