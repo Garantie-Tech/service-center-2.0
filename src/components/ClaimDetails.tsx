@@ -240,9 +240,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
     },
     bankDetails: selectedClaim?.documents?.["77"],
     panCard: selectedClaim?.documents?.["78"],
-    accessoriesProvided: selectedClaim?.data?.accessory_provided
-      ? String(selectedClaim?.data?.accessory_provided)
-      : "",
   };
 
   const settlementDetailsData: SettlementDetailsProps = {
