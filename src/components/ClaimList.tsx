@@ -228,8 +228,17 @@ const ClaimList: React.FC = () => {
     refreshClaimsTrigger,
     generatePayload,
     selectedClaim,
+<<<<<<< Updated upstream
     filterState,
     filterServiceCentre,
+=======
+    setClaimStates,
+    setClaims,
+    setFilteredClaims,
+    setClaimRevised,
+    setSelectedClaim,
+    shipmentMode,
+>>>>>>> Stashed changes
   ]);
 
   // Initial & Filter/Search API Call
@@ -307,7 +316,7 @@ const ClaimList: React.FC = () => {
     observer.current.observe(lastClaimRef.current);
 
     return () => observer.current?.disconnect();
-  }, [handleObserver]);
+  }, [filteredClaims.length, handleObserver]);
 
   return (
     <div className="w-full max-w-lg mx-auto">

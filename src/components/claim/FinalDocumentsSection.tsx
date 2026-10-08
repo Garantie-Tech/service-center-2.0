@@ -1,6 +1,7 @@
 "use client";
 
 import PdfUpload from "@/components/ui/PdfUpload";
+import { useState } from "react";
 import Image from "next/image";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import { FinalDocumentsSectionProps } from "@/interfaces/ClaimInterface";
@@ -15,6 +16,7 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   isInvalidRepairInvoice,
   isInvalidRepairInvoiceReason,
   isInvalidRepairInvoiceStatus,
+  isValidRepairInvoice,
   isInvalidReplacementReceipt,
   isInvalidReplacementReceiptReason,
   isInvalidReplacementReceiptStatus,
@@ -23,9 +25,89 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   finalDocuments,
   repairInvoiceError,
   replacementReceiptError,
+  isRepairInvoiceJobSheetMismatch,
+  isRepairInvoiceExtracting,
+  repairInvoiceExtractStatus,
+  repairInvoiceExtractMessage,
+  repairInvoiceJobSheetError,
+  estimateJobSheetNumber,
+  repairInvoiceJobSheetNumber,
+  jobSheetMismatchReason = "",
+  setJobSheetMismatchReason,
+  newJobSheetNumber = "",
+  setNewJobSheetNumber,
+  jobSheetMismatchReasonError,
+  newJobSheetNumberError,
+  jobSheetMismatchReasons = [],
 }) => {
   // Use only server-driven prop so the Device replacement toggle (local state) never affects this section
   const showReplacement = showReplacementReceiptSection === true;
+  const isJobSheetCorrectionReadOnly =
+    isRepairInvoiceJobSheetMismatch === true && isValidRepairInvoice === true;
+  const [isEditingInvoiceJobSheet, setIsEditingInvoiceJobSheet] =
+    useState(false);
+  const claimJobSheetDisplay = estimateJobSheetNumber || "Not available";
+  const invoiceJobSheetCanEdit =
+    !isJobSheetCorrectionReadOnly && !repairInvoiceJobSheetNumber;
+  const repairInvoiceJobSheetDisplay =
+    repairInvoiceJobSheetNumber || newJobSheetNumber || "Not available";
+
+  const InvoiceJobSheetValue = () =>
+    isEditingInvoiceJobSheet ? (
+      <input
+        type="text"
+        value={newJobSheetNumber}
+        onChange={(event) => setNewJobSheetNumber?.(event.target.value)}
+        placeholder="Enter invoice job sheet"
+        className={`w-full rounded-md border bg-white px-2.5 py-1.5 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
+          newJobSheetNumberError
+            ? "border-[#dc2626] focus:border-[#dc2626]"
+            : "border-[#e5e7eb] focus:border-primaryBlue"
+        }`}
+      />
+    ) : (
+      <span>{repairInvoiceJobSheetDisplay}</span>
+    );
+
+  const InvoiceJobSheetRow = () => (
+    <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3 px-3 py-2">
+      <div className="text-xs font-medium text-[#6b7280]">
+        Invoice job sheet
+      </div>
+      <div className="min-w-0 break-all text-sm font-medium text-[#181D27]">
+        <InvoiceJobSheetValue />
+        {newJobSheetNumberError && isEditingInvoiceJobSheet && (
+          <div className="mt-1 text-xs font-medium text-[#dc2626]">
+            {newJobSheetNumberError}
+          </div>
+        )}
+      </div>
+      {invoiceJobSheetCanEdit && (
+        <button
+          type="button"
+          onClick={() => setIsEditingInvoiceJobSheet((value) => !value)}
+          className="text-xs font-semibold text-primaryBlue hover:text-lightPrimaryBlue"
+        >
+          {isEditingInvoiceJobSheet ? "Done" : "Edit"}
+        </button>
+      )}
+    </div>
+  );
+
+  const JobSheetComparison = () => (
+    <div className="mb-3 divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
+      <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
+        <div className="text-xs font-medium text-[#6b7280]">
+          Estimate job sheet
+        </div>
+        <div className="break-all text-sm font-medium text-[#181D27]">
+          {claimJobSheetDisplay}
+        </div>
+      </div>
+      <InvoiceJobSheetRow />
+    </div>
+  );
+
   return (
     <div className="flex gap-8">
       {/* Repair Invoice PDF */}
@@ -70,21 +152,128 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
           </>
         )}
 
-        {isInvalidRepairInvoice && repairInvoiceError ? (
-          <span className=" p-2 text-[#EB5757] text-xxs font-semibold">
+        {isRepairInvoiceExtracting ? (
+          <div className="flex items-center gap-1.5 px-2 py-2 text-[#6b7280]">
+            <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-primaryBlue" />
+            <span className="text-xxs font-semibold">Validating invoice</span>
+          </div>
+        ) : isInvalidRepairInvoice && repairInvoiceError ? (
+          <span className="block p-2 text-[#EB5757] text-xxs font-semibold">
             Invalid Invoice : {isInvalidRepairInvoiceReason}
           </span>
         ) : isInvalidRepairInvoiceStatus == null &&
           finalDocuments?.repairInvoiceImage ? (
-          <span className=" p-2 text-[#FF9548] text-xxs font-semibold">
+          <span className="block p-2 text-[#FF9548] text-xxs font-semibold">
             Uploaded (Under Review)
           </span>
         ) : isInvalidRepairInvoiceStatus == true ? (
-          <span className=" p-2 text-[#19AD61] text-xxs font-semibold">
+          <span className="block p-2 text-[#19AD61] text-xxs font-semibold">
             Valid
           </span>
-        ) : (
-          <></>
+        ) : null}
+
+        {!isRepairInvoiceExtracting &&
+          repairInvoiceExtractStatus &&
+          repairInvoiceExtractMessage && (
+            <span
+              className={`mt-2 block px-2 pb-2 text-xxs font-semibold ${
+                repairInvoiceExtractStatus === "success"
+                  ? "text-[#19AD61]"
+                  : repairInvoiceExtractStatus === "warning"
+                    ? "text-[#c2410c]"
+                    : "text-[#EB5757]"
+              }`}
+            >
+              {repairInvoiceExtractMessage}
+            </span>
+          )}
+
+        {repairInvoiceJobSheetError && !isRepairInvoiceJobSheetMismatch && (
+          <div className="mb-3 mt-3 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-3 py-2">
+            <div className="text-xs font-semibold text-[#c2410c]">
+              Job sheet number could not be verified
+            </div>
+            <div className="mt-1 text-xs leading-5 text-[#7c2d12]">
+              {repairInvoiceJobSheetError}
+            </div>
+          </div>
+        )}
+
+        {isRepairInvoiceJobSheetMismatch && (
+          <div className="mb-3 mt-3 rounded-md border border-[#e5e7eb] bg-[#fafbfc] p-3">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <div className="text-sm font-semibold text-[#374151]">
+                Job sheet correction
+              </div>
+            </div>
+            <p className="mb-3 text-xs leading-5 text-[#6b7280]">
+              {isJobSheetCorrectionReadOnly
+                ? "The repair invoice job sheet was different from the estimate job sheet. The correction details have been recorded for review."
+                : "The repair invoice job sheet is different from the estimate job sheet. Please review the invoice job sheet and select the reason for correction."}
+            </p>
+            {isJobSheetCorrectionReadOnly ? (
+              <div className="divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
+                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
+                  <div className="text-xs font-medium text-[#6b7280]">
+                    Estimate job sheet
+                  </div>
+                  <div className="break-all text-sm font-medium text-[#181D27]">
+                    {claimJobSheetDisplay}
+                  </div>
+                </div>
+                <InvoiceJobSheetRow />
+                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
+                  <div className="text-xs font-medium text-[#6b7280]">
+                    Reason
+                  </div>
+                  <div className="text-sm font-medium text-[#181D27]">
+                    {jobSheetMismatchReason || "Not available"}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <JobSheetComparison />
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-[#374151]">
+                    Reason <span className="text-[#dc2626]">*</span>
+                  </label>
+                  <select
+                    value={jobSheetMismatchReason}
+                    onChange={(event) =>
+                      setJobSheetMismatchReason?.(event.target.value)
+                    }
+                    className={`w-full rounded-md border bg-white px-2.5 py-2 text-sm text-[#181D27] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
+                      jobSheetMismatchReasonError
+                        ? "border-[#dc2626] focus:border-[#dc2626]"
+                        : "border-[#e5e7eb] focus:border-primaryBlue"
+                    }`}
+                  >
+                    <option value="" disabled>
+                      Select reason
+                    </option>
+                    {jobSheetMismatchReasons.map((reason) => (
+                      <option key={reason} value={reason}>
+                        {reason}
+                      </option>
+                    ))}
+                  </select>
+                  {jobSheetMismatchReasonError && (
+                    <div className="mt-1 text-xs font-medium text-[#dc2626]">
+                      {jobSheetMismatchReasonError}
+                    </div>
+                  )}
+                </div>
+
+                {newJobSheetNumberError && !isEditingInvoiceJobSheet && (
+                  <div className="text-xs font-medium text-[#dc2626]">
+                    {newJobSheetNumberError}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
