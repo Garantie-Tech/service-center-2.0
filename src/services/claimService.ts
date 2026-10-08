@@ -394,13 +394,3 @@ export const validateImeiFromImage = async (
     };
   }
 };
-
-export const saveAccessoryProvided = async (
-  claimID: number,
-  accessoryProvided: "yes" | "no",
-) => {
-  const endpoint = `customer-documents/accessory-provided/${claimID}`;
-  return await postRequest<UploadCustomerDocuments>(endpoint, {
-    accessory_provided: accessoryProvided,
-  });
-};

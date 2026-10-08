@@ -6,10 +6,7 @@ import { useEffect, useState } from "react";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { useNotification } from "@/context/NotificationProvider";
 import { useGlobalStore } from "@/store/store";
-import {
-  uploadCustomerDocuments,
-  saveAccessoryProvided,
-} from "@/services/claimService";
+import { uploadCustomerDocuments } from "@/services/claimService";
 import GalleryPopup from "@/components/ui/GalleryPopup";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import AdditionalDocumentsSection from "@/components/claim/AdditionalDocumentsSection";
@@ -34,9 +31,6 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   const [aadharBackSideImage, setAadharBackSideImage] = useState<File[]>([]);
   const [bankDetailImage, setBankDetailImage] = useState<File[]>([]);
   const [panCardImage, setPanCardImage] = useState<File[]>([]);
-  const [accessoriesProvided, setAccessoriesProvided] = useState<string | null>(
-    "",
-  );
   const [reupload, setReupload] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const [showAadharCardInvalidReason, setShowAadharCardInvalidReason] =
@@ -149,27 +143,10 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     });
   };
 
-  // Handle form submission (full documents or accessory-only)
+  // Handle customer document submission.
   const handleSubmit = async () => {
-    const value =
-      accessoriesProvided === "yes" || accessoriesProvided === "no"
-        ? accessoriesProvided
-        : "no";
     try {
       setIsLoading(true);
-      if (accessoryOnly) {
-        const response = await saveAccessoryProvided(
-          Number(selectedClaim?.id),
-          value as "yes" | "no",
-        );
-        if (response.success) {
-          notifySuccess("Accessory provided saved successfully!");
-          triggerClaimRefresh();
-        } else {
-          notifyError(response.error || "Failed to save.");
-        }
-        return;
-      }
       const formData = new FormData();
       if (selectedClaim?.id) {
         formData.append("claim_id", String(selectedClaim.id));
@@ -193,7 +170,6 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
       if (panCardImage.length > 0) {
         appendFiles(panCardImage, 78, formData);
       }
-      formData.append("accessory_provided", value);
       const response = await uploadCustomerDocuments(
         Number(selectedClaim?.id),
         formData,
@@ -205,43 +181,18 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
         notifyError("Failed to upload documents.");
       }
     } catch (error) {
-      console.error(
-        accessoryOnly
-          ? "Error saving accessory provided:"
-          : "Error uploading documents:",
-        error,
-      );
-      notifyError(
-        accessoryOnly
-          ? "An error occurred while saving."
-          : "An error occurred while uploading documents.",
-      );
+      console.error("Error uploading documents:", error);
+      notifyError("An error occurred while uploading documents.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (documents?.accessoriesProvided !== undefined) {
-      setAccessoriesProvided(documents.accessoriesProvided);
-    }
-  }, [documents?.accessoriesProvided]);
-
-  useEffect(() => {
-    setAccessoriesProvided(documents?.accessoriesProvided ?? null);
-  }, [documents?.accessoriesProvided]);
-
-  const handleAccessoriesClick = (value: string) => {
-    setAccessoriesProvided(value);
-  };
-
   const isFormEditable = true;
 
   useEffect(() => {
-    const accessoriesSelected =
-      accessoriesProvided === "yes" || accessoriesProvided === "no";
     if (accessoryOnly) {
-      setIsSubmitDisabled(!accessoriesSelected);
+      setIsSubmitDisabled(true);
       return;
     }
     const allMandatoryUploaded =
@@ -249,14 +200,12 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
         aadharFrontImageStatus === "valid") &&
       (aadharBackSideImage?.length > 0 || aadharBackImageStatus === "valid") &&
       (bankDetailImage?.length > 0 || bankDetailsStatus === "valid");
-    const shouldDisableSubmit = !allMandatoryUploaded || !accessoriesSelected;
-    setIsSubmitDisabled(shouldDisableSubmit);
+    setIsSubmitDisabled(!allMandatoryUploaded);
   }, [
     accessoryOnly,
     aadharFrontSideImage,
     aadharBackSideImage,
     bankDetailImage,
-    accessoriesProvided,
     aadharFrontImageStatus,
     aadharBackImageStatus,
     bankDetailsStatus,
@@ -287,86 +236,15 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
     await handleFileUploadWithCompression(files, setPanCardImage);
   };
 
-  const accessoryAlreadySaved =
-    documents?.accessoriesProvided === "yes" ||
-    documents?.accessoriesProvided === "no";
-  const berSettleDetails = selectedClaim?.data?.ber_settle;
-  const formatYesNo = (value?: string | boolean | null) => {
-    if (value === true || value === "yes") return "Yes";
-    if (value === false || value === "no") return "No";
-    return "N/A";
-  };
-
   if (accessoryOnly) {
     return (
       <div>
         <h2 className="text-lg font-semibold mb-4">Customer Documents</h2>
-        {berSettleDetails && (
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-[#e5e7eb] bg-[#fafbfc] p-4">
-            <div>
-              <h4 className="text-xs text-gray-500">Device Collected</h4>
-              <p className="text-sm font-semibold">
-                {formatYesNo(berSettleDetails.device_collected)}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xs text-gray-500">Accessories Provided</h4>
-              <p className="text-sm font-semibold">
-                {formatYesNo(
-                  berSettleDetails.accessory_provided ??
-                    selectedClaim?.data?.accessory_provided,
-                )}
-              </p>
-            </div>
-          </div>
-        )}
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded">
           <p className="font-medium">
             Documents are not required for this claim.
           </p>
         </div>
-        <div className="mt-6">
-          <h3 className="text-sm font-medium mb-2 text-primaryDark">
-            Accessories Provided:
-          </h3>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="accessoriesProvided"
-                value="yes"
-                className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
-                checked={accessoriesProvided === "yes"}
-                onChange={() => handleAccessoriesClick("yes")}
-              />
-              <span>Yes</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="accessoriesProvided"
-                value="no"
-                className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
-                checked={accessoriesProvided === "no"}
-                onChange={() => handleAccessoriesClick("no")}
-              />
-              <span>No</span>
-            </label>
-          </div>
-        </div>
-        {!accessoryAlreadySaved && (
-          <button
-            className={`btn mt-6 px-6 py-2 rounded-md ${
-              isSubmitDisabled
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-primaryBlue text-white hover:bg-blue-700"
-            }`}
-            disabled={isSubmitDisabled || isLoading}
-            onClick={handleSubmit}
-          >
-            {isLoading ? "Saving..." : "Save"}
-          </button>
-        )}
       </div>
     );
   }
@@ -374,26 +252,6 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Upload Customer Documents</h2>
-
-      {berSettleDetails && (
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-[#e5e7eb] bg-[#fafbfc] p-4">
-          <div>
-            <h4 className="text-xs text-gray-500">Device Collected</h4>
-            <p className="text-sm font-semibold">
-              {formatYesNo(berSettleDetails.device_collected)}
-            </p>
-          </div>
-          <div>
-            <h4 className="text-xs text-gray-500">Accessories Provided</h4>
-            <p className="text-sm font-semibold">
-              {formatYesNo(
-                berSettleDetails.accessory_provided ??
-                  selectedClaim?.data?.accessory_provided,
-              )}
-            </p>
-          </div>
-        </div>
-      )}
 
       {showAadharCardInvalidReason && invalidAadharFrontImageReason && (
         <ErrorAlert
@@ -599,38 +457,6 @@ const CustomerDocumentsTab: React.FC<CustomerDocumentsTabProps> = ({
               setImages={handlePanCardUpload}
             />
           )}
-        </div>
-      </div>
-
-      {/* Accessories Provided */}
-      <div className="mt-6">
-        <h3 className="text-sm font-medium mb-2 text-primaryDark">
-          Accessories Provided:
-        </h3>
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="accessoriesProvided"
-              value="yes"
-              className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
-              checked={accessoriesProvided === "yes"}
-              onChange={() => handleAccessoriesClick("yes")}
-            />
-            <span>Yes</span>
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="accessoriesProvided"
-              value="no"
-              className="radio checked:bg-primaryBlue w-[20px] h-[20px]"
-              checked={accessoriesProvided === "no"}
-              onChange={() => handleAccessoriesClick("no")}
-            />
-            <span>No</span>
-          </label>
         </div>
       </div>
 

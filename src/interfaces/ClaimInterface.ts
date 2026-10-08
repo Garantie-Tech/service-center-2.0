@@ -169,7 +169,6 @@ export interface CustomerDocuments {
   };
   bankDetails: DocumentItem | undefined;
   panCard: DocumentItem | undefined;
-  accessoriesProvided: string | undefined;
 }
 
 export interface CustomerDocumentsTabProps {
