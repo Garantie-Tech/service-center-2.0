@@ -339,7 +339,6 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
       console.error("Background refresh failed:", error);
     }
   }, [
-    claimsRef,
     generatePayload,
     refreshClaimsTrigger,
     selectedClaim,
@@ -347,8 +346,8 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
     setClaims,
     setFilteredClaims,
     setClaimRevised,
+    setSelectedClaim,
     shipmentMode,
-    setClaimStates,
   ]);
 
   useEffect(() => {
@@ -433,7 +432,7 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
     observer.current.observe(lastClaimRef.current);
 
     return () => observer.current?.disconnect();
-  }, [handleObserver]);
+  }, [filteredClaims.length, handleObserver]);
 
   return (
     <div className="w-full max-w-lg mx-auto">
