@@ -617,7 +617,7 @@ export const useFinalDocuments = () => {
           "Job sheet number could not be read from the repair invoice.",
         );
         setRepairInvoiceExtractError(
-          "We could not read the job sheet number from the repair invoice. You can still submit; final validation will verify the document.",
+          "We could not verify the job sheet number at this time. You may proceed with submission; the document will be reviewed during the standard validation process.",
         );
         return;
       }
