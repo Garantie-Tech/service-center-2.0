@@ -89,6 +89,7 @@ const BulkRepairInvoiceUploadModal: React.FC<
 > = ({ isOpen, onClose, onComplete }) => {
   const [rows, setRows] = useState<UploadRow[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { notifyError, notifySuccess } = useNotification();
 
@@ -120,8 +121,9 @@ const BulkRepairInvoiceUploadModal: React.FC<
     );
   };
 
-  const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
+  const addFiles = (selectedFiles: File[]) => {
+    if (selectedFiles.length === 0) return;
+
     const pdfFiles = selectedFiles.filter(
       (file) =>
         file.type === "application/pdf" ||
@@ -138,10 +140,32 @@ const BulkRepairInvoiceUploadModal: React.FC<
         makeRow(file, currentRows.length + index),
       ),
     ]);
+  };
+
+  const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    addFiles(Array.from(event.target.files ?? []));
 
     if (event.target) {
       event.target.value = "";
     }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (isProcessing) return;
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDraggingOver(false);
+    if (isProcessing) return;
+    addFiles(Array.from(event.dataTransfer.files ?? []));
   };
 
   const removeRow = (id: string) => {
@@ -257,14 +281,21 @@ const BulkRepairInvoiceUploadModal: React.FC<
               className="hidden"
             />
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                disabled={isProcessing}
-                className="rounded-md bg-primaryBlue px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-md disabled:translate-y-0 disabled:opacity-50"
-              >
-                Select PDFs
-              </button>
+              {rows.length > 0 && (
+                <div
+                  onClick={() => !isProcessing && inputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-4 py-3 text-sm font-semibold transition ${
+                    isDraggingOver
+                      ? "border-primaryBlue bg-blue-50 text-primaryBlue"
+                      : "border-slate-300 text-slate-600 hover:border-primaryBlue hover:text-primaryBlue"
+                  } ${isProcessing ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  Drag &amp; drop PDFs, or click to add more
+                </div>
+              )}
               <button
                 type="button"
                 onClick={processUploads}
@@ -323,12 +354,22 @@ const BulkRepairInvoiceUploadModal: React.FC<
                       colSpan={8}
                       className="px-4 py-12 text-center text-slate-500"
                     >
-                      <div className="mx-auto max-w-sm rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8">
+                      <div
+                        onClick={() => !isProcessing && inputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`mx-auto max-w-sm cursor-pointer rounded-lg border border-dashed px-6 py-8 transition ${
+                          isDraggingOver
+                            ? "border-primaryBlue bg-blue-50"
+                            : "border-slate-300 bg-slate-50 hover:border-primaryBlue hover:bg-blue-50/40"
+                        }`}
+                      >
                         <p className="font-semibold text-slate-700">
                           No invoices selected
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
-                          Select repair invoice PDFs to begin processing.
+                          Drag and drop repair invoice PDFs here, or click to select files.
                         </p>
                       </div>
                     </td>
