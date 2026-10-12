@@ -281,21 +281,6 @@ const BulkRepairInvoiceUploadModal: React.FC<
               className="hidden"
             />
             <div className="flex flex-wrap items-center gap-3">
-              {rows.length > 0 && (
-                <div
-                  onClick={() => !isProcessing && inputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-4 py-3 text-sm font-semibold transition ${
-                    isDraggingOver
-                      ? "border-primaryBlue bg-blue-50 text-primaryBlue"
-                      : "border-slate-300 text-slate-600 hover:border-primaryBlue hover:text-primaryBlue"
-                  } ${isProcessing ? "pointer-events-none opacity-50" : ""}`}
-                >
-                  Drag &amp; drop PDFs, or click to add more
-                </div>
-              )}
               <button
                 type="button"
                 onClick={processUploads}
@@ -432,6 +417,27 @@ const BulkRepairInvoiceUploadModal: React.FC<
               </tbody>
             </table>
           </div>
+
+          {rows.length > 0 && (
+            <div
+              onClick={() => !isProcessing && inputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`cursor-pointer rounded-lg border border-dashed px-6 py-8 text-center transition ${
+                isDraggingOver
+                  ? "border-primaryBlue bg-blue-50"
+                  : "border-slate-300 bg-slate-50 hover:border-primaryBlue hover:bg-blue-50/40"
+              } ${isProcessing ? "pointer-events-none opacity-50" : ""}`}
+            >
+              <p className="font-semibold text-slate-700">
+                Add more repair invoices
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Drag and drop repair invoice PDFs here, or click to select files.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
