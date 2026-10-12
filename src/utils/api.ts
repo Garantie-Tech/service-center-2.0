@@ -43,6 +43,14 @@ function responseMessage(payload: unknown, fallback: string): string {
   return typeof message === "string" && message.trim() ? message : fallback;
 }
 
+function isServiceError(payload: unknown): boolean {
+  return (
+    !!payload &&
+    typeof payload === "object" &&
+    (payload as { success?: unknown }).success === false
+  );
+}
+
 // Function to format query parameters into a URL string
 function formatQueryParams(
   params:
@@ -121,6 +129,14 @@ export async function apiRequest<T>(
       return {
         success: false,
         error: responseMessage(rawData, "Something went wrong"),
+      };
+    }
+
+    if (isServiceError(rawData)) {
+      return {
+        success: false,
+        error: responseMessage(rawData, "Something went wrong"),
+        data: rawData as T,
       };
     }
 
@@ -212,6 +228,14 @@ export async function externalApiRequest<T>(
       return {
         success: false,
         error: responseMessage(rawData, "Something went wrong"),
+      };
+    }
+
+    if (isServiceError(rawData)) {
+      return {
+        success: false,
+        error: responseMessage(rawData, "Something went wrong"),
+        data: rawData as T,
       };
     }
 

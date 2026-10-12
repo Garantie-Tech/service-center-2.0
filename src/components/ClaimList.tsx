@@ -12,6 +12,7 @@ import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 import Claim from "@/interfaces/ClaimInterface";
 import { DuplicateClaimsIcon } from "./icons/Icons";
 import { applyClaimSelection } from "@/helpers/claimSelectionHelper";
+import { useNotification } from "@/context/NotificationProvider";
 
 interface ClaimListProps {
   shipmentMode?: boolean;
@@ -47,6 +48,7 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
 
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
   const pageRef = useRef(0);
@@ -54,6 +56,7 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
   const lastClaimRef = useRef<HTMLLIElement | null>(null);
   const isFetching = useRef(false);
   const claimsRef = useRef<Claim[]>([]);
+  const { notifyError } = useNotification();
 
   const actionRequiredStatus = useMemo(
     () => ["Invalid Documents", "Claim Initiated", "BER Marked"],
@@ -217,6 +220,7 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
           const newClaims = response.data.data.claims;
           const claimCount = response.data.data.totalCount;
           setClaimCount(Number(claimCount));
+          setFetchError(null);
 
           if (reset) {
             setClaims(newClaims);
@@ -250,9 +254,18 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
         } else {
           hasMoreRef.current = false;
           setHasMore(false);
+          if (reset) {
+            const message = response.error || "Unable to load claims. Please try again.";
+            setFetchError(message);
+            notifyError(message);
+          }
         }
       } catch (error) {
         console.error("Error loading claims:", error);
+        if (reset) {
+          setFetchError("Unable to load claims. Please try again.");
+          notifyError("Unable to load claims. Please try again.");
+        }
       } finally {
         setLoading(false);
         setIsLoading(false);
@@ -264,6 +277,7 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
     [
       clearShipmentSelection,
       generatePayload,
+      notifyError,
       setClaimCount,
       setClaimRevised,
       setClaims,
@@ -531,6 +545,8 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
               </div>
             </li>
           ))
+        ) : fetchError ? (
+          <p className="text-center text-red-500 py-4">{fetchError}</p>
         ) : (
           <p className="text-center text-gray-500 py-4">No claims found</p>
         )}
