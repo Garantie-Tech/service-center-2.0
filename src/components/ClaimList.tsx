@@ -362,6 +362,8 @@ const ClaimList: React.FC<ClaimListProps> = ({ shipmentMode = false }) => {
     setClaimRevised,
     setSelectedClaim,
     shipmentMode,
+    filterState,
+    filterServiceCentre,
   ]);
 
   useEffect(() => {

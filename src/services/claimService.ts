@@ -355,7 +355,10 @@ export interface RepairInvoiceExtractResponse {
   message?: string;
   data?: unknown;
   invoice_obj?: {
+    invoice_no?: string | null;
+    invoice_date?: string | null;
     job_sheet_number?: string | null;
+    imei?: string | null;
     is_job_sheet_number?: boolean | null;
     repair_invoice_job_sheet_matched?: boolean | null;
     qr_data?: Record<string, unknown> | null;
@@ -364,6 +367,13 @@ export interface RepairInvoiceExtractResponse {
   is_job_sheet_number?: boolean | null;
   repair_invoice_job_sheet_matched?: boolean | null;
   validation_results?: Record<string, unknown> | null;
+  job_sheet_extraction?: {
+    job_sheet_number?: string | null;
+    as_printed?: string | null;
+    source?: string | null;
+    confidence?: string | null;
+    warnings?: string[];
+  } | null;
   validation_rules?: Record<string, unknown> | null;
   qr_data?: Record<string, unknown> | null;
 }
