@@ -384,6 +384,8 @@ export type BulkRepairInvoiceSeverity =
 
 export interface BulkRepairInvoiceUploadResult {
   file_name: string;
+  invoice_no?: string | null;
+  invoice_number?: string | null;
   severity: BulkRepairInvoiceSeverity;
   claim_id: number | null;
   match_status: string | null;
@@ -391,6 +393,8 @@ export interface BulkRepairInvoiceUploadResult {
   message?: string;
   http_status?: number;
   extracted?: {
+    invoice_no?: string | null;
+    invoice_number?: string | null;
     job_sheet_number?: string | null;
     job_sheet_number_as_printed?: string | null;
     imei?: string | null;

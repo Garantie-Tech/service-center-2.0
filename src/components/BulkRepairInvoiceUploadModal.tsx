@@ -12,10 +12,9 @@ import { useNotification } from "@/context/NotificationProvider";
 type UploadRow = {
   id: string;
   file: File;
+  invoiceNo: string;
   severity: BulkRepairInvoiceSeverity;
   claimId: number | null;
-  matchStatus: string | null;
-  uploadStatus: string | null;
   message: string;
   jobSheetNumber: string | null;
   imei: string | null;
@@ -30,10 +29,9 @@ interface BulkRepairInvoiceUploadModalProps {
 const makeRow = (file: File, index: number): UploadRow => ({
   id: `${file.name}-${file.lastModified}-${index}`,
   file,
+  invoiceNo: "N/A",
   severity: "queued",
   claimId: null,
-  matchStatus: null,
-  uploadStatus: null,
   message: "Queued",
   jobSheetNumber: null,
   imei: null,
@@ -84,6 +82,24 @@ const unwrapResult = (
   return null;
 };
 
+const firstFilled = (...values: Array<string | null | undefined>): string | null => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return null;
+};
+
+const invoiceNoFromResult = (result: BulkRepairInvoiceUploadResult): string =>
+  firstFilled(
+    result.invoice_no,
+    result.invoice_number,
+    result.extracted?.invoice_no,
+    result.extracted?.invoice_number,
+  ) ?? "N/A";
+
 const BulkRepairInvoiceUploadModal: React.FC<
   BulkRepairInvoiceUploadModalProps
 > = ({ isOpen, onClose, onComplete }) => {
@@ -109,9 +125,7 @@ const BulkRepairInvoiceUploadModal: React.FC<
     } satisfies Record<BulkRepairInvoiceSeverity, number>,
   );
   const hasQueuedRows = summary.queued > 0;
-  const hasFailedRows = summary.error > 0;
-  const canRunUpload = rows.length > 0 && (hasQueuedRows || hasFailedRows);
-  const uploadActionLabel = hasQueuedRows ? "Upload" : "Retry Failed";
+  const canRunUpload = rows.length > 0 && hasQueuedRows;
 
   const updateRow = (id: string, changes: Partial<UploadRow>) => {
     setRows((currentRows) =>
@@ -168,14 +182,8 @@ const BulkRepairInvoiceUploadModal: React.FC<
     addFiles(Array.from(event.dataTransfer.files ?? []));
   };
 
-  const removeRow = (id: string) => {
-    setRows((currentRows) => currentRows.filter((row) => row.id !== id));
-  };
-
   const processUploads = async () => {
-    const rowsToProcess = hasQueuedRows
-      ? rows.filter((row) => row.severity === "queued")
-      : rows.filter((row) => row.severity === "error");
+    const rowsToProcess = rows.filter((row) => row.severity === "queued");
 
     if (rowsToProcess.length === 0) {
       notifyError("Please select at least one repair invoice PDF.");
@@ -210,9 +218,8 @@ const BulkRepairInvoiceUploadModal: React.FC<
 
         updateRow(row.id, {
           severity: result.severity,
+          invoiceNo: invoiceNoFromResult(result),
           claimId: result.claim_id ?? null,
-          matchStatus: result.match_status ?? null,
-          uploadStatus: result.upload_status ?? null,
           message: cleanMessage(result.message || "Repair invoice processed."),
           jobSheetNumber: result.extracted?.job_sheet_number ?? null,
           imei: result.extracted?.imei ?? null,
@@ -250,9 +257,6 @@ const BulkRepairInvoiceUploadModal: React.FC<
                 </span>
               )}
             </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Select PDF invoices and process them one by one with live status updates.
-            </p>
           </div>
           <button
             type="button"
@@ -287,7 +291,7 @@ const BulkRepairInvoiceUploadModal: React.FC<
                 disabled={isProcessing || !canRunUpload}
                 className="rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md disabled:translate-y-0 disabled:opacity-50"
               >
-                {isProcessing ? "Processing..." : uploadActionLabel}
+                {isProcessing ? "Processing..." : "Upload"}
               </button>
               <button
                 type="button"
@@ -319,24 +323,21 @@ const BulkRepairInvoiceUploadModal: React.FC<
           </div>
 
           <div className="max-h-[58vh] overflow-auto rounded-lg border border-slate-200 bg-white">
-            <table className="min-w-[1120px] text-left text-xs">
+            <table className="min-w-[980px] text-left text-xs">
               <thead className="sticky top-0 bg-slate-50 text-slate-500 shadow-sm">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">File</th>
+                  <th className="px-4 py-3 font-semibold">Invoice No.</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Claim</th>
-                  <th className="px-4 py-3 font-semibold">Match</th>
-                  <th className="px-4 py-3 font-semibold">Upload</th>
-                  <th className="px-4 py-3 font-semibold">Extracted</th>
+                  <th className="px-4 py-3 font-semibold">claim id</th>
+                  <th className="px-4 py-3 font-semibold">Job Sheet / IMEI</th>
                   <th className="px-4 py-3 font-semibold">Message</th>
-                  <th className="px-4 py-3 font-semibold"></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={5}
                       className="px-4 py-12 text-center text-slate-500"
                     >
                       <div
@@ -365,8 +366,8 @@ const BulkRepairInvoiceUploadModal: React.FC<
                       key={row.id}
                       className="border-t border-slate-100 align-top transition hover:bg-slate-50"
                     >
-                      <td className="max-w-[220px] px-4 py-4 font-medium text-slate-900">
-                        <span className="break-words">{row.file.name}</span>
+                      <td className="max-w-[260px] px-4 py-4 font-medium text-slate-900">
+                        <span className="break-words">{row.invoiceNo}</span>
                         <p className="mt-1 text-[11px] text-slate-500">
                           {(row.file.size / (1024 * 1024)).toFixed(2)} MB
                         </p>
@@ -385,31 +386,13 @@ const BulkRepairInvoiceUploadModal: React.FC<
                         {row.claimId ?? "-"}
                       </td>
                       <td className="px-4 py-4 text-slate-700">
-                        {row.matchStatus ?? "-"}
-                      </td>
-                      <td className="px-4 py-4 text-slate-700">
-                        {row.uploadStatus ?? "-"}
-                      </td>
-                      <td className="px-4 py-4 text-slate-700">
                         <p>{row.jobSheetNumber ?? "-"}</p>
                         <p className="text-[11px] text-slate-500">
                           {row.imei ?? ""}
                         </p>
                       </td>
-                      <td className="min-w-[260px] px-4 py-4 text-slate-700">
+                      <td className="min-w-[320px] px-4 py-4 text-slate-700">
                         {row.message}
-                      </td>
-                      <td className="px-4 py-4">
-                        <button
-                          type="button"
-                          onClick={() => removeRow(row.id)}
-                          disabled={isProcessing}
-                          className="font-semibold text-slate-400 transition hover:text-red-600 disabled:opacity-40"
-                          aria-label={`Remove ${row.file.name}`}
-                          title="Remove this row from the popup only. It does not delete uploaded documents."
-                        >
-                          {row.severity === "queued" ? "Remove" : "Dismiss"}
-                        </button>
                       </td>
                     </tr>
                   ))
