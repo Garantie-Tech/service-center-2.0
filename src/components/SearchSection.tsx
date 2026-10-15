@@ -496,16 +496,16 @@ const SearchSection: React.FC<SearchSectionProps> = ({
                 <button
                   onClick={() => setIsBulkUploadOpen(true)}
                   className="btn group border border-primaryBlue bg-white text-primaryBlue shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primaryBlue hover:text-white hover:shadow-lg hover:shadow-blue-200 active:translate-y-0 tooltip flex items-center gap-2"
-                  data-tip="Bulk Uplaod"
+                  data-tip="Bulk Upload"
                 >
                   <Image
                     src="/images/upload-icon.svg"
-                    alt="Bulk Uplaod"
+                    alt="Bulk Upload"
                     width={20}
                     height={20}
                     className="transition duration-200 group-hover:-translate-y-0.5 group-hover:brightness-0 group-hover:invert"
                   />
-                  <span className="hidden xl:block">Bulk Uplaod</span>
+                  <span className="hidden xl:block">Bulk Upload</span>
                 </button>
                 <button
                   onClick={redirectToClaimsPortal}
