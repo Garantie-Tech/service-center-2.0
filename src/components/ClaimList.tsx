@@ -228,17 +228,8 @@ const ClaimList: React.FC = () => {
     refreshClaimsTrigger,
     generatePayload,
     selectedClaim,
-<<<<<<< Updated upstream
     filterState,
     filterServiceCentre,
-=======
-    setClaimStates,
-    setClaims,
-    setFilteredClaims,
-    setClaimRevised,
-    setSelectedClaim,
-    shipmentMode,
->>>>>>> Stashed changes
   ]);
 
   // Initial & Filter/Search API Call

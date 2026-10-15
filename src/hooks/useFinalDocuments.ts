@@ -9,6 +9,9 @@ import { getDocumentInfo, isIMEIFormat } from "@/helpers/globalHelper";
 
 type PlainObject = Record<string, unknown>;
 
+const normalizeJobSheetNumber = (value: string | null | undefined) =>
+  (value ?? "").trim().toLowerCase();
+
 const JOB_SHEET_MISMATCH_REASONS = [
   "Due no-response from the customer",
   "Due to shortage of spare parts",
@@ -119,10 +122,6 @@ export const useFinalDocuments = () => {
       newImei.length !== 15 ||
       !imeiUpdateReason ||
       (repairedMobilePhotos.length === 0 && !hasRepairMobileImagesOnServer));
-  const savedJobSheetMismatchReason =
-    selectedClaim?.job_sheet_mismatch_reason ??
-    selectedClaim?.data?.inputs?.job_sheet_mismatch_reason ??
-    "";
   const jobSheetMismatchReasons =
     selectedClaim?.job_sheet_mismatch_reasons &&
     selectedClaim.job_sheet_mismatch_reasons.length > 0
@@ -135,11 +134,27 @@ export const useFinalDocuments = () => {
       !!extractedRepairInvoiceJobSheetNumber ||
       !!repairInvoiceExtractError);
   const serverRepairInvoiceJobSheetMismatch =
-    selectedClaim?.repair_invoice_job_sheet_matched === false &&
-    (!isValidRepairInvoice || !!savedJobSheetMismatchReason);
+    selectedClaim?.repair_invoice_job_sheet_matched === false;
+  const manuallyEnteredRepairInvoiceJobSheetMismatch =
+    hasLocalRepairInvoiceExtract &&
+    extractedRepairInvoiceJobSheetMatched === null &&
+    !!newJobSheetNumber.trim() &&
+    !!(
+      selectedClaim?.estimate_job_sheet_number ??
+      selectedClaim?.job_sheet_number ??
+      selectedClaim?.data?.inputs?.job_sheet_number
+    ) &&
+    normalizeJobSheetNumber(newJobSheetNumber) !==
+      normalizeJobSheetNumber(
+        selectedClaim?.estimate_job_sheet_number ??
+          selectedClaim?.job_sheet_number ??
+          selectedClaim?.data?.inputs?.job_sheet_number ??
+          "",
+      );
   const isRepairInvoiceJobSheetMismatch =
     (hasLocalRepairInvoiceExtract &&
       extractedRepairInvoiceJobSheetMatched === false) ||
+    manuallyEnteredRepairInvoiceJobSheetMismatch ||
     (!reuploadFinalDocs && serverRepairInvoiceJobSheetMismatch);
   const repairInvoiceJobSheetNumber =
     hasLocalRepairInvoiceExtract && extractedRepairInvoiceJobSheetNumber
@@ -331,6 +346,14 @@ export const useFinalDocuments = () => {
       if (isRepairInvoiceJobSheetMismatch) {
         formData.append("job_sheet_mismatch_reason", jobSheetMismatchReason);
         formData.append("new_job_sheet_number", newJobSheetNumber.trim());
+        const invoiceJobSheetForMismatch =
+          extractedRepairInvoiceJobSheetNumber || newJobSheetNumber.trim();
+        if (invoiceJobSheetForMismatch) {
+          formData.append(
+            "repair_invoice_job_sheet_number",
+            invoiceJobSheetForMismatch,
+          );
+        }
       }
 
       const response = await uploadFinalDocuments(
@@ -403,9 +426,6 @@ export const useFinalDocuments = () => {
 
     return undefined;
   };
-
-  const normalizeJobSheetNumber = (value: string | null | undefined) =>
-    (value ?? "").trim().toLowerCase();
 
   const resetRepairInvoiceExtractState = () => {
     repairInvoiceExtractRequestIdRef.current += 1;
@@ -513,6 +533,7 @@ export const useFinalDocuments = () => {
 
       const extractedJobSheetRaw = getNestedValue(payload, [
         "data.data.invoice_obj.job_sheet_number",
+        "data.data.job_sheet_extraction.job_sheet_number",
         "data.data.invoice_obj.qr_data.JobSheetNumber",
         "data.data.invoice_obj.qr_data.job_sheet_number",
         "data.data.invoice_obj.qr_data.jobsheet_number",
@@ -549,28 +570,24 @@ export const useFinalDocuments = () => {
             ? String(extractedJobSheetRaw).trim()
             : "";
       const matchedRaw = getNestedValue(payload, [
-        "data.data.invoice_obj.is_job_sheet_number",
+        "data.data.validation_results.checks.job_sheet_number_match.status",
+        "data.data.validation_results.imei_job_sheet_validation.checks.job_sheet_number_match.status",
         "data.data.invoice_obj.repair_invoice_job_sheet_matched",
         "data.data.validation_results.checks.imei_and_job_sheet_match.status",
-        "data.data.validation_results.overall_status",
         "data.data.repair_invoice_job_sheet_matched",
-        "data.data.is_job_sheet_number",
         "data.data.job_sheet_matched",
-        "data.data.validation.is_job_sheet_number",
-        "data.invoice_obj.is_job_sheet_number",
         "data.invoice_obj.repair_invoice_job_sheet_matched",
+        "data.validation_results.checks.job_sheet_number_match.status",
+        "data.validation_results.imei_job_sheet_validation.checks.job_sheet_number_match.status",
         "data.validation_results.checks.imei_and_job_sheet_match.status",
-        "data.validation_results.overall_status",
+        "data.invoice_obj.repair_invoice_job_sheet_matched",
         "data.repair_invoice_job_sheet_matched",
-        "data.is_job_sheet_number",
         "data.job_sheet_matched",
-        "data.validation.is_job_sheet_number",
-        "invoice_obj.is_job_sheet_number",
         "invoice_obj.repair_invoice_job_sheet_matched",
+        "validation_results.checks.job_sheet_number_match.status",
+        "validation_results.imei_job_sheet_validation.checks.job_sheet_number_match.status",
         "validation_results.checks.imei_and_job_sheet_match.status",
-        "validation_results.overall_status",
         "repair_invoice_job_sheet_matched",
-        "is_job_sheet_number",
         "job_sheet_matched",
       ]);
       const validationRules = getNestedValue(payload, [
