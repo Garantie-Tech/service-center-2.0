@@ -152,10 +152,10 @@ export const useFinalDocuments = () => {
           "",
       );
   const isRepairInvoiceJobSheetMismatch =
-    (hasLocalRepairInvoiceExtract &&
-      extractedRepairInvoiceJobSheetMatched === false) ||
-    manuallyEnteredRepairInvoiceJobSheetMismatch ||
-    (!reuploadFinalDocs && serverRepairInvoiceJobSheetMismatch);
+    hasLocalRepairInvoiceExtract
+      ? extractedRepairInvoiceJobSheetMatched === false ||
+        manuallyEnteredRepairInvoiceJobSheetMismatch
+      : !reuploadFinalDocs && serverRepairInvoiceJobSheetMismatch;
   const repairInvoiceJobSheetNumber =
     hasLocalRepairInvoiceExtract && extractedRepairInvoiceJobSheetNumber
       ? extractedRepairInvoiceJobSheetNumber
@@ -324,6 +324,16 @@ export const useFinalDocuments = () => {
         appendFiles(replacementReceipt, 75);
       }
 
+      // Send the freshly verified job sheet for every repair-invoice upload.
+      // The backend uses a matching value to retire stale correction metadata
+      // when a previously invalid invoice is replaced with a valid one.
+      if (repairInvoice !== undefined && extractedRepairInvoiceJobSheetNumber) {
+        formData.append(
+          "repair_invoice_job_sheet_number",
+          extractedRepairInvoiceJobSheetNumber,
+        );
+      }
+
       if (showDeviceReplacementSection) {
         if (canSubmitDeviceReplacementUpdate) {
           // Editable: send full device replacement payload
@@ -481,6 +491,8 @@ export const useFinalDocuments = () => {
   const handleRepairInvoiceUpload = async (files: File[]) => {
     setRepairInvoice(files);
     setRepairInvoiceError(false);
+    setJobSheetMismatchReason("");
+    setNewJobSheetNumber("");
     setJobSheetMismatchReasonError(null);
     setNewJobSheetNumberError(null);
     resetRepairInvoiceExtractState();
@@ -533,6 +545,7 @@ export const useFinalDocuments = () => {
 
       const extractedJobSheetRaw = getNestedValue(payload, [
         "data.data.invoice_obj.job_sheet_number",
+        "data.data.extracted.job_sheet_number",
         "data.data.job_sheet_extraction.job_sheet_number",
         "data.data.invoice_obj.qr_data.JobSheetNumber",
         "data.data.invoice_obj.qr_data.job_sheet_number",
@@ -544,6 +557,7 @@ export const useFinalDocuments = () => {
         "data.data.qr_data.job_sheet_number",
         "data.data.qr_data.jobsheet_number",
         "data.invoice_obj.job_sheet_number",
+        "data.extracted.job_sheet_number",
         "data.invoice_obj.qr_data.JobSheetNumber",
         "data.invoice_obj.qr_data.job_sheet_number",
         "data.invoice_obj.qr_data.jobsheet_number",
@@ -554,6 +568,7 @@ export const useFinalDocuments = () => {
         "data.qr_data.job_sheet_number",
         "data.qr_data.jobsheet_number",
         "invoice_obj.job_sheet_number",
+        "extracted.job_sheet_number",
         "invoice_obj.qr_data.JobSheetNumber",
         "invoice_obj.qr_data.job_sheet_number",
         "invoice_obj.qr_data.jobsheet_number",
@@ -649,6 +664,10 @@ export const useFinalDocuments = () => {
         );
         setNewJobSheetNumber(extractedJobSheet);
       } else if (matched === true) {
+        setJobSheetMismatchReason("");
+        setNewJobSheetNumber("");
+        setJobSheetMismatchReasonError(null);
+        setNewJobSheetNumberError(null);
         setRepairInvoiceExtractStatus("success");
         setRepairInvoiceExtractMessage(
           "Repair invoice job sheet matched successfully.",
