@@ -27,6 +27,9 @@ import {
 import ShipmentBuilderModal from "./shipment/ShipmentBuilderModal";
 import BulkRepairInvoiceUploadModal from "@/components/BulkRepairInvoiceUploadModal";
 
+const BULK_REPAIR_INVOICE_UPLOAD_PERMISSION =
+  "serviceCenter_actions_bulk_repair_invoice_upload";
+
 interface SearchSectionProps {
   shipmentActionsEnabled?: boolean;
   shipmentMode?: boolean;
@@ -60,6 +63,9 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const permissions = useAuthStore((state) => state.user.permissions ?? []);
+  const canBulkUpload = permissions.includes(
+    BULK_REPAIR_INVOICE_UPLOAD_PERMISSION,
+  );
   const stateCount = Object.keys(stateOptions ?? {}).length;
   const showStateFilter = isServiceHeadUserType(user?.user_type) && stateCount > 1;
   const showServiceCentreFilter =
@@ -493,20 +499,22 @@ const SearchSection: React.FC<SearchSectionProps> = ({
             </div>
             {!shipmentMode && (
               <>
-                <button
-                  onClick={() => setIsBulkUploadOpen(true)}
-                  className="btn group border border-primaryBlue bg-white text-primaryBlue shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primaryBlue hover:text-white hover:shadow-lg hover:shadow-blue-200 active:translate-y-0 tooltip flex items-center gap-2"
-                  data-tip="Bulk Upload"
-                >
-                  <Image
-                    src="/images/upload-icon.svg"
-                    alt="Bulk Upload"
-                    width={20}
-                    height={20}
-                    className="transition duration-200 group-hover:-translate-y-0.5 group-hover:brightness-0 group-hover:invert"
-                  />
-                  <span className="hidden xl:block">Bulk Upload</span>
-                </button>
+                {canBulkUpload && (
+                  <button
+                    onClick={() => setIsBulkUploadOpen(true)}
+                    className="btn group border border-primaryBlue bg-white text-primaryBlue shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primaryBlue hover:text-white hover:shadow-lg hover:shadow-blue-200 active:translate-y-0 tooltip flex items-center gap-2"
+                    data-tip="Bulk Upload"
+                  >
+                    <Image
+                      src="/images/upload-icon.svg"
+                      alt="Bulk Upload"
+                      width={20}
+                      height={20}
+                      className="transition duration-200 group-hover:-translate-y-0.5 group-hover:brightness-0 group-hover:invert"
+                    />
+                    <span className="hidden xl:block">Bulk Upload</span>
+                  </button>
+                )}
                 <button
                   onClick={redirectToClaimsPortal}
                   className="btn bg-primaryBlue text-white flex items-center gap-2 transition duration-200 hover:bg-blue-500 tooltip"

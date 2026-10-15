@@ -2,6 +2,7 @@
 
 import { StateMap } from "@/interfaces/GlobalInterface";
 import { create } from "zustand";
+import { safeJsonParse } from "@/helpers/safeJson";
 
 interface User {
   token: string | null;
@@ -24,9 +25,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
-      const parsedUser = storedUser
-        ? JSON.parse(storedUser)
-        : { name: null, id: null, user_type: null, permissions: [], states: {} };
+      const parsedUser = safeJsonParse<{
+        name: string | null;
+        id: string | number | null;
+        user_type: string | null;
+        permissions?: string[];
+        states?: StateMap;
+      }>(storedUser, {
+        name: null,
+        id: null,
+        user_type: null,
+        permissions: [],
+        states: {},
+      });
       return {
         token,
         name: parsedUser.name,
@@ -50,18 +61,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user: User) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("token", user.token || "");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            name: user.name,
-            id: user.id,
-            user_type: user.user_type,
-            permissions: user.permissions ?? [],
-            states: user.states ?? {},
-          })
-        );
-      }
-      set({ user, isAuthenticated: !!user.token });
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          name: user.name,
+          id: user.id,
+          user_type: user.user_type,
+          permissions: user.permissions ?? [],
+          states: user.states ?? {},
+        }),
+      );
+    }
+    set({ user, isAuthenticated: !!user.token });
   },
   logout: () => {
     if (typeof window !== "undefined") {
