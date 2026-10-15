@@ -132,6 +132,14 @@ export interface BulkRepairInvoiceUploadResult {
   upload_status: string | null;
   message?: string;
   http_status?: number;
+  raw?: {
+    data?: {
+      extracted?: {
+        invoice_number?: string | null;
+        invoice_no?: string | null;
+      } | null;
+    } | null;
+  } | null;
   extracted?: {
     invoice_no?: string | null;
     invoice_number?: string | null;

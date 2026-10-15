@@ -98,7 +98,20 @@ const invoiceNoFromResult = (result: BulkRepairInvoiceUploadResult): string =>
     result.invoice_number,
     result.extracted?.invoice_no,
     result.extracted?.invoice_number,
+    result.raw?.data?.extracted?.invoice_number,
+    result.raw?.data?.extracted?.invoice_no,
   ) ?? "N/A";
+
+const severitySortOrder: Record<BulkRepairInvoiceSeverity, number> = {
+  success: 0,
+  warning: 1,
+  error: 2,
+  processing: 3,
+  queued: 4,
+};
+
+const csvCell = (value: string | number | null): string =>
+  `"${String(value ?? "").replace(/"/g, '""')}"`;
 
 const BulkRepairInvoiceUploadModal: React.FC<
   BulkRepairInvoiceUploadModalProps
@@ -126,6 +139,18 @@ const BulkRepairInvoiceUploadModal: React.FC<
   );
   const hasQueuedRows = summary.queued > 0;
   const canRunUpload = rows.length > 0 && hasQueuedRows;
+  const displayRows = rows
+    .map((row, index) => ({ row, index }))
+    .sort(
+      (left, right) =>
+        severitySortOrder[left.row.severity] -
+          severitySortOrder[right.row.severity] ||
+        left.index - right.index,
+    )
+    .map(({ row }) => row);
+  const reviewRows = rows.filter(
+    (row) => row.severity === "error" || row.severity === "warning",
+  );
 
   const updateRow = (id: string, changes: Partial<UploadRow>) => {
     setRows((currentRows) =>
@@ -242,6 +267,47 @@ const BulkRepairInvoiceUploadModal: React.FC<
     setRows([]);
   };
 
+  const exportReviewRows = () => {
+    if (reviewRows.length === 0) {
+      notifyError("There are no failed or warning invoices to export.");
+      return;
+    }
+
+    const headers = [
+      "Invoice No.",
+      "Status",
+      "Claim ID",
+      "Job Sheet",
+      "IMEI",
+      "Message",
+    ];
+    const csvRows = reviewRows.map((row) =>
+      [
+        row.invoiceNo,
+        statusLabel[row.severity],
+        row.claimId,
+        row.jobSheetNumber,
+        row.imei,
+        row.message,
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+    const csv = [headers.map(csvCell).join(","), ...csvRows].join("\r\n");
+    const blobUrl = URL.createObjectURL(
+      new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `bulk-repair-invoice-review-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
       <div className="w-full max-w-6xl overflow-hidden rounded-lg bg-white shadow-2xl ring-1 ring-black/10">
@@ -301,6 +367,21 @@ const BulkRepairInvoiceUploadModal: React.FC<
               >
                 Clear
               </button>
+              <button
+                type="button"
+                onClick={exportReviewRows}
+                disabled={isProcessing || reviewRows.length === 0}
+                className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
+                title="export failed invoices"
+              >
+                <Image
+                  src="/images/download-icon.svg"
+                  alt=""
+                  width={16}
+                  height={16}
+                />
+                Export
+              </button>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -328,7 +409,9 @@ const BulkRepairInvoiceUploadModal: React.FC<
                 <tr>
                   <th className="px-4 py-3 font-semibold">Invoice No.</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">claim id</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-semibold">
+                    Claim ID
+                  </th>
                   <th className="px-4 py-3 font-semibold">Job Sheet / IMEI</th>
                   <th className="px-4 py-3 font-semibold">Message</th>
                 </tr>
@@ -361,7 +444,7 @@ const BulkRepairInvoiceUploadModal: React.FC<
                     </td>
                   </tr>
                 ) : (
-                  rows.map((row) => (
+                  displayRows.map((row) => (
                     <tr
                       key={row.id}
                       className="border-t border-slate-100 align-top transition hover:bg-slate-50"
