@@ -50,13 +50,36 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   const repairInvoiceJobSheetDisplay =
     repairInvoiceJobSheetNumber || newJobSheetNumber || "Not available";
 
-  const InvoiceJobSheetRow = () => (
+  const InvoiceJobSheetRow = ({ editable = false }: { editable?: boolean }) => (
     <div className="grid grid-cols-[140px_1fr] items-center gap-3 px-3 py-2">
       <div className="text-xs font-medium text-[#6b7280]">
         Invoice job sheet
       </div>
       <div className="min-w-0 break-all text-sm font-medium text-[#181D27]">
-        {repairInvoiceJobSheetDisplay}
+        {editable ? (
+          <>
+            <input
+              type="text"
+              value={newJobSheetNumber}
+              onChange={(event) =>
+                setNewJobSheetNumber?.(event.target.value)
+              }
+              placeholder="Enter invoice job sheet"
+              className={`w-full rounded-md border bg-white px-2.5 py-1.5 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
+                newJobSheetNumberError
+                  ? "border-[#dc2626] focus:border-[#dc2626]"
+                  : "border-[#e5e7eb] focus:border-primaryBlue"
+              }`}
+            />
+            {newJobSheetNumberError && (
+              <div className="mt-1 text-xs font-medium text-[#dc2626]">
+                {newJobSheetNumberError}
+              </div>
+            )}
+          </>
+        ) : (
+          repairInvoiceJobSheetDisplay
+        )}
       </div>
     </div>
   );
@@ -71,7 +94,7 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
           {claimJobSheetDisplay}
         </div>
       </div>
-      <InvoiceJobSheetRow />
+      <InvoiceJobSheetRow editable />
     </div>
   );
 
@@ -163,6 +186,18 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
             <div className="mt-1 text-xs leading-5 text-[#7c2d12]">
               {repairInvoiceJobSheetError}
             </div>
+            <label className="mb-1 mt-3 block text-xs font-medium text-[#7c2d12]">
+              Invoice job sheet
+            </label>
+            <input
+              type="text"
+              value={newJobSheetNumber}
+              onChange={(event) =>
+                setNewJobSheetNumber?.(event.target.value)
+              }
+              placeholder="Enter invoice job sheet"
+              className="w-full rounded-md border border-[#fed7aa] bg-white px-2.5 py-2 text-sm text-[#181D27] placeholder-[#9ca3af] focus:border-[#c2410c] focus:outline-none focus:ring-1 focus:ring-[#c2410c]/20"
+            />
           </div>
         )}
 
@@ -191,14 +226,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
                 <InvoiceJobSheetRow />
                 <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
                   <div className="text-xs font-medium text-[#6b7280]">
-                    New job sheet
-                  </div>
-                  <div className="break-all text-sm font-medium text-[#181D27]">
-                    {newJobSheetNumber || "Not available"}
-                  </div>
-                </div>
-                <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-                  <div className="text-xs font-medium text-[#6b7280]">
                     Reason
                   </div>
                   <div className="text-sm font-medium text-[#181D27]">
@@ -209,30 +236,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
             ) : (
               <div className="space-y-3">
                 <JobSheetComparison />
-
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-[#374151]">
-                    New job sheet <span className="text-[#dc2626]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={newJobSheetNumber}
-                    onChange={(event) =>
-                      setNewJobSheetNumber?.(event.target.value)
-                    }
-                    placeholder="Enter new job sheet number"
-                    className={`w-full rounded-md border bg-white px-2.5 py-2 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
-                      newJobSheetNumberError
-                        ? "border-[#dc2626] focus:border-[#dc2626]"
-                        : "border-[#e5e7eb] focus:border-primaryBlue"
-                    }`}
-                  />
-                  {newJobSheetNumberError && (
-                    <div className="mt-1 text-xs font-medium text-[#dc2626]">
-                      {newJobSheetNumberError}
-                    </div>
-                  )}
-                </div>
 
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#374151]">

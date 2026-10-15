@@ -9,6 +9,9 @@ import { getDocumentInfo, isIMEIFormat } from "@/helpers/globalHelper";
 
 type PlainObject = Record<string, unknown>;
 
+const normalizeJobSheetNumber = (value: string | null | undefined) =>
+  (value ?? "").trim().toLowerCase();
+
 const JOB_SHEET_MISMATCH_REASONS = [
   "Due no-response from the customer",
   "Due to shortage of spare parts",
@@ -132,9 +135,26 @@ export const useFinalDocuments = () => {
       !!repairInvoiceExtractError);
   const serverRepairInvoiceJobSheetMismatch =
     selectedClaim?.repair_invoice_job_sheet_matched === false;
+  const manuallyEnteredRepairInvoiceJobSheetMismatch =
+    hasLocalRepairInvoiceExtract &&
+    extractedRepairInvoiceJobSheetMatched === null &&
+    !!newJobSheetNumber.trim() &&
+    !!(
+      selectedClaim?.estimate_job_sheet_number ??
+      selectedClaim?.job_sheet_number ??
+      selectedClaim?.data?.inputs?.job_sheet_number
+    ) &&
+    normalizeJobSheetNumber(newJobSheetNumber) !==
+      normalizeJobSheetNumber(
+        selectedClaim?.estimate_job_sheet_number ??
+          selectedClaim?.job_sheet_number ??
+          selectedClaim?.data?.inputs?.job_sheet_number ??
+          "",
+      );
   const isRepairInvoiceJobSheetMismatch =
     (hasLocalRepairInvoiceExtract &&
       extractedRepairInvoiceJobSheetMatched === false) ||
+    manuallyEnteredRepairInvoiceJobSheetMismatch ||
     (!reuploadFinalDocs && serverRepairInvoiceJobSheetMismatch);
   const repairInvoiceJobSheetNumber =
     hasLocalRepairInvoiceExtract && extractedRepairInvoiceJobSheetNumber
@@ -326,10 +346,12 @@ export const useFinalDocuments = () => {
       if (isRepairInvoiceJobSheetMismatch) {
         formData.append("job_sheet_mismatch_reason", jobSheetMismatchReason);
         formData.append("new_job_sheet_number", newJobSheetNumber.trim());
-        if (extractedRepairInvoiceJobSheetNumber) {
+        const invoiceJobSheetForMismatch =
+          extractedRepairInvoiceJobSheetNumber || newJobSheetNumber.trim();
+        if (invoiceJobSheetForMismatch) {
           formData.append(
             "repair_invoice_job_sheet_number",
-            extractedRepairInvoiceJobSheetNumber,
+            invoiceJobSheetForMismatch,
           );
         }
       }
@@ -404,9 +426,6 @@ export const useFinalDocuments = () => {
 
     return undefined;
   };
-
-  const normalizeJobSheetNumber = (value: string | null | undefined) =>
-    (value ?? "").trim().toLowerCase();
 
   const resetRepairInvoiceExtractState = () => {
     repairInvoiceExtractRequestIdRef.current += 1;
