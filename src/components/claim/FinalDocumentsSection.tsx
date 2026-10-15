@@ -50,54 +50,6 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
   const repairInvoiceJobSheetDisplay =
     repairInvoiceJobSheetNumber || newJobSheetNumber || "Not available";
 
-  const InvoiceJobSheetRow = ({ editable = false }: { editable?: boolean }) => (
-    <div className="grid grid-cols-[140px_1fr] items-center gap-3 px-3 py-2">
-      <div className="text-xs font-medium text-[#6b7280]">
-        Invoice job sheet
-      </div>
-      <div className="min-w-0 break-all text-sm font-medium text-[#181D27]">
-        {editable ? (
-          <>
-            <input
-              type="text"
-              value={newJobSheetNumber}
-              onChange={(event) =>
-                setNewJobSheetNumber?.(event.target.value)
-              }
-              placeholder="Enter invoice job sheet"
-              className={`w-full rounded-md border bg-white px-2.5 py-1.5 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
-                newJobSheetNumberError
-                  ? "border-[#dc2626] focus:border-[#dc2626]"
-                  : "border-[#e5e7eb] focus:border-primaryBlue"
-              }`}
-            />
-            {newJobSheetNumberError && (
-              <div className="mt-1 text-xs font-medium text-[#dc2626]">
-                {newJobSheetNumberError}
-              </div>
-            )}
-          </>
-        ) : (
-          repairInvoiceJobSheetDisplay
-        )}
-      </div>
-    </div>
-  );
-
-  const JobSheetComparison = () => (
-    <div className="mb-3 divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
-      <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
-        <div className="text-xs font-medium text-[#6b7280]">
-          Estimate job sheet
-        </div>
-        <div className="break-all text-sm font-medium text-[#181D27]">
-          {claimJobSheetDisplay}
-        </div>
-      </div>
-      <InvoiceJobSheetRow editable />
-    </div>
-  );
-
   return (
     <div className="flex gap-8">
       {/* Repair Invoice PDF */}
@@ -223,7 +175,14 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
                     {claimJobSheetDisplay}
                   </div>
                 </div>
-                <InvoiceJobSheetRow />
+                <div className="grid grid-cols-[140px_1fr] items-center gap-3 px-3 py-2">
+                  <div className="text-xs font-medium text-[#6b7280]">
+                    Invoice job sheet
+                  </div>
+                  <div className="min-w-0 break-all text-sm font-medium text-[#181D27]">
+                    {repairInvoiceJobSheetDisplay}
+                  </div>
+                </div>
                 <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
                   <div className="text-xs font-medium text-[#6b7280]">
                     Reason
@@ -235,7 +194,41 @@ const FinalDocumentsSection: React.FC<FinalDocumentsSectionProps> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                <JobSheetComparison />
+                <div className="mb-3 divide-y divide-[#e5e7eb] rounded-md border border-[#e5e7eb] bg-white">
+                  <div className="grid grid-cols-[140px_1fr] gap-3 px-3 py-2">
+                    <div className="text-xs font-medium text-[#6b7280]">
+                      Estimate job sheet
+                    </div>
+                    <div className="break-all text-sm font-medium text-[#181D27]">
+                      {claimJobSheetDisplay}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-3 px-3 py-2">
+                    <div className="text-xs font-medium text-[#6b7280]">
+                      Invoice job sheet
+                    </div>
+                    <div className="min-w-0 break-all text-sm font-medium text-[#181D27]">
+                      <input
+                        type="text"
+                        value={newJobSheetNumber}
+                        onChange={(event) =>
+                          setNewJobSheetNumber?.(event.target.value)
+                        }
+                        placeholder="Enter invoice job sheet"
+                        className={`w-full rounded-md border bg-white px-2.5 py-1.5 text-sm text-[#181D27] placeholder-[#9ca3af] focus:outline-none focus:ring-1 focus:ring-primaryBlue/40 ${
+                          newJobSheetNumberError
+                            ? "border-[#dc2626] focus:border-[#dc2626]"
+                            : "border-[#e5e7eb] focus:border-primaryBlue"
+                        }`}
+                      />
+                      {newJobSheetNumberError && (
+                        <div className="mt-1 text-xs font-medium text-[#dc2626]">
+                          {newJobSheetNumberError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#374151]">
