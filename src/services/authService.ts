@@ -18,6 +18,7 @@ export type LoginResponse = {
     token?: string;
     user_type?: string;
     states?: StateMap;
+    permissions?: string[];
   };
 };
 
