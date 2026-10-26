@@ -19,6 +19,38 @@ export interface ApiResponse<T> {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
 
+async function parseResponseBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      message:
+        response.status >= 500
+          ? "Server is temporarily unavailable. Please try again."
+          : text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(),
+    };
+  }
+}
+
+function responseMessage(payload: unknown, fallback: string): string {
+  if (!payload || typeof payload !== "object") return fallback;
+
+  const message = (payload as { message?: unknown }).message;
+  return typeof message === "string" && message.trim() ? message : fallback;
+}
+
+function isServiceError(payload: unknown): boolean {
+  return (
+    !!payload &&
+    typeof payload === "object" &&
+    (payload as { success?: unknown }).success === false
+  );
+}
+
 // Function to format query parameters into a URL string
 function formatQueryParams(
   params:
@@ -91,14 +123,20 @@ export async function apiRequest<T>(
 
     const response = await fetch(url, fetchOptions);
 
-    // Ensure the response is valid JSON
-    const rawData = await response.json();
+    const rawData = await parseResponseBody(response);
 
     if (!response.ok) {
       return {
         success: false,
-        error:
-          (rawData as { message?: string })?.message || "Something went wrong",
+        error: responseMessage(rawData, "Something went wrong"),
+      };
+    }
+
+    if (isServiceError(rawData)) {
+      return {
+        success: false,
+        error: responseMessage(rawData, "Something went wrong"),
+        data: rawData as T,
       };
     }
 
@@ -184,13 +222,20 @@ export async function externalApiRequest<T>(
           : undefined,
     });
 
-    const rawData = await response.json();
+    const rawData = await parseResponseBody(response);
 
     if (!response.ok) {
       return {
         success: false,
-        error:
-          (rawData as { message?: string })?.message || "Something went wrong",
+        error: responseMessage(rawData, "Something went wrong"),
+      };
+    }
+
+    if (isServiceError(rawData)) {
+      return {
+        success: false,
+        error: responseMessage(rawData, "Something went wrong"),
+        data: rawData as T,
       };
     }
 
