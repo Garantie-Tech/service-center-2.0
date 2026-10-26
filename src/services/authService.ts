@@ -18,6 +18,7 @@ export type LoginResponse = {
     token?: string;
     user_type?: string;
     states?: StateMap;
+    permissions?: string[];
   };
 };
 
@@ -72,6 +73,7 @@ export async function loginService(
         name: data?.data?.name,
         id: data?.data?.service_centre_id,
         user_type: data?.data?.user_type,
+        permissions: data?.data?.permissions,
       })
     );
   }

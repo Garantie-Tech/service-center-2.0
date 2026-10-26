@@ -9,6 +9,7 @@ import { ClaimFetchPayload } from "@/interfaces/GlobalInterface";
 import Claim from "@/interfaces/ClaimInterface";
 import { DuplicateClaimsIcon } from "./icons/Icons";
 import { applyClaimSelection } from "@/helpers/claimSelectionHelper";
+import { useNotification } from "@/context/NotificationProvider";
 
 const INVALID_DOCUMENT_STATUS = "INVALID DOCUMENTS";
 const ALL_INVALID_DOCUMENT_TYPES = ["estimate", "final", "customer"];
@@ -37,9 +38,11 @@ const ClaimList: React.FC = () => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
   const lastClaimRef = useRef<HTMLLIElement | null>(null);
   const isFetching = useRef(false);
+  const { notifyError } = useNotification();
 
   const actionRequiredStatus = useMemo(
     () => ["Invalid Documents", "Claim Initiated", "BER Marked"],
@@ -148,6 +151,7 @@ const ClaimList: React.FC = () => {
           const newClaims = response.data.data.claims;
           const claimCount = response.data.data.totalCount;
           setClaimCount(Number(claimCount));
+          setFetchError(null);
 
           if (reset) {
             setFilteredClaims(newClaims);
@@ -166,9 +170,18 @@ const ClaimList: React.FC = () => {
           setHasMore(newClaims.length > 0);
         } else {
           setHasMore(false);
+          if (reset) {
+            const message = response.error || "Unable to load claims. Please try again.";
+            setFetchError(message);
+            notifyError(message);
+          }
         }
       } catch (error) {
         console.error("Error loading claims:", error);
+        if (reset) {
+          setFetchError("Unable to load claims. Please try again.");
+          notifyError("Unable to load claims. Please try again.");
+        }
       } finally {
         setLoading(false);
         setIsLoading(false);
@@ -176,7 +189,7 @@ const ClaimList: React.FC = () => {
         setClaimRevised(false);
       }
     },
-    [loading, hasMore, generatePayload, filterState, filterServiceCentre],
+    [loading, hasMore, generatePayload, filterState, filterServiceCentre, notifyError],
   );
 
   // Fetch claims in the background when triggered
@@ -375,6 +388,8 @@ const ClaimList: React.FC = () => {
               </div>
             </li>
           ))
+        ) : fetchError ? (
+          <p className="text-center text-red-500 py-4">{fetchError}</p>
         ) : (
           <p className="text-center text-gray-500 py-4">No claims found</p>
         )}
