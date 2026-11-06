@@ -383,7 +383,7 @@ export const extractRepairInvoiceJobSheet = async (body: FormData) => {
     "claim/repair-invoice-extract",
     body,
   );
-};
+}
 
 export type BulkRepairInvoiceSeverity =
   | "queued"
