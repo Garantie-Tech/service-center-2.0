@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useGlobalStore } from "@/store/store";
-import NoticeMarquee from "@/components/NoticeMarquee";
+// import NoticeMarquee from "@/components/NoticeMarquee";
 
 // Dynamically import components for performance optimization
 const SearchSection = dynamic(() => import("@/components/SearchSection"), {
