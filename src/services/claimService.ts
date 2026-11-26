@@ -46,7 +46,6 @@ export interface ServiceCentreOption {
   };
   city?: string;
   state?: string;
-  pincode?: string;
 }
 
 export interface ServiceCentreResponse {
