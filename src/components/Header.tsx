@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HomeIcon } from "@/components/icons/Icons";
 import { useClaimNotifications } from "@/context/ClaimNotificationProvider";
+import { useAuthStore } from "@/store/authStore";
 
 interface HeaderProps {
   onLogout: () => void;
@@ -15,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const user = localStorage.getItem("user");
   const serviceCenterName = user ? JSON.parse(user) : null;
   const pathname = usePathname();
+  const userType = useAuthStore((state) => state.user.user_type);
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const {
     notifications,
@@ -175,6 +177,23 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
               tabIndex={0}
               className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-xs"
             >
+              {userType === "service_head" && (
+                <li>
+                  <Link href="/service-centres" className="flex items-center gap-2">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M8 7h2m4 0h2M8 11h2m4 0h2M8 15h2m4 0h2M10 21v-4h4v4" />
+                    </svg>
+                    Manage Service Centres
+                  </Link>
+                </li>
+              )}
               {pathname === "/dashboard" && (
                 <li>
                   <Link href="/profile" className="flex items-center gap-2">

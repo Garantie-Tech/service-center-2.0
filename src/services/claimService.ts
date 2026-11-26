@@ -81,7 +81,7 @@ export interface UpdateServiceCentreContactPayload extends Record<string, string
 }
 
 export const fetchServiceHeadServiceCentre = async (serviceCentreId: number) => {
-  return await getRequest<ServiceCentreResponse>(
+  return await getRequest<ServiceCentreDetailResponse>(
     `head/service-centres/${serviceCentreId}`,
   );
 };

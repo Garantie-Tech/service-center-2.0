@@ -11,7 +11,6 @@ import { useGlobalStore } from "@/store/store";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import ServiceCentreManagement from "@/components/ServiceCentreManagement";
 
 const ProfileDetails = () => {
   const [profile, setProfile] = useState<ServiceCenterProfile | null>(null);
@@ -30,6 +29,7 @@ const ProfileDetails = () => {
   const [formError, setFormError] = useState("");
 
   const logout = useAuthStore((state) => state.logout);
+  const userType = useAuthStore((state) => state.user.user_type);
   const setFilterServiceCentre = useGlobalStore(
     (state) => state.setFilterServiceCentre,
   );
@@ -117,6 +117,15 @@ const ProfileDetails = () => {
     }
   };
 
+  const profileAddress = [
+    profile?.address?.address_line_1,
+    profile?.city,
+    profile?.state,
+    profile?.pincode,
+  ]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(", ");
+
   return (
     <div className="pb-8">
       <Header onLogout={handleLogout} />
@@ -164,11 +173,31 @@ const ProfileDetails = () => {
               <div>
                 <p className="text-xs text-[#757575]">Address</p>
                 <p className="text-sm font-semibold text-blackContent">
-                  {`${profile?.address?.address_line_1}, ${profile?.city}, ${profile?.state}, ${profile?.pincode}`}
+                  {profileAddress || "Address not available"}
                 </p>
               </div>
             </div>
           </div>
+
+          {userType === "service_head" && (
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b pb-8">
+              <div>
+                <h3 className="text-lg font-semibold text-black">
+                  Service Centre operations
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Update contact details for Service Centres assigned to your states.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn bg-primaryBlue text-white hover:bg-blue-700"
+                onClick={() => router.push("/service-centres")}
+              >
+                Manage Service Centres
+              </button>
+            </div>
+          )}
 
           {/* User Account Details */}
           <h3 className="text-lg font-semibold mb-4 text-black">
@@ -233,8 +262,6 @@ const ProfileDetails = () => {
               </div>
             </div>
           </div>
-
-          <ServiceCentreManagement />
 
           {/* Password Reset Form */}
           {showResetPasswordSection && (
