@@ -17,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const user = useAuthStore((state) => state.user);
   const hasShipmentAccess = hasNoidaShipmentAccess(user);
   const pathname = usePathname();
+  const userType = useAuthStore((state) => state.user.user_type);
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -175,6 +176,23 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
               tabIndex={0}
               className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 text-xs shadow"
             >
+              {userType === "service_head" && (
+                <li>
+                  <Link href="/service-centres" className="flex items-center gap-2">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M8 7h2m4 0h2M8 11h2m4 0h2M8 15h2m4 0h2M10 21v-4h4v4" />
+                    </svg>
+                    Manage Service Centres
+                  </Link>
+                </li>
+              )}
               {pathname === "/dashboard" && (
                 <>
                   {hasShipmentAccess && (
