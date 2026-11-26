@@ -17,7 +17,7 @@ import {
   UploadCustomerDocuments,
   UploadFinalDocuments,
 } from "@/interfaces/GlobalInterface";
-import { getRequest, postRequest } from "@/utils/api";
+import { apiRequest, getRequest, postRequest } from "@/utils/api";
 import {
   ClaimNotificationInboxResponse,
   ClaimNotificationItem,
@@ -229,6 +229,15 @@ export const fetchServiceCentreDetail = async (serviceCentreId: number) => {
 export interface ServiceCentreOption {
   title: string;
   value: number;
+  mobile?: string;
+  email?: string;
+  address?: {
+    address_line_1?: string;
+    address_line_2?: string | null;
+  };
+  city?: string;
+  state?: string;
+  pincode?: string;
 }
 
 export interface ServiceCentreResponse {
@@ -236,6 +245,13 @@ export interface ServiceCentreResponse {
   status?: boolean;
   message: string;
   data: ServiceCentreOption[];
+}
+
+export interface ServiceHeadServiceCentreResponse {
+  success: boolean;
+  status_code: number;
+  message: string;
+  data?: ServiceCentreOption;
 }
 
 export const fetchServiceCentres = async (stateIds: string[]) => {
@@ -280,6 +296,30 @@ export const cancelNoidaOfficeShipment = async (claimId: number) => {
   return await postRequest<NoidaOfficeShipmentCancelResponse>(
     `noida-office-shipment/${claimId}/cancel`,
     {},
+  );
+};
+
+export interface UpdateServiceCentreContactPayload
+  extends Record<string, string> {
+  mobile: string;
+  address_line_1: string;
+  address_line_2: string;
+}
+
+export const fetchServiceHeadServiceCentre = async (serviceCentreId: number) => {
+  return await getRequest<ServiceHeadServiceCentreResponse>(
+    `head/service-centres/${serviceCentreId}`,
+  );
+};
+
+export const updateServiceHeadServiceCentre = async (
+  serviceCentreId: number,
+  body: UpdateServiceCentreContactPayload,
+) => {
+  return await apiRequest<ServiceHeadServiceCentreResponse>(
+    `head/service-centres/${serviceCentreId}/contact`,
+    "PATCH",
+    body,
   );
 };
 

@@ -73,7 +73,7 @@ function formatQueryParams(
 // Generic API request function
 export async function apiRequest<T>(
   endpoint: string,
-  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET",
   body?:
     | Record<string, unknown>
     | FormData

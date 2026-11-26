@@ -13,6 +13,7 @@ import useSyncAuthenticatedProfile from "@/hooks/useSyncAuthenticatedProfile";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import ServiceCentreManagement from "@/components/ServiceCentreManagement";
 
 export default function ProfilePage() {
   useSyncAuthenticatedProfile();
@@ -235,6 +236,8 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          <ServiceCentreManagement />
 
           {/* Password Reset Form */}
           {showResetPasswordSection && (
