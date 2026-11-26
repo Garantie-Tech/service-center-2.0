@@ -230,6 +230,7 @@ export interface ServiceCentreOption {
   title: string;
   value: number;
   mobile?: string;
+  pincode?: string;
   email?: string;
   address?: {
     address_line_1?: string;
@@ -302,6 +303,7 @@ export const cancelNoidaOfficeShipment = async (claimId: number) => {
 export interface UpdateServiceCentreContactPayload
   extends Record<string, string> {
   mobile: string;
+  pincode: string;
   address_line_1: string;
   address_line_2: string;
 }
