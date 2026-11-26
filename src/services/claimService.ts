@@ -17,7 +17,7 @@ import {
   UploadCustomerDocuments,
   UploadFinalDocuments,
 } from "@/interfaces/GlobalInterface";
-import { getRequest, postRequest } from "@/utils/api";
+import { apiRequest, getRequest, postRequest } from "@/utils/api";
 import {
   ClaimNotificationInboxResponse,
   ClaimNotificationItem,
@@ -37,6 +37,15 @@ export const fetchClaims = async (
 export interface ServiceCentreOption {
   title: string;
   value: number;
+  mobile?: string;
+  email?: string;
+  address?: {
+    address_line_1?: string;
+    address_line_2?: string | null;
+  };
+  city?: string;
+  state?: string;
+  pincode?: string;
 }
 
 export interface ServiceCentreResponse {
@@ -44,6 +53,13 @@ export interface ServiceCentreResponse {
   status?: boolean;
   message: string;
   data: ServiceCentreOption[];
+}
+
+export interface ServiceCentreDetailResponse {
+  success: boolean;
+  status_code: number;
+  message: string;
+  data?: ServiceCentreOption;
 }
 
 export const fetchServiceCentres = async (stateIds: string[]) => {
@@ -56,6 +72,29 @@ export const fetchServiceHeadServiceCentres = async (stateIds: string[]) => {
   return await getRequest<ServiceCentreResponse>("head/service-centres", {
     state_id: stateIds.join(","),
   });
+};
+
+export interface UpdateServiceCentreContactPayload extends Record<string, string> {
+  mobile: string;
+  address_line_1: string;
+  address_line_2: string;
+}
+
+export const fetchServiceHeadServiceCentre = async (serviceCentreId: number) => {
+  return await getRequest<ServiceCentreResponse>(
+    `head/service-centres/${serviceCentreId}`,
+  );
+};
+
+export const updateServiceHeadServiceCentre = async (
+  serviceCentreId: number,
+  body: UpdateServiceCentreContactPayload,
+) => {
+  return await apiRequest<ServiceCentreDetailResponse>(
+    `head/service-centres/${serviceCentreId}/contact`,
+    "PATCH",
+    body,
+  );
 };
 
 export const submitEstimate = async (claimID: number, body: FormData) => {

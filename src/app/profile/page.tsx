@@ -11,6 +11,7 @@ import { useGlobalStore } from "@/store/store";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import ServiceCentreManagement from "@/components/ServiceCentreManagement";
 
 const ProfileDetails = () => {
   const [profile, setProfile] = useState<ServiceCenterProfile | null>(null);
@@ -232,6 +233,8 @@ const ProfileDetails = () => {
               </div>
             </div>
           </div>
+
+          <ServiceCentreManagement />
 
           {/* Password Reset Form */}
           {showResetPasswordSection && (
