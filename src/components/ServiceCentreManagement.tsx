@@ -1,6 +1,7 @@
 "use client";
 
 import SearchableServiceCentreDropdown from "@/components/ui/SearchableServiceCentreDropdown";
+import { useNotification } from "@/context/NotificationProvider";
 import useInitializeStates from "@/hooks/useInitializeStates";
 import {
   fetchServiceHeadServiceCentres,
@@ -13,6 +14,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 const emptyForm = {
   mobile: "",
+  pincode: "",
   address_line_1: "",
   address_line_2: "",
 };
@@ -21,6 +23,7 @@ type FormField = keyof typeof emptyForm;
 
 const getFormValues = (centre?: ServiceCentreOption) => ({
   mobile: centre?.mobile ?? "",
+  pincode: centre?.pincode ?? "",
   address_line_1: centre?.address?.address_line_1 ?? "",
   address_line_2: centre?.address?.address_line_2 ?? "",
 });
@@ -30,6 +33,8 @@ const ServiceCentreManagement: React.FC = () => {
 
   const userType = useAuthStore((state) => state.user.user_type);
   const stateOptions = useGlobalStore((state) => state.stateOptions);
+  const setGlobalLoading = useGlobalStore((state) => state.setIsLoading);
+  const { notifySuccess, notifyError } = useNotification();
   const [serviceCentres, setServiceCentres] = useState<ServiceCentreOption[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [form, setForm] = useState(emptyForm);
@@ -38,7 +43,6 @@ const ServiceCentreManagement: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [formError, setFormError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const stateIds = useMemo(() => Object.keys(stateOptions ?? {}), [stateOptions]);
   const selectedCentre = serviceCentres.find(
@@ -99,7 +103,6 @@ const ServiceCentreManagement: React.FC = () => {
     setForm(getFormValues(selectedCentre));
     setIsEditing(false);
     setFormError("");
-    setSuccessMessage("");
   }, [selectedCentre]);
 
   if (userType !== "service_head") return null;
@@ -107,13 +110,13 @@ const ServiceCentreManagement: React.FC = () => {
   const updateField = (field: FormField, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
     setFormError("");
-    setSuccessMessage("");
   };
 
   const handleSave = async () => {
     if (!selectedCentre || isSaving) return;
 
     const mobile = form.mobile.trim();
+    const pincode = form.pincode.trim();
     const addressLine1 = form.address_line_1.trim();
     const addressLine2 = form.address_line_2.trim();
 
@@ -127,24 +130,31 @@ const ServiceCentreManagement: React.FC = () => {
       return;
     }
 
+    if (!/^\d{6}$/.test(pincode)) {
+      setFormError("Enter a valid 6-digit pincode.");
+      return;
+    }
+
     setIsSaving(true);
+    setGlobalLoading(true);
     setFormError("");
-    setSuccessMessage("");
 
     try {
       const response = await updateServiceHeadServiceCentre(selectedCentre.value, {
         mobile,
+        pincode,
         address_line_1: addressLine1,
         address_line_2: addressLine2,
       });
       const updatedCentre = response.data?.data;
 
       if (!response.success || !updatedCentre) {
-        setFormError(
+        const message =
           response.error ??
-            response.data?.message ??
-            "Unable to update Service Centre details.",
-        );
+          response.data?.message ??
+          "Unable to update Service Centre details.";
+        setFormError(message);
+        notifyError(message);
         return;
       }
 
@@ -155,18 +165,20 @@ const ServiceCentreManagement: React.FC = () => {
       );
       setForm(getFormValues(updatedCentre));
       setIsEditing(false);
-      setSuccessMessage("Service Centre details updated successfully.");
+      notifySuccess("Service Centre details updated successfully.");
     } catch {
-      setFormError("Unable to update Service Centre details.");
+      const message = "Unable to update Service Centre details.";
+      setFormError(message);
+      notifyError(message);
     } finally {
       setIsSaving(false);
+      setGlobalLoading(false);
     }
   };
 
   const handleCancel = () => {
     setForm(getFormValues(selectedCentre));
     setFormError("");
-    setSuccessMessage("");
     setIsEditing(false);
   };
 
@@ -261,7 +273,6 @@ const ServiceCentreManagement: React.FC = () => {
                   className="btn min-h-10 bg-primaryBlue px-5 text-white hover:bg-blue-700"
                   onClick={() => {
                     setFormError("");
-                    setSuccessMessage("");
                     setIsEditing(true);
                   }}
                 >
@@ -290,9 +301,12 @@ const ServiceCentreManagement: React.FC = () => {
                   Pincode
                 </label>
                 <input
-                  value={selectedCentre?.pincode ?? "Not available"}
-                  disabled
-                  className="input input-bordered h-12 w-full bg-gray-100 text-sm text-gray-500"
+                  value={form.pincode}
+                  disabled={!isEditing || isSaving}
+                  onChange={(event) => updateField("pincode", event.target.value)}
+                  className="input input-bordered h-12 w-full bg-inputBg text-sm disabled:bg-gray-100"
+                  inputMode="numeric"
+                  maxLength={6}
                 />
               </div>
             </div>
@@ -324,7 +338,7 @@ const ServiceCentreManagement: React.FC = () => {
             </div>
 
             <p id="service-centre-contact-help" className="mt-3 text-xs text-gray-500">
-              Mobile number must contain exactly 10 digits.
+              Mobile number must contain exactly 10 digits. Pincode must contain exactly 6 digits.
             </p>
 
             {formError && (
@@ -332,21 +346,23 @@ const ServiceCentreManagement: React.FC = () => {
                 {formError}
               </p>
             )}
-            {successMessage && (
-              <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">
-                {successMessage}
-              </p>
-            )}
-
             {isEditing && (
               <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-5">
                 <button
                   type="button"
                   className="btn min-h-10 bg-primaryBlue px-5 text-white hover:bg-blue-700 disabled:bg-gray-300"
                   disabled={isSaving}
+                  aria-busy={isSaving}
                   onClick={() => void handleSave()}
                 >
-                  {isSaving ? "Saving..." : "Save details"}
+                  {isSaving ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm" aria-hidden="true" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save details"
+                  )}
                 </button>
                 <button
                   type="button"
